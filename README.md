@@ -47,6 +47,4 @@ To create an IRC client, you'll need to understand the protocol and implement it
 - **Handling multiple clients simultaneously**
 
 
-
-
-`https://reactive.so/post/42-a-comprehensive-guide-to-ft_irc/`
+![alt text](test.drawio.svg)
