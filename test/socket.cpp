@@ -10,7 +10,7 @@ int main() {
     struct sockaddr_in server_addr, client_addr;
     socklen_t client_addr_len = sizeof(client_addr);
     char buffer[1024];
-    int port = 6697; // Default IRC port
+    int port = 6667; // Default IRC port
 
     // Create the server socket
     server_fd = socket(AF_INET, SOCK_STREAM, 0);
@@ -50,22 +50,23 @@ int main() {
     }
 
     std::cout << "Client connected" << std::endl;
+    while (1) {
+        // Read data from the client
+        ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
+        if (bytes_read < 0) {
+            perror("read");
+            close(client_fd);
+            close(server_fd);
+            return 1;
+        }
 
-    // Read data from the client
-    ssize_t bytes_read = read(client_fd, buffer, sizeof(buffer) - 1);
-    if (bytes_read < 0) {
-        perror("read");
-        close(client_fd);
-        close(server_fd);
-        return 1;
+        buffer[bytes_read] = '\0'; // Null-terminate the buffer
+        std::cout << "Received message: " << buffer << std::endl;
     }
 
-    buffer[bytes_read] = '\0'; // Null-terminate the buffer
-    std::cout << "Received message: " << buffer << std::endl;
-
     // Close the client and server sockets
-    close(client_fd);
-    close(server_fd);
+    // close(client_fd);
+    // close(server_fd);
 
     return 0;
 }
