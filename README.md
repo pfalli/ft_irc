@@ -47,10 +47,3 @@ To create an IRC client, you'll need to understand the protocol and implement it
 - **Handling multiple clients simultaneously**
 
 
-## Table
-| COMMAND  | how use  | behavior |
-|----------|----------|----------|
-|          |          |          |
-|          |          |          |
-|          |          |          |
-
