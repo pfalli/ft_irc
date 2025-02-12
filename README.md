@@ -15,25 +15,25 @@ To create an IRC client, you'll need to understand the protocol and implement it
 # Structure:
 
 **Client-Server Communication**
-
-    Clients connect to the server via TCP.
-    Commands like JOIN, PART, PRIVMSG, and KICK are handled.
-    Multiple users can join channels and communicate.
+1. Clients connect to the server via TCP.
+2. Commands like JOIN, PART, PRIVMSG, and KICK are handled.
+3. Multiple users can join channels and communicate.
 
 **Core Components**
-
-    Server: Manages connections, messages, and channels.
-    Client Handler: Handles incoming commands.
-    Message Parser: Parses and executes IRC commands.
-    Channel Management: Handles user permissions, topics, and bans.
+1. Server: Manages connections, messages, and channels.
+2. Client Handler: Handles incoming commands.
+3. Message Parser: Parses and executes IRC commands.
+4. Channel Management: Handles user permissions, topics, and bans.
 
 **Protocol Flow**
+1. User connects (PASS, NICK, USER)
+2. User joins a channel (JOIN #channel)
+3. User sends messages (PRIVMSG or NOTICE)
+4. User leaves (PART, QUIT)
+5. Admin commands (KICK, BAN)
 
-    User connects (PASS, NICK, USER)
-    User joins a channel (JOIN #channel)
-    User sends messages (PRIVMSG or NOTICE)
-    User leaves (PART, QUIT)
-    Admin commands (KICK, BAN)
+![alt text](test.drawio.svg)
+
 
 # Features
 - **Client-Server Communication** using TCP sockets
@@ -46,5 +46,3 @@ To create an IRC client, you'll need to understand the protocol and implement it
 - **User and channel permissions**
 - **Handling multiple clients simultaneously**
 
-
-![alt text](test.drawio.svg)
