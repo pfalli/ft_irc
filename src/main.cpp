@@ -3,7 +3,7 @@
 int main(int argc, char **argv)
 {
     if (argc != 3)
-        throw std::out_of_range("Usage: ./ircserv <port> <password>");
+        throw std::out_of_range("Follow subject: ./ircserv <port> <password>");
     
     Server program;
 
