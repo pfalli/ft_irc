@@ -26,60 +26,71 @@
 class Client
 {
 	private:
-	int						clientSocket;
-	std::string				name;
+	int										clientSocket;
+	std::string								name;
 
 	public:
 
-	void					setName(std::string _name){this->name = _name;}
-	std::string				getName() const{return (this->name);}
-	int						getSocket()const{return (this->clientSocket);}
+	void									setName(std::string _name){this->name = _name;}
+	std::string								getName() const{return (this->name);}
+	int										getSocket()const{return (this->clientSocket);}
 };
 
-class Channel{};
+class Channel{
+	private:
+	std::string								name;
+
+	public:
+	void									setName(std::string _name){this->name = _name;}
+	std::string								getName()const{return (this->name);}
+};
 
 class Server
 {
-private:
-	const std::string		name;
-	const std::string		password;
-	const int				port;
-	std::vector<Client>		clients;
-	std::vector<Channel>	channels;
-	int						serverSocket;
-	sockaddr_in				serverAddress;
-public:
-							Server();
-							Server(std::string _password, int _port, std::string _name);
-							Server(const Server &src);
-							~Server();
+	private:
+	const std::string						name;
+	const std::string						password;
+	const int								port;
+	std::vector<Client>						clients;
+	std::vector<Channel>					channels;
+	int										serverSocket;
+	sockaddr_in								serverAddress;
 
-	Server 					&operator=(const Server &src);
+	public:
+											Server();
+											Server(std::string _password, int _port, std::string _name);
+											Server(const Server &src);
+											~Server();
 
-	int						getPort()const;
-	std::string				getName()const;
-	std::string				getPassword()const;
-	std::vector<Client>		getClients()const;
-	std::vector<Channel>	getChannels()const;
+	Server 									&operator=(const Server &src);
 
-	void					startServer();
-    void                    launch();
-	bool					existingUser(int clientSocket);
-	void					initUser(int clientSocket);
+	int										getPort()const;
+	std::string								getName()const;
+	std::string								getPassword()const;
+	std::vector<Client>						getClients()const;
+	std::vector<Channel>					getChannels()const;
+
+	void									startServer();
+	void									launch();
+	bool									existingUser(int clientSocket);
+	void									initUser(int clientSocket);
+	int										checkForNewClient(std::vector<struct pollfd> &poll_fds);
+	template <typename T>
+	typename std::vector<T>::iterator		findObject(std::string toFind, std::vector<T> &array);
 	class SeverExceptionSocket : public std::exception
 	{
 		public:
-			const char* what() const throw();
+			const char*						what() const throw();
 	};
 	class SeverExceptionBind : public std::exception
 	{
 		public:
-			const char* what() const throw();
+			const char*						what() const throw();
 	};
 	class SeverExceptionListen : public std::exception
 	{
 		public:
-			const char* what() const throw();
+			const char*						what() const throw();
 	};
 };
 

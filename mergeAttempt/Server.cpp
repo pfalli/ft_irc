@@ -6,7 +6,7 @@
 /*   By: ehedeman <ehedeman@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 14:34:33 by ehedeman          #+#    #+#             */
-/*   Updated: 2025/02/13 16:28:31 by ehedeman         ###   ########.fr       */
+/*   Updated: 2025/02/13 17:01:28 by ehedeman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,21 +91,18 @@ Server 					&Server::operator=(const Server &src)
 	return (*this);
 }
 
-// void					Server::startServer()
-// {
-// 	bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress));
-// 	listen(serverSocket, 5);
-// 	std::string from_client = "start";
-// 	sockaddr *ptr1 = NULL;
-// 	socklen_t *ptr2 = NULL;
-// 	while (from_client != "ende")
-// 	{
-// 		int clientSocket = accept(serverSocket, ptr1, ptr2);
-// 		initUser(clientSocket);
-// 		std::cout << "New User: " << this->clients.front().getName() << std::endl;
-// 	}
-// 	close(serverSocket);
-// }
+template <typename T>
+typename std::vector<T>::iterator		Server::findObject(std::string toFind, std::vector<T> &array)
+{
+	typename std::vector<T>::iterator it = array.begin();
+	while (it != array.end())
+	{
+		if ((*it).getName() == name)
+			break;
+		it++;
+	}
+	return (it);
+}
 
 std::string					removeNewline(char *buff)
 {
@@ -162,6 +159,28 @@ bool					Server::existingUser(int clientSocket)
 	return (false);
 }
 
+int	Server::checkForNewClient(std::vector<struct pollfd> &poll_fds)
+{
+	// Check for new client connections
+	socklen_t addrlen = sizeof(serverAddress);
+	int new_socket = accept(serverSocket, (struct sockaddr*)&serverAddress, &addrlen);
+	if (new_socket < 0) 
+	{
+		perror("Accept failed");
+		return (0);
+	}
+	std::cout << "New client connected: " << new_socket << std::endl;
+	
+	initUser(new_socket);
+	
+	// Add new client to poll list
+	pollfd client_fd;
+	client_fd.fd = new_socket;
+	client_fd.events = POLLIN;  // Monitor for incoming data
+	poll_fds.push_back(client_fd);
+	return (1);
+}
+
 void Server::launch() {
 	if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
 		throw SeverExceptionBind();
@@ -196,27 +215,11 @@ void Server::launch() {
 			perror("Poll error");
 			continue;
 		}
-
-		// Check for new client connections
-		if (poll_fds[0].revents & POLLIN) {
-			socklen_t addrlen = sizeof(serverAddress);
-			int new_socket = accept(serverSocket, (struct sockaddr*)&serverAddress, &addrlen);
-			if (new_socket < 0) {
-				perror("Accept failed");
-				continue;
-			}
-
-			std::cout << "New client connected: " << new_socket << std::endl;
-			
-			initUser(new_socket);
-			
-			// Add new client to poll list
-			pollfd client_fd;
-			client_fd.fd = new_socket;
-			client_fd.events = POLLIN;  // Monitor for incoming data
-			poll_fds.push_back(client_fd);
+		if (poll_fds[0].revents & POLLIN)
+		{
+			if (!checkForNewClient(poll_fds))
+				continue ;
 		}
-
 		// Loop for clients messages
 		for (size_t i = 1; i < poll_fds.size(); i++) {
 			if (poll_fds[i].revents & POLLIN) {
