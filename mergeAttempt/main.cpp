@@ -1,4 +1,6 @@
 #include "Server.hpp"
+#include "utils.hpp"
+
 
 int main(int ac, char **av)
 {
@@ -9,6 +11,8 @@ int main(int ac, char **av)
  //   Server program(av[1], std::atoi(av[2]), "GreatestServerEver");
 	try
 	{
+		validFormat(PASSWORD, av[1]);
+		validFormat(PORT, av[2]);
 	    Server program(av[1], std::atoi(av[2]), "GreatestServerEver");
 	    program.launch();
 	    return 0;

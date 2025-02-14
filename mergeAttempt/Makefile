@@ -6,14 +6,15 @@
 #    By: ehedeman <ehedeman@student.42wolfsburg.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/01/14 14:53:54 by ehedeman          #+#    #+#              #
-#    Updated: 2025/02/13 15:23:07 by ehedeman         ###   ########.fr        #
+#    Updated: 2025/02/14 14:22:38 by ehedeman         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 NAME = server
 
 SRC =		main.cpp	\
-			Server.cpp
+			Server.cpp	\
+			utils.cpp
 
 OBJS_DIR = objs/
 OBJS = $(SRC:.cpp=.o)
@@ -28,7 +29,7 @@ OBJS_PREFIXED = $(addprefix $(OBJS_DIR), $(OBJS))
 # client_OBJS = $(client_SRC:.cpp=.o)
 # client_OBJS_PREFIXED = $(addprefix $(client_OBJS_DIR), $(client_OBJS))
 
-INCLUDES =	Server.hpp
+INCLUDES =	Server.hpp	utils.hpp
 
 CXX = c++
 

@@ -6,12 +6,12 @@
 /*   By: ehedeman <ehedeman@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 14:34:33 by ehedeman          #+#    #+#             */
-/*   Updated: 2025/02/14 13:50:34 by ehedeman         ###   ########.fr       */
+/*   Updated: 2025/02/14 16:48:59 by ehedeman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
-
+#include "utils.hpp"
 
 const char* Server::SeverExceptionSocket::what() const throw()
 {
@@ -117,34 +117,73 @@ std::string					removeNewline(char *buff)
 	return _new;
 }
 
-void					Server::initUser(int clientSocket)
+std::string					Server::requestName(int format, int clientSocket)
 {
-	Client _new;
-	std::string from_client;
 	char buff[1024] = {0};
-
-	const char *pw_check = "Please enter the password:\n";
-	send(clientSocket, pw_check, strlen(pw_check), 0);
-	recv(clientSocket, buff, sizeof(buff), 0);
-	from_client = removeNewline(buff);
-	if (from_client == this->password)
+	std::string _name;
+	const char *to_client;
+	while (true)
 	{
-		const char *to_client = "Please enter your user name:\n";
+		if (format == USERNAME)
+			to_client = "Please enter your user name (user name != nickname):\n";
+		else if (format == NICKNAME)
+			to_client = "Please enter your nick name (user name != nickname):\n";
 		send(clientSocket, to_client, strlen(to_client), 0);
 		recv(clientSocket, buff, sizeof(buff), 0);
-		from_client = removeNewline(buff);
-		_new.setName(from_client);
-		_new.setSocket(clientSocket);
-		this->clients.push_back(_new);
+		_name = removeNewline(buff);
+		if (validFormat(format, _name))
 		{
-			const char *to_client = "Thanks for joining :)\nYou may continue now\n";
+			if (!userNameTaken(this->clients, _name))
+				break;
+			else
+			{
+				to_client = "Username already taken.\n";
+				send(clientSocket, to_client, strlen(to_client), 0);
+			}
+		}
+		else
+		{
+			to_client = "Wrong Format.\n";
 			send(clientSocket, to_client, strlen(to_client), 0);
 		}
-		return ;
 	}
-	const char *to_client = "Wrong Password.\n";
-	send(clientSocket, to_client, strlen(to_client), 0);
-	close(clientSocket);
+	return (_name);
+}
+
+
+int					Server::initUser(int clientSocket)
+{
+	std::string from_client;
+	char buff[1024] = {0};
+	int i;
+	for (i = 0; i < 3; i++)	
+	{
+		const char *pw_check = "Please enter the password:\n";
+		send(clientSocket, pw_check, strlen(pw_check), 0);
+		recv(clientSocket, buff, sizeof(buff), 0);
+		from_client = removeNewline(buff);
+		if (from_client == this->password)
+			break ;
+		std::string temp = "Wrong Password.\n";
+		const char *to_client = temp.c_str();
+		send(clientSocket, to_client, strlen(to_client), 0);
+	}
+	if (i == 3)
+	{
+		close (clientSocket);
+		return (1);
+	}
+
+	Client _new;
+	_new.setUserName(requestName(USERNAME, clientSocket));
+	_new.setNickName(requestName(NICKNAME, clientSocket));
+	_new.setSocket(clientSocket);
+	this->clients.push_back(_new);
+	{
+		const char *to_client = "Thanks for joining :)\nYou may continue now\n";
+		send(clientSocket, to_client, strlen(to_client), 0);
+	}
+	return (0);
 }
 
 bool					Server::existingUser(int clientSocket)
@@ -160,20 +199,12 @@ bool					Server::existingUser(int clientSocket)
 	return (false);
 }
 
-int	Server::checkForNewClient(std::vector<struct pollfd> &poll_fds)
+int	Server::NewClient(int new_socket)
 {
-	// Check for new client connections
-	socklen_t addrlen = sizeof(serverAddress);
-	int new_socket = accept(serverSocket, (struct sockaddr*)&serverAddress, &addrlen);
-	if (new_socket < 0) 
-	{
-		perror("Accept failed");
-		return (0);
-	}
 	std::cout << "New client connected: " << new_socket << std::endl;
 	
-	initUser(new_socket);
-	
+	if (initUser(new_socket) == 1)
+		return (0);
 	// Add new client to poll list
 	pollfd client_fd;
 	client_fd.fd = new_socket;
@@ -182,8 +213,7 @@ int	Server::checkForNewClient(std::vector<struct pollfd> &poll_fds)
 	return (1);
 }
 
-int			Server::checkForDisconnect(std::vector<struct pollfd> &poll_fds, \
-	int client_fd, size_t i, int bytes_read)
+int			Server::checkForDisconnect(int client_fd, size_t i, int bytes_read)
 {
 	if (bytes_read <= 0)
 	{
@@ -194,8 +224,9 @@ int			Server::checkForDisconnect(std::vector<struct pollfd> &poll_fds, \
 				break ;
 			it++;
 		}
-		std::cout	<< "Client disconnected: "	<< (*it).getName() <<
+		std::cout	<< "Client disconnected: "	<< (*it).getUserName() + "," <<
 		" Socket: "	<< client_fd				<< std::endl;
+		this->clients.erase(it);
 		close(client_fd);
 		poll_fds.erase(poll_fds.begin() + i);
 		return (1);
@@ -204,7 +235,30 @@ int			Server::checkForDisconnect(std::vector<struct pollfd> &poll_fds, \
 		return (0);
 }
 
-void						Server::getMessages(std::vector<struct pollfd> &poll_fds)
+bool									Server::sendToNext(char *buff, int client_fd)
+{
+	if (this->clients.size() < 2)
+		return false;
+	std::vector<Client>::iterator it = this->clients.begin();
+	std::vector<Client>::iterator send_to;
+	while (it != this->clients.end())
+	{
+		if ((*it).getSocket() == client_fd)
+			break ;
+		it++;
+	}
+	if (it + 1 == this->clients.end())
+		send_to = (it - 1);
+	else
+		send_to = (it + 1);
+	//complicated i know, couldnt think of anything else
+	std::string temp = (*it).getNickName() + ": " + buff; 
+	const char *message = temp.c_str();
+	send((*send_to).getSocket(), message, strlen(message), 0);
+	return true;
+}
+
+void						Server::getMessages()
 {
 	for (size_t i = 1; i < poll_fds.size(); i++)
 	{
@@ -214,11 +268,14 @@ void						Server::getMessages(std::vector<struct pollfd> &poll_fds)
 			memset(buffer, 0, BUFFER_SIZE);
 			int bytes_read = recv(client_fd, buffer, BUFFER_SIZE, 0);
 
-			if (checkForDisconnect(poll_fds, client_fd, i, bytes_read))
+			if (checkForDisconnect(client_fd, i, bytes_read))
 				i--;
 			else
 			{
-				std::cout << "Received: " << buffer;
+				if (removeNewline(buffer) == "end")
+					checkForDisconnect(client_fd, i, -1);
+				if (!sendToNext(buffer, client_fd))
+					std::cout << "Received: " << buffer;
 				// send(client_fd, buffer, bytes_read, 0); *** to send it back to client***
 			}
 		}
@@ -228,7 +285,10 @@ void						Server::getMessages(std::vector<struct pollfd> &poll_fds)
 void	Server::launch()
 {
 	if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1)
+	{
+		perror("");
 		throw SeverExceptionBind();
+	}
 	std::cout << "Password to join: " << this->password << std::endl;
 	// // Print the network address
 	// char ipStr[INET_ADDRSTRLEN];
@@ -246,11 +306,10 @@ void	Server::launch()
 	//------------------------------------------------//
 
 	// to manage multiple clients
-	std::vector<struct pollfd> poll_fds;
 	pollfd server_poll_fd;
 	server_poll_fd.fd = serverSocket;
 	server_poll_fd.events = POLLIN;  // constant check for incoming connections
-	poll_fds.push_back(server_poll_fd);
+	this->poll_fds.push_back(server_poll_fd);
 
 	while (true)
 	{
@@ -263,11 +322,19 @@ void	Server::launch()
 		}
 		if (poll_fds[0].revents & POLLIN)
 		{
-			if (!checkForNewClient(poll_fds))
+			// Check for new client connections
+			
+			socklen_t addrlen = sizeof(serverAddress);
+			int new_socket = accept(serverSocket, (struct sockaddr*)&serverAddress, &addrlen);
+			if (new_socket < 0) 
+			{
+				perror("Accept failed");
 				continue ;
+			}
+			NewClient(new_socket);
 		}
 		// Loop for clients messages
-		getMessages(poll_fds);
+		getMessages();
 	}
 	close(serverSocket);
 	return ;

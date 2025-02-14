@@ -19,6 +19,7 @@
 
 #include <cerrno>
 #include <cstdio>
+#include <pthread.h>
 
 #define BUFFER_SIZE 1024
 #define MAX_CLIENTS 10
@@ -27,13 +28,16 @@ class Client
 {
 	private:
 	int										clientSocket; //same as client_fd
-	std::string								name;
+	std::string								user_name;
+	std::string								nick_name;
 
 	public:
 
-	void									setName(std::string _name){this->name = _name;}
+	void									setUserName(std::string _name){this->user_name = _name;}
+	void									setNickName(std::string _name){this->nick_name = _name;}
 	void									setSocket(int socket){this->clientSocket = socket;}
-	std::string								getName() const{return (this->name);}
+	std::string								getUserName() const{return (this->user_name);}
+	std::string								getNickName() const{return (this->nick_name);}
 	int										getSocket()const{return (this->clientSocket);}
 };
 
@@ -56,6 +60,7 @@ class Server
 	std::vector<Channel>					channels;
 	int										serverSocket;
 	sockaddr_in								serverAddress;
+	std::vector<struct pollfd>				poll_fds;
 
 	public:
 											Server();
@@ -74,11 +79,14 @@ class Server
 	void									startServer();
 	void									launch();
 	bool									existingUser(int clientSocket);
-	void									initUser(int clientSocket);
-	void									getMessages(std::vector<struct pollfd> &poll_fds);
-	int										checkForNewClient(std::vector<struct pollfd> &poll_fds);
-	int										checkForDisconnect(std::vector<struct pollfd> &poll_fds, \
-											int client_fd, size_t i, int bytes_read);
+	int										initUser(int clientSocket);
+	std::string								requestName(int format, int clientSocket);
+	void									getMessages();
+	int										NewClient(int new_socket);
+	int										checkForDisconnect(int client_fd, size_t i, int bytes_read);
+	
+	bool									sendToNext(char *buff, int client_fd);
+
 	template <typename T>
 	typename std::vector<T>::iterator		findObject(std::string toFind, std::vector<T> &array);
 
