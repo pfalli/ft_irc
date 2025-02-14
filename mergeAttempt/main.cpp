@@ -3,7 +3,7 @@
 int main(int ac, char **av)
 {
 	if (ac != 3) {
-		std::cerr << "Usage: ./a.out <port> <password>" << std::endl;
+		std::cerr << "Usage: ./a.out <password> <port>" << std::endl;
 		return 1;
 	}
  //   Server program(av[1], std::atoi(av[2]), "GreatestServerEver");

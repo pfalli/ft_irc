@@ -6,7 +6,7 @@
 /*   By: ehedeman <ehedeman@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 14:34:33 by ehedeman          #+#    #+#             */
-/*   Updated: 2025/02/13 17:01:28 by ehedeman         ###   ########.fr       */
+/*   Updated: 2025/02/14 13:50:34 by ehedeman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -132,8 +132,9 @@ void					Server::initUser(int clientSocket)
 		const char *to_client = "Please enter your user name:\n";
 		send(clientSocket, to_client, strlen(to_client), 0);
 		recv(clientSocket, buff, sizeof(buff), 0);
-		from_client = buff;
+		from_client = removeNewline(buff);
 		_new.setName(from_client);
+		_new.setSocket(clientSocket);
 		this->clients.push_back(_new);
 		{
 			const char *to_client = "Thanks for joining :)\nYou may continue now\n";
@@ -181,10 +182,53 @@ int	Server::checkForNewClient(std::vector<struct pollfd> &poll_fds)
 	return (1);
 }
 
-void Server::launch() {
-	if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1) {
-		throw SeverExceptionBind();
+int			Server::checkForDisconnect(std::vector<struct pollfd> &poll_fds, \
+	int client_fd, size_t i, int bytes_read)
+{
+	if (bytes_read <= 0)
+	{
+		std::vector<Client>::iterator it = this->clients.begin();
+		while (it != this->clients.end())
+		{
+			if ((*it).getSocket() == client_fd)
+				break ;
+			it++;
+		}
+		std::cout	<< "Client disconnected: "	<< (*it).getName() <<
+		" Socket: "	<< client_fd				<< std::endl;
+		close(client_fd);
+		poll_fds.erase(poll_fds.begin() + i);
+		return (1);
 	}
+	else
+		return (0);
+}
+
+void						Server::getMessages(std::vector<struct pollfd> &poll_fds)
+{
+	for (size_t i = 1; i < poll_fds.size(); i++)
+	{
+		if (poll_fds[i].revents & POLLIN) {
+			int client_fd = poll_fds[i].fd;
+			char buffer[BUFFER_SIZE];
+			memset(buffer, 0, BUFFER_SIZE);
+			int bytes_read = recv(client_fd, buffer, BUFFER_SIZE, 0);
+
+			if (checkForDisconnect(poll_fds, client_fd, i, bytes_read))
+				i--;
+			else
+			{
+				std::cout << "Received: " << buffer;
+				// send(client_fd, buffer, bytes_read, 0); *** to send it back to client***
+			}
+		}
+	}
+}
+
+void	Server::launch()
+{
+	if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1)
+		throw SeverExceptionBind();
 	std::cout << "Password to join: " << this->password << std::endl;
 	// // Print the network address
 	// char ipStr[INET_ADDRSTRLEN];
@@ -192,9 +236,9 @@ void Server::launch() {
 	// std::cout << "Server bound to IP: " << ipStr << " on port: " << ntohs(address.sin_port) << std::endl;
 
 	// Mark the socket for listenign in
-	if (listen(serverSocket, SOMAXCONN) == -1) {
+	if (listen(serverSocket, SOMAXCONN) == -1)
 		throw SeverExceptionListen();
-	}
+
 	std::cout << "Server listening on port " << this->port << std::endl;
 
 	//------------------------------------------------//
@@ -208,10 +252,12 @@ void Server::launch() {
 	server_poll_fd.events = POLLIN;  // constant check for incoming connections
 	poll_fds.push_back(server_poll_fd);
 
-	while (true) {
+	while (true)
+	{
 		int activity = poll(&poll_fds[0], poll_fds.size(), -1);  // Wait indefinitely
 
-		if (activity < 0) {
+		if (activity < 0)
+		{
 			perror("Poll error");
 			continue;
 		}
@@ -221,26 +267,8 @@ void Server::launch() {
 				continue ;
 		}
 		// Loop for clients messages
-		for (size_t i = 1; i < poll_fds.size(); i++) {
-			if (poll_fds[i].revents & POLLIN) {
-				int client_fd = poll_fds[i].fd;
-				char buffer[BUFFER_SIZE];
-				memset(buffer, 0, BUFFER_SIZE);
-				int bytes_read = recv(client_fd, buffer, BUFFER_SIZE, 0);
-
-				if (bytes_read <= 0) {
-					std::cout << "Client disconnected: " << client_fd << std::endl;
-					close(client_fd);
-					poll_fds.erase(poll_fds.begin() + i);
-					i--;
-				} else {
-					std::cout << "Received: " << buffer;
-					// send(client_fd, buffer, bytes_read, 0); *** to send it back to client***
-				}
-			}
-		}
+		getMessages(poll_fds);
 	}
-
 	close(serverSocket);
 	return ;
 }
