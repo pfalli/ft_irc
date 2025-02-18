@@ -32,7 +32,8 @@ class Client
 	std::string								nick_name;
 
 	public:
-
+											Client(){user_name = "default"; nick_name = "default_nick";}
+											~Client(){};
 	void									setUserName(std::string _name){this->user_name = _name;}
 	void									setNickName(std::string _name){this->nick_name = _name;}
 	void									setSocket(int socket){this->clientSocket = socket;}
@@ -85,7 +86,7 @@ class Server
 	int										NewClient(int new_socket);
 	int										checkForDisconnect(int client_fd, size_t i, int bytes_read);
 	
-	bool									sendToNext(char *buff, int client_fd);
+	bool									sendToNext(std::string buff, int client_fd);
 
 	template <typename T>
 	typename std::vector<T>::iterator		findObject(std::string toFind, std::vector<T> &array);

@@ -6,7 +6,7 @@
 /*   By: ehedeman <ehedeman@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 14:34:33 by ehedeman          #+#    #+#             */
-/*   Updated: 2025/02/14 16:48:59 by ehedeman         ###   ########.fr       */
+/*   Updated: 2025/02/18 17:41:07 by ehedeman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -156,27 +156,27 @@ int					Server::initUser(int clientSocket)
 	std::string from_client;
 	char buff[1024] = {0};
 	int i;
-	for (i = 0; i < 3; i++)	
-	{
-		const char *pw_check = "Please enter the password:\n";
-		send(clientSocket, pw_check, strlen(pw_check), 0);
-		recv(clientSocket, buff, sizeof(buff), 0);
-		from_client = removeNewline(buff);
-		if (from_client == this->password)
-			break ;
-		std::string temp = "Wrong Password.\n";
-		const char *to_client = temp.c_str();
-		send(clientSocket, to_client, strlen(to_client), 0);
-	}
-	if (i == 3)
-	{
-		close (clientSocket);
-		return (1);
-	}
+	// for (i = 0; i < 3; i++)	
+	// {
+	// 	const char *pw_check = "Please enter the password:\n";
+	// 	send(clientSocket, pw_check, strlen(pw_check), 0);
+	// 	recv(clientSocket, buff, sizeof(buff), 0);
+	// 	from_client = removeNewline(buff);
+	// 	if (from_client == this->password)
+	// 		break ;
+	// 	std::string temp = "Wrong Password.\n";
+	// 	const char *to_client = temp.c_str();
+	// 	send(clientSocket, to_client, strlen(to_client), 0);
+	// }
+	// if (i == 3)
+	// {
+	// 	close (clientSocket);
+	// 	return (1);
+	// }
 
 	Client _new;
-	_new.setUserName(requestName(USERNAME, clientSocket));
-	_new.setNickName(requestName(NICKNAME, clientSocket));
+	// _new.setUserName(requestName(USERNAME, clientSocket));
+	// _new.setNickName(requestName(NICKNAME, clientSocket));
 	_new.setSocket(clientSocket);
 	this->clients.push_back(_new);
 	{
@@ -235,7 +235,7 @@ int			Server::checkForDisconnect(int client_fd, size_t i, int bytes_read)
 		return (0);
 }
 
-bool									Server::sendToNext(char *buff, int client_fd)
+bool									Server::sendToNext(std::string buff, int client_fd)
 {
 	if (this->clients.size() < 2)
 		return false;
@@ -252,7 +252,7 @@ bool									Server::sendToNext(char *buff, int client_fd)
 	else
 		send_to = (it + 1);
 	//complicated i know, couldnt think of anything else
-	std::string temp = (*it).getNickName() + ": " + buff; 
+	std::string temp = (*it).getNickName() + ": " + buff + "\n"; 
 	const char *message = temp.c_str();
 	send((*send_to).getSocket(), message, strlen(message), 0);
 	return true;
@@ -265,16 +265,16 @@ void						Server::getMessages()
 		if (poll_fds[i].revents & POLLIN) {
 			int client_fd = poll_fds[i].fd;
 			char buffer[BUFFER_SIZE];
-			memset(buffer, 0, BUFFER_SIZE);
 			int bytes_read = recv(client_fd, buffer, BUFFER_SIZE, 0);
-
+			std::string str = removeNewline(buffer);
+			memset(buffer, 0, BUFFER_SIZE);
 			if (checkForDisconnect(client_fd, i, bytes_read))
 				i--;
 			else
 			{
-				if (removeNewline(buffer) == "end")
+				if (str == "end")
 					checkForDisconnect(client_fd, i, -1);
-				if (!sendToNext(buffer, client_fd))
+				else if (!sendToNext(str.c_str(), client_fd))
 					std::cout << "Received: " << buffer;
 				// send(client_fd, buffer, bytes_read, 0); *** to send it back to client***
 			}
@@ -324,8 +324,9 @@ void	Server::launch()
 		{
 			// Check for new client connections
 			
-			socklen_t addrlen = sizeof(serverAddress);
-			int new_socket = accept(serverSocket, (struct sockaddr*)&serverAddress, &addrlen);
+			pollfd client;
+			socklen_t addrlen = sizeof(client);
+			int new_socket = accept(serverSocket, (struct sockaddr*)&client, &addrlen);
 			if (new_socket < 0) 
 			{
 				perror("Accept failed");
