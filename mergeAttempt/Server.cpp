@@ -6,31 +6,37 @@
 /*   By: ehedeman <ehedeman@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 14:34:33 by ehedeman          #+#    #+#             */
-/*   Updated: 2025/02/19 13:27:59 by ehedeman         ###   ########.fr       */
+/*   Updated: 2025/02/19 16:23:35 by ehedeman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include "utils.hpp"
 
-const char* Server::SeverExceptionSocket::what() const throw()
+const char* SeverExceptionSocket::what() const throw()
 {
 	return "Error: Socket.";
 }
 
-const char* Server::SeverExceptionBind::what() const throw()
+const char* SeverExceptionBind::what() const throw()
 {
 	return "Error: Bind.";
 }
 
-const char* Server::SeverExceptionListen::what() const throw()
+const char* SeverExceptionListen::what() const throw()
 {
 	return "Error: Listen.";
+}
+
+const char* FailedPollException::what() const throw()
+{
+	return "Error: Poll timeout or error.";
 }
 
 Server::Server(): \
 	name("default"), password("123456\n"), port(8080)
 {
+	this->server_shutdown = false;
 	this->serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverSocket == -1) {
 		throw SeverExceptionSocket();
@@ -44,6 +50,7 @@ Server::Server(): \
 Server::Server(std::string _password, int _port, std::string _name): \
 	name(_name), password(_password), port(_port)
 {
+	this->server_shutdown = false;
 	this->serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverSocket == -1) {
 		throw SeverExceptionSocket();
@@ -69,6 +76,7 @@ std::string				Server::getName()const{return (name);}
 std::string				Server::getPassword()const{return (password);}
 std::vector<Client>		Server::getClients()const{return (clients);}
 std::vector<Channel>	Server::getChannels()const{return (channels);}
+bool					Server::getServerShutdown()const{return (server_shutdown);}
 
 Server 					&Server::operator=(const Server &src)
 {
@@ -88,16 +96,17 @@ Server 					&Server::operator=(const Server &src)
 		this->channels.push_back(*_channels);
 		_channels++;
 	}
+	this->server_shutdown = src.getServerShutdown();
 	return (*this);
 }
 
 template <typename T>
-typename std::vector<T>::iterator		Server::findObject(std::string toFind, std::vector<T> &array)
+typename std::vector<T>::iterator		Server::findObject(int toFind, std::vector<T> &array)
 {
 	typename std::vector<T>::iterator it = array.begin();
 	while (it != array.end())
 	{
-		if ((*it).getName() == name)
+		if ((*it).getSocket() == toFind)
 			break;
 		it++;
 	}
@@ -114,7 +123,8 @@ int					Server::initUser(int clientSocket)
 	this->clients.push_back(_new);
 	{
 		const char *to_client = "Thanks for joining :)\nYou may continue now\n";
-		send(clientSocket, to_client, strlen(to_client), 0);
+		if (send(clientSocket, to_client, strlen(to_client), 0) == FAILURE)
+			return (FAILURE);
 	}
 	return (0);
 }
@@ -136,36 +146,34 @@ int	Server::NewClient(int new_socket)
 {
 	std::cout << "New client connected: " << new_socket << std::endl;
 	
-	if (initUser(new_socket) == 1)
-		return (0);
-	// Add new client to poll list
+	initUser(new_socket);
+	// Add new client to poll lists
 	pollfd client_fd;
 	client_fd.fd = new_socket;
 	client_fd.events = POLLIN;  // Monitor for incoming data
 	poll_fds.push_back(client_fd);
-	return (1);
+	return (SUCCESS);
 }
 
-int			Server::checkForDisconnect(int client_fd, size_t i, int bytes_read)
+int			Server::clientDisconnect(int client_fd, std::vector<pollfd>::iterator pollfd, int bytes_read)
 {
-	if (bytes_read <= 0)
+	if (bytes_read == 0)
 	{
-		std::vector<Client>::iterator it = this->clients.begin();
-		while (it != this->clients.end())
-		{
-			if ((*it).getSocket() == client_fd)
-				break ;
-			it++;
-		}
-		std::cout	<< "Client disconnected: "	<< (*it).getUserName() + "," <<
-		" Socket: "	<< client_fd				<< std::endl;
-		this->clients.erase(it);
-		close(client_fd);
-		poll_fds.erase(poll_fds.begin() + i);
-		return (1);
+		std::cout << "A client just disconnected" << std::endl;
+		deleteClient(findObject(client_fd, this->clients), pollfd);
+		return DISCONNECT;
 	}
 	else
 		return (0);
+}
+
+void		Server::deleteClient(std::vector<Client>::iterator client, std::vector<pollfd>::iterator poll)
+{
+	std::cout	<< "Client disconnected: "	<< (*client).getUserName() + "," <<
+		" Socket: "	<< client->getSocket()				<< std::endl;
+	close(client->getSocket());
+	this->clients.erase(client);
+	this->poll_fds.erase(poll);
 }
 
 bool									Server::sendToNext(std::string buff, int client_fd)
@@ -191,30 +199,6 @@ bool									Server::sendToNext(std::string buff, int client_fd)
 	return true;
 }
 
-void						Server::getMessages()
-{
-	for (size_t i = 1; i < poll_fds.size(); i++)
-	{
-		if (poll_fds[i].revents & POLLIN) {
-			int client_fd = poll_fds[i].fd;
-			char buffer[BUFFER_SIZE];
-			int bytes_read = recv(client_fd, buffer, BUFFER_SIZE, 0);
-			std::string str = removeNewline(buffer);
-			memset(buffer, 0, BUFFER_SIZE);
-			if (checkForDisconnect(client_fd, i, bytes_read))
-				i--;
-			else
-			{
-				if (str == "end")
-					checkForDisconnect(client_fd, i, -1);
-				else if (!sendToNext(str.c_str(), client_fd))
-					std::cout << "Received: " << str << std::endl;
-				// send(client_fd, buffer, bytes_read, 0); *** to send it back to client***
-			}
-		}
-	}
-}
-
 int									Server::acceptClient()
 {
 	pollfd client;
@@ -224,7 +208,7 @@ int									Server::acceptClient()
 	if (socket < 0)
 	{
 		perror("Accept failed");
-		return ACCEPT_FAILED ;
+		return FAILURE ;
 	}
 	return socket;
 }
@@ -232,15 +216,8 @@ int									Server::acceptClient()
 void	Server::launch()
 {
 	if (bind(serverSocket, (struct sockaddr*)&serverAddress, sizeof(serverAddress)) == -1)
-	{
-		perror("");
 		throw SeverExceptionBind();
-	}
 	std::cout << "Password to join: " << this->password << std::endl;
-	// // Print the network address
-	// char ipStr[INET_ADDRSTRLEN];
-	// inet_ntop(AF_INET, &address.sin_addr, ipStr, INET_ADDRSTRLEN);
-	// std::cout << "Server bound to IP: " << ipStr << " on port: " << ntohs(address.sin_port) << std::endl;
 
 	// Mark the socket for listenign in
 	if (listen(serverSocket, SOMAXCONN) == -1)
@@ -258,27 +235,80 @@ void	Server::launch()
 	server_poll_fd.events = POLLIN;  // constant check for incoming connections
 	this->poll_fds.push_back(server_poll_fd);
 
-	while (true)
+	while (!server_shutdown)
 	{
 		int activity = poll(&poll_fds[0], poll_fds.size(), -1);  // Wait indefinitely
-
-		if (activity < 0)
+		if (activity == FAILURE || activity == POLL_TIMEOUT)
 		{
-			perror("Poll error");
-			continue;
+			if (errno == EINTR)
+				break ;
+			throw FailedPollException();
 		}
-		if (poll_fds[0].revents & POLLIN)
+		std::vector<pollfd>::iterator it = poll_fds.begin();
+		size_t i = 0;
+		while (it != poll_fds.end() && i < poll_fds.size())
 		{
-			// Check for new client connections
-			
-			
-			int new_socket = acceptClient();
-			if (new_socket == ACCEPT_FAILED)
-				continue ;
-			NewClient(new_socket);
+			if (it->revents & POLLIN)
+			{
+				if (it->fd == serverSocket)
+				{
+					// Check for new client connections
+					if (newConnection() == FAILURE)
+						continue ;
+				}
+				else
+				{
+					if (existingConnection(it) == DISCONNECT)
+						break ;
+				}
+			}
+			i++;
+			it++;
 		}
-		getMessages();
+		// getMessages();
 	}
 	close(serverSocket);
 	return ;
+}
+
+int Server::newConnection()
+{
+	int new_socket = acceptClient();
+	if (new_socket == FAILURE)
+		return FAILURE ;
+	if (NewClient(new_socket) == FAILURE)
+		return FAILURE ;
+	return SUCCESS;
+}
+
+int Server::existingConnection(std::vector<pollfd>::iterator it)
+{
+	Client *client = &(*(findObject(it->fd, this->clients)));
+	char buffer[BUFFER_SIZE];
+	int bytes_read;
+	memset(buffer, 0, sizeof(buffer));
+
+	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0);
+	if (bytes_read <= FAILURE)
+	{
+		deleteClient(findObject(it->fd, this->clients), it);
+		return DISCONNECT;
+	}
+	else if (clientDisconnect(client->getSocket(), it, bytes_read))
+		return DISCONNECT;
+	else
+	if (bytes_read > 0)
+	{
+		std::string str = removeNewline(buffer);
+		memset(buffer, 0, BUFFER_SIZE);
+		if (str == "end")
+		{
+			if (clientDisconnect(client->getSocket(), it, 0) == DISCONNECT)
+				return DISCONNECT;
+		}
+		else if (!sendToNext(str.c_str(), client->getSocket()))
+			std::cout << "Received: " << str << std::endl;
+		// send(client_fd, buffer, bytes_read, 0); *** to send it back to client***
+	}
+	return SUCCESS;
 }

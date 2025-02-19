@@ -24,7 +24,11 @@
 #define BUFFER_SIZE 1024
 #define MAX_CLIENTS 10
 
-#define ACCEPT_FAILED -1
+#define FAILURE -1
+#define POLL_TIMEOUT 0
+#define SUCCESS 1
+#define DISCONNECT 2
+#define IGNORE 5
 
 class Client
 {
@@ -56,6 +60,7 @@ class Channel{
 class Server
 {
 	private:
+	bool								server_shutdown;
 	const std::string						name;
 	const std::string						password;
 	const int								port;
@@ -78,6 +83,7 @@ class Server
 	std::string								getPassword()const;
 	std::vector<Client>						getClients()const;
 	std::vector<Channel>					getChannels()const;
+	bool									getServerShutdown()const;
 
 	void									startServer();
 	void									launch();
@@ -86,29 +92,38 @@ class Server
 	std::string								requestName(int format, int clientSocket);
 	void									getMessages();
 	int										NewClient(int new_socket);
-	int										checkForDisconnect(int client_fd, size_t i, int bytes_read);
-	int									acceptClient();
+	int										clientDisconnect(int client_fd, std::vector<pollfd>::iterator it, int bytes_read);
+	int										acceptClient();
 	bool									sendToNext(std::string buff, int client_fd);
+	int										existingConnection(std::vector<pollfd>::iterator it);
+	int										newConnection();
 
+
+	void									deleteClient(std::vector<Client>::iterator client, std::vector<pollfd>::iterator poll);
 	template <typename T>
-	typename std::vector<T>::iterator		findObject(std::string toFind, std::vector<T> &array);
-
-	class SeverExceptionSocket : public std::exception
-	{
-		public:
-			const char*						what() const throw();
-	};
-	class SeverExceptionBind : public std::exception
-	{
-		public:
-			const char*						what() const throw();
-	};
-	class SeverExceptionListen : public std::exception
-	{
-		public:
-			const char*						what() const throw();
-	};
+	typename std::vector<T>::iterator		findObject(int toFind, std::vector<T> &array);
 };
 
+
+class SeverExceptionSocket : public std::exception
+{
+	public:
+		const char*						what() const throw();
+};
+class SeverExceptionBind : public std::exception
+{
+	public:
+		const char*						what() const throw();
+};
+class SeverExceptionListen : public std::exception
+{
+	public:
+		const char*						what() const throw();
+};
+class FailedPollException : public std::exception
+{
+	public:
+		const char*						what() const throw();
+};
 
 #endif
