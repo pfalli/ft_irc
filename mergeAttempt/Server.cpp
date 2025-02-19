@@ -6,7 +6,7 @@
 /*   By: ehedeman <ehedeman@student.42wolfsburg.    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/11 14:34:33 by ehedeman          #+#    #+#             */
-/*   Updated: 2025/02/18 17:41:07 by ehedeman         ###   ########.fr       */
+/*   Updated: 2025/02/19 13:27:59 by ehedeman         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -104,76 +104,9 @@ typename std::vector<T>::iterator		Server::findObject(std::string toFind, std::v
 	return (it);
 }
 
-std::string					removeNewline(char *buff)
-{
-	std::string _new = "";
-
-	for (size_t i = 0; i < strlen(buff); i++)
-	{
-		if (!isalnum(buff[i]))
-			break;
-		_new += buff[i];
-	}
-	return _new;
-}
-
-std::string					Server::requestName(int format, int clientSocket)
-{
-	char buff[1024] = {0};
-	std::string _name;
-	const char *to_client;
-	while (true)
-	{
-		if (format == USERNAME)
-			to_client = "Please enter your user name (user name != nickname):\n";
-		else if (format == NICKNAME)
-			to_client = "Please enter your nick name (user name != nickname):\n";
-		send(clientSocket, to_client, strlen(to_client), 0);
-		recv(clientSocket, buff, sizeof(buff), 0);
-		_name = removeNewline(buff);
-		if (validFormat(format, _name))
-		{
-			if (!userNameTaken(this->clients, _name))
-				break;
-			else
-			{
-				to_client = "Username already taken.\n";
-				send(clientSocket, to_client, strlen(to_client), 0);
-			}
-		}
-		else
-		{
-			to_client = "Wrong Format.\n";
-			send(clientSocket, to_client, strlen(to_client), 0);
-		}
-	}
-	return (_name);
-}
-
 
 int					Server::initUser(int clientSocket)
 {
-	std::string from_client;
-	char buff[1024] = {0};
-	int i;
-	// for (i = 0; i < 3; i++)	
-	// {
-	// 	const char *pw_check = "Please enter the password:\n";
-	// 	send(clientSocket, pw_check, strlen(pw_check), 0);
-	// 	recv(clientSocket, buff, sizeof(buff), 0);
-	// 	from_client = removeNewline(buff);
-	// 	if (from_client == this->password)
-	// 		break ;
-	// 	std::string temp = "Wrong Password.\n";
-	// 	const char *to_client = temp.c_str();
-	// 	send(clientSocket, to_client, strlen(to_client), 0);
-	// }
-	// if (i == 3)
-	// {
-	// 	close (clientSocket);
-	// 	return (1);
-	// }
-
 	Client _new;
 	// _new.setUserName(requestName(USERNAME, clientSocket));
 	// _new.setNickName(requestName(NICKNAME, clientSocket));
@@ -275,11 +208,25 @@ void						Server::getMessages()
 				if (str == "end")
 					checkForDisconnect(client_fd, i, -1);
 				else if (!sendToNext(str.c_str(), client_fd))
-					std::cout << "Received: " << buffer;
+					std::cout << "Received: " << str << std::endl;
 				// send(client_fd, buffer, bytes_read, 0); *** to send it back to client***
 			}
 		}
 	}
+}
+
+int									Server::acceptClient()
+{
+	pollfd client;
+	socklen_t addrlen = sizeof(client);
+
+	int socket = accept(serverSocket, (struct sockaddr*)&client, &addrlen);
+	if (socket < 0)
+	{
+		perror("Accept failed");
+		return ACCEPT_FAILED ;
+	}
+	return socket;
 }
 
 void	Server::launch()
@@ -324,17 +271,12 @@ void	Server::launch()
 		{
 			// Check for new client connections
 			
-			pollfd client;
-			socklen_t addrlen = sizeof(client);
-			int new_socket = accept(serverSocket, (struct sockaddr*)&client, &addrlen);
-			if (new_socket < 0) 
-			{
-				perror("Accept failed");
+			
+			int new_socket = acceptClient();
+			if (new_socket == ACCEPT_FAILED)
 				continue ;
-			}
 			NewClient(new_socket);
 		}
-		// Loop for clients messages
 		getMessages();
 	}
 	close(serverSocket);

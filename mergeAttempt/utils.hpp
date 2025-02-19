@@ -12,5 +12,8 @@ typedef enum	s_format
 
 }				t_format;
 
-bool		validFormat(int format, std::string str);
-bool		userNameTaken(std::vector<Client> clients, std::string username);
+bool			validFormat(int format, std::string str);
+bool			userNameTaken(std::vector<Client> clients, std::string username);
+std::string		removeNewline(char *buff);
+bool			verfifyPassword(std::string password, int clientSocket);
+std::string		requestName(int format, int clientSocket, std::vector<Client> &clients);

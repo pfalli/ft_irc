@@ -24,6 +24,8 @@
 #define BUFFER_SIZE 1024
 #define MAX_CLIENTS 10
 
+#define ACCEPT_FAILED -1
+
 class Client
 {
 	private:
@@ -85,7 +87,7 @@ class Server
 	void									getMessages();
 	int										NewClient(int new_socket);
 	int										checkForDisconnect(int client_fd, size_t i, int bytes_read);
-	
+	int									acceptClient();
 	bool									sendToNext(std::string buff, int client_fd);
 
 	template <typename T>

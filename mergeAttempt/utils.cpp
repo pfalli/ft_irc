@@ -107,3 +107,74 @@ bool validFormat(int format, std::string str)
 	}
 	return false;
 }
+std::string					removeNewline(char *buff)
+{
+	std::string _new = "";
+
+	for (size_t i = 0; i < strlen(buff); i++)
+	{
+		if (!isalnum(buff[i]) && buff[i] != ' ')
+			break;
+		_new += buff[i];
+	}
+	return _new;
+}
+
+
+bool	verfifyPassword(std::string password, int clientSocket)
+{
+	std::string from_client;
+	char buff[1024] = {0};
+	int i;
+	for (i = 0; i < 3; i++)	
+	{
+		const char *pw_check = "Please enter the password:\n";
+		send(clientSocket, pw_check, strlen(pw_check), 0);
+		recv(clientSocket, buff, sizeof(buff), 0);
+		from_client = removeNewline(buff);
+		if (from_client == password)
+			break ;
+		std::string temp = "Wrong Password.\n";
+		const char *to_client = temp.c_str();
+		send(clientSocket, to_client, strlen(to_client), 0);
+	}
+	if (i == 3)
+	{
+		close (clientSocket);
+		return (false);
+	}
+	return true;
+}
+
+std::string					requestName(int format, int clientSocket, std::vector<Client> &clients)
+{
+	char buff[1024] = {0};
+	std::string _name;
+	const char *to_client;
+	while (true)
+	{
+		if (format == USERNAME)
+			to_client = "Please enter your user name (user name != nickname):\n";
+		else if (format == NICKNAME)
+			to_client = "Please enter your nick name (user name != nickname):\n";
+		send(clientSocket, to_client, strlen(to_client), 0);
+		recv(clientSocket, buff, sizeof(buff), 0);
+		_name = removeNewline(buff);
+		if (validFormat(format, _name))
+		{
+			if (!userNameTaken(clients, _name))
+				break;
+			else
+			{
+				to_client = "Username already taken.\n";
+				send(clientSocket, to_client, strlen(to_client), 0);
+			}
+		}
+		else
+		{
+			to_client = "Wrong Format.\n";
+			send(clientSocket, to_client, strlen(to_client), 0);
+		}
+	}
+	return (_name);
+}
