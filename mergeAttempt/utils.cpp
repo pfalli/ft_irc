@@ -61,7 +61,7 @@ static bool validNickname(std::string str)
 }
 static bool validPassword(std::string str)
 {
-	if (strlen(str.c_str()) > 20 || strlen(str.c_str()) < 8)
+	if (strlen(str.c_str()) > 20 || strlen(str.c_str()) < 2)
 		return (false);
 	for (size_t i = 0; i < strlen(str.c_str()); i++)
 	{

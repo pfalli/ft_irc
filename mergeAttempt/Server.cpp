@@ -178,8 +178,10 @@ void		Server::deleteClient(std::vector<Client>::iterator client, std::vector<pol
 
 bool									Server::sendToNext(std::string buff, int client_fd)
 {
-	if (this->clients.size() < 2)
+	if (this->clients.size() < 2){
+		std::cout << "***only one client***\n"; 
 		return false;
+	}
 	std::vector<Client>::iterator it = this->clients.begin();
 	std::vector<Client>::iterator send_to;
 	while (it != this->clients.end())
@@ -258,7 +260,7 @@ void	Server::launch()
 				}
 				else
 				{
-					if (existingConnection(it) == DISCONNECT)
+					if (existingConnection(it) == DISCONNECT) // ***connecting PieroHong part
 						break ;
 				}
 			}
@@ -288,7 +290,7 @@ int Server::existingConnection(std::vector<pollfd>::iterator it)
 	int bytes_read;
 	memset(buffer, 0, sizeof(buffer));
 
-	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0);
+	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0); // ***receiving message
 	if (bytes_read <= FAILURE)
 	{
 		deleteClient(findObject(it->fd, this->clients), it);
@@ -306,9 +308,17 @@ int Server::existingConnection(std::vector<pollfd>::iterator it)
 			if (clientDisconnect(client->getSocket(), it, 0) == DISCONNECT)
 				return DISCONNECT;
 		}
-		else if (!sendToNext(str.c_str(), client->getSocket()))
-			std::cout << "Received: " << str << std::endl;
-		// send(client_fd, buffer, bytes_read, 0); *** to send it back to client***
+		// else if(!sendToNext(str.c_str(), client->getSocket()))
+		// 	std::cout << "Received(existingConnection): " << str << std::endl;
+		else
+		{
+			std::cout << "(existingConnection): ....parsing: " << str << std::endl;
+			parseCommand(str);
+		}
 	}
 	return SUCCESS;
+}
+
+void Server::parseCommand(const std::string &str) {
+    (void)str;
 }

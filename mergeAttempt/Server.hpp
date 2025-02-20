@@ -51,6 +51,7 @@ class Client
 class Channel{
 	private:
 	std::string								name;
+	std::string	nameClientList;
 
 	public:
 	void									setName(std::string _name){this->name = _name;}
@@ -65,7 +66,7 @@ class Server
 	const std::string						password;
 	const int								port;
 	std::vector<Client>						clients;
-	std::vector<Channel>					channels;
+	std::vector<Channel>					channels; // **#team
 	int										serverSocket;
 	sockaddr_in								serverAddress;
 	std::vector<struct pollfd>				poll_fds;
@@ -97,6 +98,7 @@ class Server
 	bool									sendToNext(std::string buff, int client_fd);
 	int										existingConnection(std::vector<pollfd>::iterator it);
 	int										newConnection();
+	void parseCommand(const std::string &str);
 
 
 	void									deleteClient(std::vector<Client>::iterator client, std::vector<pollfd>::iterator poll);
