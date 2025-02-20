@@ -107,17 +107,31 @@ bool validFormat(int format, std::string str)
 	}
 	return false;
 }
-std::string					removeNewline(char *buff)
-{
-	std::string _new = "";
+// std::string					removeNewline(char *buff) // *** it was deleting '#', ':', and more chars ***
+// {
+// 	std::string _new = "";
 
-	for (size_t i = 0; i < strlen(buff); i++)
-	{
-		if (!isalnum(buff[i]) && buff[i] != ' ')
-			break;
-		_new += buff[i];
-	}
-	return _new;
+// 	for (size_t i = 0; i < strlen(buff); i++)
+// 	{
+// 		if (!isalnum(buff[i]) && buff[i] != ' ')
+// 			break;
+// 		_new += buff[i];
+// 	}
+// 	return _new;
+// }
+
+std::string removeNewline(char *buff) // ***good one***
+{
+    std::string _new = "";
+
+    for (size_t i = 0; i < strlen(buff); i++)
+    {
+        if (buff[i] != '\n' && buff[i] != '\r')
+        {
+            _new += buff[i];
+        }
+    }
+    return _new;
 }
 
 

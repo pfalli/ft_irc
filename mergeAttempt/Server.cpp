@@ -301,7 +301,8 @@ int Server::existingConnection(std::vector<pollfd>::iterator it)
 	else
 	if (bytes_read > 0)
 	{
-		std::string str = removeNewline(buffer);
+		std::cout << buffer << std::endl;
+		std::string str = buffer;
 		memset(buffer, 0, BUFFER_SIZE);
 		if (str == "end")
 		{
@@ -312,7 +313,7 @@ int Server::existingConnection(std::vector<pollfd>::iterator it)
 		// 	std::cout << "Received(existingConnection): " << str << std::endl;
 		else
 		{
-			std::cout << "(existingConnection): ....parsing: " << str << std::endl;
+			std::cout << "Received(existingConnection): " << str << std::endl;
 			parseCommand(str);
 		}
 	}
@@ -335,32 +336,33 @@ void Server::parseCommand(const std::string &str) {
 
     std::string remainingStr;
     std::getline(iss, remainingStr); // Read the rest of the string
+	// iss >> remainingStr;
 
-    // std::cout << "  debug: " << str << std::endl;
-    // std::cout << "  firstWord: " << firstWord << std::endl;
-    // std::cout << "  remainingStr: " << remainingStr << std::endl;
+    std::cout << "  parse: " << str << std::endl;
+    std::cout << "  firstWord: " << firstWord << std::endl;
+    std::cout << "  remainingStr: " << remainingStr << std::endl;
 
     for (int i = 0; i < 5; ++i) {
         if (firstWord == commands[i]) {
             std::cout << "Command recognized: " << firstWord << std::endl;
-            handleCommand(firstWord, remainingStr);
+            handleCommand(remainingStr, firstWord);
             return;
         }
     }
-    std::cout << "Unknown command: " << firstWord << std::endl;
+    std::cout << "Wrong message: " << firstWord << std::endl;
     // what to do if client wrote wrong?
 }
 
-void Server::handleCommand(const std::string &str, std::string &firstWord) {
+void Server::handleCommand(const std::string &remainingStr, std::string &firstWord) {
     if (firstWord == "JOIN") {
-        std::cout << "Handling JOIN: " << str << std::endl;
+        std::cout << "Handling JOIN: " << remainingStr << std::endl;
     } else if (firstWord == "MODE") {
-        std::cout << "Handling MODE: "<< str << std::endl;
+        std::cout << "Handling MODE: "<< remainingStr << std::endl;
     } else if (firstWord == "KICK") {
-        std::cout << "Handling KICK: " << str << std::endl;
+        std::cout << "Handling KICK: " << remainingStr << std::endl;
     } else if (firstWord == "PRIVMSG") {
-        std::cout << "Handling PRIVMSG: " << str << std::endl;
+        std::cout << "Handling PRIVMSG: " << remainingStr << std::endl;
     } else {
-        std::cout << "Unknown command(inside handleCommand()): " << str << std::endl;
+        std::cout << "Wrong message(inside handleCommand()): " << remainingStr << std::endl;
     }
 }
