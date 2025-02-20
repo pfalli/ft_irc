@@ -319,6 +319,48 @@ int Server::existingConnection(std::vector<pollfd>::iterator it)
 	return SUCCESS;
 }
 
+
 void Server::parseCommand(const std::string &str) {
-    (void)str;
+    const char* commands[] = {
+        "JOIN",
+        "PRIVMSG",
+        "KICK",
+        "INVITE",
+        "TOPIC"
+    };
+
+    std::istringstream iss(str); // Read
+    std::string firstWord;
+    iss >> firstWord;
+
+    std::string remainingStr;
+    std::getline(iss, remainingStr); // Read the rest of the string
+
+    // std::cout << "  debug: " << str << std::endl;
+    // std::cout << "  firstWord: " << firstWord << std::endl;
+    // std::cout << "  remainingStr: " << remainingStr << std::endl;
+
+    for (int i = 0; i < 5; ++i) {
+        if (firstWord == commands[i]) {
+            std::cout << "Command recognized: " << firstWord << std::endl;
+            handleCommand(firstWord, remainingStr);
+            return;
+        }
+    }
+    std::cout << "Unknown command: " << firstWord << std::endl;
+    // what to do if client wrote wrong?
+}
+
+void Server::handleCommand(const std::string &str, std::string &firstWord) {
+    if (firstWord == "JOIN") {
+        std::cout << "Handling JOIN: " << str << std::endl;
+    } else if (firstWord == "MODE") {
+        std::cout << "Handling MODE: "<< str << std::endl;
+    } else if (firstWord == "KICK") {
+        std::cout << "Handling KICK: " << str << std::endl;
+    } else if (firstWord == "PRIVMSG") {
+        std::cout << "Handling PRIVMSG: " << str << std::endl;
+    } else {
+        std::cout << "Unknown command(inside handleCommand()): " << str << std::endl;
+    }
 }

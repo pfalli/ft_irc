@@ -20,6 +20,7 @@
 #include <cerrno>
 #include <cstdio>
 #include <pthread.h>
+#include <sstream>
 
 #define BUFFER_SIZE 1024
 #define MAX_CLIENTS 10
@@ -98,7 +99,9 @@ class Server
 	bool									sendToNext(std::string buff, int client_fd);
 	int										existingConnection(std::vector<pollfd>::iterator it);
 	int										newConnection();
+
 	void parseCommand(const std::string &str);
+	void handleCommand(const std::string &str, std::string &firstWord);
 
 
 	void									deleteClient(std::vector<Client>::iterator client, std::vector<pollfd>::iterator poll);
