@@ -14,7 +14,8 @@ NAME = server
 
 SRC =		main.cpp	\
 			Server.cpp	\
-			utils.cpp
+			utils.cpp	\
+			Channel.cpp
 
 OBJS_DIR = objs/
 OBJS = $(SRC:.cpp=.o)
@@ -29,7 +30,7 @@ OBJS_PREFIXED = $(addprefix $(OBJS_DIR), $(OBJS))
 # client_OBJS = $(client_SRC:.cpp=.o)
 # client_OBJS_PREFIXED = $(addprefix $(client_OBJS_DIR), $(client_OBJS))
 
-INCLUDES =	Server.hpp	utils.hpp
+INCLUDES =	Server.hpp Client.hpp Common.hpp Channel.hpp utils.hpp
 
 CXX = c++
 

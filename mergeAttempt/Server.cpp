@@ -71,14 +71,15 @@ Server::Server(const Server &src): name(src.getName()), \
 	*this = src;
 }
 
-int						Server::getPort()const{return (port);}
-std::string				Server::getName()const{return (name);}
-std::string				Server::getPassword()const{return (password);}
-std::vector<Client>		Server::getClients()const{return (clients);}
-std::vector<Channel>	Server::getChannels()const{return (channels);}
-bool					Server::getServerShutdown()const{return (server_shutdown);}
+int							Server::getPort()const{return (port);}
+std::string					Server::getName()const{return (name);}
+std::string					Server::getPassword()const{return (password);}
+std::vector<Client>			Server::getClients()const{return (clients);}
+std::vector<Channel>		Server::getChannels()const{return (channels);}
+std::vector<Channel>& 		Server::getChannelsref() {return channels;}
+bool						Server::getServerShutdown()const{return (server_shutdown);}
 
-Server 					&Server::operator=(const Server &src)
+Server					&Server::operator=(const Server &src)
 {
 	if (this == &src)
 		return *this;
@@ -322,47 +323,76 @@ int Server::existingConnection(std::vector<pollfd>::iterator it)
 
 
 void Server::parseCommand(const std::string &str) {
-    const char* commands[] = {
-        "JOIN",
-        "PRIVMSG",
-        "KICK",
-        "INVITE",
-        "TOPIC"
-    };
+	const char* commands[] = {
+		"JOIN",
+		"PRIVMSG",
+		"KICK",
+		"INVITE",
+		"TOPIC"
+	};
 
-    std::istringstream iss(str); // Read
-    std::string firstWord;
-    iss >> firstWord;
+	std::istringstream iss(str); // Read
+	std::string firstWord;
+	iss >> firstWord;
 
-    std::string remainingStr;
-    std::getline(iss, remainingStr); // Read the rest of the string
+	std::string remainingStr;
+	std::getline(iss, remainingStr); // Read the rest of the string
 	// iss >> remainingStr;
 
-    std::cout << "  parse: " << str << std::endl;
-    std::cout << "  firstWord: " << firstWord << std::endl;
-    std::cout << "  remainingStr: " << remainingStr << std::endl;
+	std::cout << "  parse: " << str << std::endl;
+	std::cout << "  firstWord: " << firstWord << std::endl;
+	std::cout << "  remainingStr: " << remainingStr << std::endl;
 
-    for (int i = 0; i < 5; ++i) {
-        if (firstWord == commands[i]) {
-            std::cout << "Command recognized: " << firstWord << std::endl;
-            handleCommand(remainingStr, firstWord);
-            return;
-        }
-    }
-    std::cout << "Wrong message: " << firstWord << std::endl;
-    // what to do if client wrote wrong?
+	for (int i = 0; i < 5; ++i) {
+		if (firstWord == commands[i]) {
+			std::cout << "Command recognized: " << firstWord << std::endl;
+			handleCommand(remainingStr, firstWord);
+			return;
+		}
+	}
+	std::cout << "Wrong message: " << firstWord << std::endl;
+	// what to do if client wrote wrong?
 }
 
 void Server::handleCommand(const std::string &remainingStr, std::string &firstWord) {
-    if (firstWord == "JOIN") {
-        std::cout << "Handling JOIN: " << remainingStr << std::endl;
-    } else if (firstWord == "MODE") {
-        std::cout << "Handling MODE: "<< remainingStr << std::endl;
-    } else if (firstWord == "KICK") {
-        std::cout << "Handling KICK: " << remainingStr << std::endl;
-    } else if (firstWord == "PRIVMSG") {
-        std::cout << "Handling PRIVMSG: " << remainingStr << std::endl;
-    } else {
-        std::cout << "Wrong message(inside handleCommand()): " << remainingStr << std::endl;
-    }
+	if (firstWord == "JOIN") {
+		std::cout << "Handling JOIN: " << remainingStr << std::endl;
+	} else if (firstWord == "MODE") {
+		std::cout << "Handling MODE: "<< remainingStr << std::endl;
+	} else if (firstWord == "KICK") {
+		std::cout << "Handling KICK: " << remainingStr << std::endl;
+	} else if (firstWord == "PRIVMSG") {
+		std::cout << "Handling PRIVMSG: " << remainingStr << std::endl;
+	} else {
+		std::cout << "Wrong message(inside handleCommand()): " << remainingStr << std::endl;
+	}
 }
+
+
+void	Server::createChannel(std::string name)
+{
+	// Check if a channel with the given name already exists
+	for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); ++it)
+	{
+		if (it->getName() == name)
+			return ;
+	}
+	// if does not exist, create a new one and add
+	channels.push_back(Channel(name));
+}
+
+
+// /*	CLIENT	*/
+
+// /* add joiningClient to _joinedClients in Channel object 
+//    before add, check if client is already exist in joinedClients list. */
+// void Channel::joinClient(const Client &joiningClient) 
+// {
+//     std::string clientName = joiningClient.getUserName();
+//     for (std::vector<Client>::iterator it = _joinedClients.begin(); it != _joinedClients.end(); ++it)
+//     {
+//         if (it->getUserName() == clientName)
+//             return; // need announce function for both server & client
+//     }
+//     _joinedClients.push_back(joiningClient);
+// }

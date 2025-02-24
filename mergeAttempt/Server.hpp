@@ -1,68 +1,75 @@
 #ifndef SERVER_HPP
-#define SERVER_HPP
+# define SERVER_HPP
 
-#include <iostream>
-#include <sys/types.h>
-#include <unistd.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <arpa/inet.h>
-#include <string.h>
-#include <string>
-#include <vector>
+#include "Client.hpp"
+#include "Channel.hpp"
+#include "Common.hpp"
 
-#include <poll.h>
-#include <netinet/in.h>
-#include <cstdlib>
-#include <cstring>
-#include <sys/types.h>
+// #include <iostream>
+// #include <sys/types.h>
+// #include <unistd.h>
+// #include <sys/socket.h>
+// #include <netdb.h>
+// #include <arpa/inet.h>
+// #include <string.h>
+// #include <string>
+// #include <vector>
 
-#include <cerrno>
-#include <cstdio>
-#include <pthread.h>
-#include <sstream>
+// #include <poll.h>
+// #include <netinet/in.h>
+// #include <cstdlib>
+// #include <cstring>
+// #include <sys/types.h>
 
-#define BUFFER_SIZE 1024
-#define MAX_CLIENTS 10
+// #include <cerrno>
+// #include <cstdio>
+// #include <pthread.h>
+// #include <sstream>
 
-#define FAILURE -1
-#define POLL_TIMEOUT 0
-#define SUCCESS 1
-#define DISCONNECT 2
-#define IGNORE 5
+// #define BUFFER_SIZE 1024
+// #define MAX_CLIENTS 10
 
-class Client
-{
-	private:
-	int										clientSocket; //same as client_fd
-	std::string								user_name;
-	std::string								nick_name;
+// #define FAILURE -1
+// #define POLL_TIMEOUT 0
+// #define SUCCESS 1
+// #define DISCONNECT 2
+// #define IGNORE 5
 
-	public:
-											Client(){user_name = "default"; nick_name = "default_nick";}
-											~Client(){};
-	void									setUserName(std::string _name){this->user_name = _name;}
-	void									setNickName(std::string _name){this->nick_name = _name;}
-	void									setSocket(int socket){this->clientSocket = socket;}
-	std::string								getUserName() const{return (this->user_name);}
-	std::string								getNickName() const{return (this->nick_name);}
-	int										getSocket()const{return (this->clientSocket);}
-};
+// class Client
+// {
+// 	private:
+// 	int										clientSocket; //same as client_fd
+// 	std::string								user_name;
+// 	std::string								nick_name;
 
-class Channel{
-	private:
-	std::string								name;
-	std::string	nameClientList;
+// 	public:
+// 											Client(){user_name = "default"; nick_name = "default_nick";}
+// 											~Client(){};
+// 	void									setUserName(std::string _name){this->user_name = _name;}
+// 	void									setNickName(std::string _name){this->nick_name = _name;}
+// 	void									setSocket(int socket){this->clientSocket = socket;}
+// 	std::string								getUserName() const{return (this->user_name);}
+// 	std::string								getNickName() const{return (this->nick_name);}
+// 	int										getSocket()const{return (this->clientSocket);}
+// };
 
-	public:
-	void									setName(std::string _name){this->name = _name;}
-	std::string								getName()const{return (this->name);}
-};
+// class Channel{
+// 	private:
+// 	std::string								name;
+// 	std::string								nameClientList;
+// 	std::vector<Client>						_joinedClients;
+
+// 	public:
+// 	void									setName(std::string _name){this->name = _name;}
+// 	void									joinClient(const Client &client);
+// 	std::string								getName()const{return (this->name);}
+// 	std::vector<Client>&					getJoinedClients(){return (this-> _joinedClients);}
+// };
 
 class Server
 {
 	private:
-	bool								server_shutdown;
+	bool									server_shutdown;
 	const std::string						name;
 	const std::string						password;
 	const int								port;
@@ -85,7 +92,10 @@ class Server
 	std::string								getPassword()const;
 	std::vector<Client>						getClients()const;
 	std::vector<Channel>					getChannels()const;
+	std::vector<Channel>&					getChannelsref();
 	bool									getServerShutdown()const;
+
+	void									createChannel(std::string name);
 
 	void									startServer();
 	void									launch();
