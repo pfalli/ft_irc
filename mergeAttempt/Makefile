@@ -15,7 +15,8 @@ NAME = server
 SRC =		main.cpp	\
 			Server.cpp	\
 			utils.cpp	\
-			Channel.cpp
+			Channel.cpp \
+			privmsg.cpp
 
 OBJS_DIR = objs/
 OBJS = $(SRC:.cpp=.o)

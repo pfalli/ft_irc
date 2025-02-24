@@ -368,31 +368,14 @@ void Server::handleCommand(const std::string &remainingStr, std::string &firstWo
 	}
 }
 
-
 void	Server::createChannel(std::string name)
 {
-	// Check if a channel with the given name already exists
-	for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); ++it)
-	{
-		if (it->getName() == name)
-			return ;
-	}
-	// if does not exist, create a new one and add
+	// // Check if a channel with the given name already exists
+	// for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); ++it)
+	// {
+	// 	if (it->getName() == name)
+	// 		return ;
+	// }
+	// // if does not exist, create a new one and add
 	channels.push_back(Channel(name));
 }
-
-
-// /*	CLIENT	*/
-
-// /* add joiningClient to _joinedClients in Channel object 
-//    before add, check if client is already exist in joinedClients list. */
-// void Channel::joinClient(const Client &joiningClient) 
-// {
-//     std::string clientName = joiningClient.getUserName();
-//     for (std::vector<Client>::iterator it = _joinedClients.begin(); it != _joinedClients.end(); ++it)
-//     {
-//         if (it->getUserName() == clientName)
-//             return; // need announce function for both server & client
-//     }
-//     _joinedClients.push_back(joiningClient);
-// }
