@@ -315,7 +315,13 @@ void Server::parseCommand(const std::string &str) {
 		"PRIVMSG",
 		"KICK",
 		"INVITE",
-		"TOPIC"
+		"TOPIC",
+		"PART",
+		"QUIT",
+		"MODE",
+		"WHO",
+		"PING",
+		"PONG"
 	};
 
 	std::istringstream iss(str); // Read
@@ -330,7 +336,7 @@ void Server::parseCommand(const std::string &str) {
 	std::cout << "  firstWord: " << firstWord << std::endl;
 	std::cout << "  remainingStr: " << remainingStr << std::endl;
 
-	for (int i = 0; i < 5; ++i) {
+	for (int i = 0; i < 11; ++i) {
 		if (firstWord == commands[i]) {
 			std::cout << "Command recognized: " << firstWord << std::endl;
 			handleCommand(remainingStr, firstWord);
