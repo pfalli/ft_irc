@@ -286,6 +286,9 @@ int Server::newConnection()
 
 int Server::existingConnection(std::vector<pollfd>::iterator it)
 {
+	std::vector<Client>::iterator it_c = findObject(it->fd, this->clients);
+	if (it_c == this->clients.end())
+		return (FAILURE);
 	Client *client = &(*(findObject(it->fd, this->clients)));
 	char buffer[BUFFER_SIZE];
 	int bytes_read;
