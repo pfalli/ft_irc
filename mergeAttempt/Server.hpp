@@ -110,8 +110,8 @@ class Server
 	int										existingConnection(std::vector<pollfd>::iterator it);
 	int										newConnection();
 
-	void parseCommand(const std::string &str);
-	void handleCommand(const std::string &remainingStr, std::string &firstWord);
+	void parseCommand(const std::string &str, Client *client);
+	void handleCommand(const std::string &remainingStr, std::string &firstWord, Client *client);
 
 
 	void									deleteClient(std::vector<Client>::iterator client, std::vector<pollfd>::iterator poll);

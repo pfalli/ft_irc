@@ -6,7 +6,7 @@
 /*   By: junhhong <junhhong@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 15:04:11 by junhhong          #+#    #+#             */
-/*   Updated: 2025/02/24 15:19:15 by junhhong         ###   ########.fr       */
+/*   Updated: 2025/02/25 12:18:36 by junhhong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,9 @@ class Client
 	int										clientSocket; //same as client_fd
 	std::string								user_name;
 	std::string								nick_name;
+
+	std::string								buffer_in;
+	std::string								buffer_out;
 
 	public:
 											Client(){user_name = "default"; nick_name = "default_nick";}

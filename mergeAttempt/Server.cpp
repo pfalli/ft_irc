@@ -294,6 +294,7 @@ int Server::existingConnection(std::vector<pollfd>::iterator it)
 	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0); // ***receiving message
 	if (bytes_read <= FAILURE)
 	{
+		std::cout << "#1" << std::endl;
 		deleteClient(findObject(it->fd, this->clients), it);
 		return DISCONNECT;
 	}
@@ -315,14 +316,14 @@ int Server::existingConnection(std::vector<pollfd>::iterator it)
 		else
 		{
 			std::cout << "Received(existingConnection): " << str << std::endl;
-			parseCommand(str);
+			parseCommand(str, client);
 		}
 	}
 	return SUCCESS;
 }
 
 
-void Server::parseCommand(const std::string &str) {
+void Server::parseCommand(const std::string &str, Client *client) {
 	const char* commands[] = {
 		"JOIN",
 		"PRIVMSG",
@@ -346,7 +347,7 @@ void Server::parseCommand(const std::string &str) {
 	for (int i = 0; i < 5; ++i) {
 		if (firstWord == commands[i]) {
 			std::cout << "Command recognized: " << firstWord << std::endl;
-			handleCommand(remainingStr, firstWord);
+			handleCommand(remainingStr, firstWord, client);
 			return;
 		}
 	}
@@ -354,8 +355,10 @@ void Server::parseCommand(const std::string &str) {
 	// what to do if client wrote wrong?
 }
 
-void Server::handleCommand(const std::string &remainingStr, std::string &firstWord) {
-	if (firstWord == "JOIN") {
+void Server::handleCommand(const std::string &remainingStr, std::string &firstWord, Client *client) {
+	if (firstWord == "JOIN") 
+	{
+		join(this, client, remainingStr);
 		std::cout << "Handling JOIN: " << remainingStr << std::endl;
 	} else if (firstWord == "MODE") {
 		std::cout << "Handling MODE: "<< remainingStr << std::endl;
