@@ -248,8 +248,7 @@ void	Server::launch()
 			throw FailedPollException();
 		}
 		std::vector<pollfd>::iterator it = poll_fds.begin();
-		size_t i = 0;
-		while (it != poll_fds.end() && i < poll_fds.size())
+		for (size_t i = 0; i < poll_fds.size(); i++)
 		{
 			if (it->revents & POLLIN)
 			{
@@ -261,11 +260,11 @@ void	Server::launch()
 				}
 				else
 				{
-					if (existingConnection(it) == DISCONNECT) // ***connecting PieroHong part
+					int error = existingConnection(it);
+					if (error == DISCONNECT || error == FAILURE)
 						break ;
 				}
 			}
-			i++;
 			it++;
 		}
 		// getMessages();
