@@ -5,15 +5,15 @@
 int main(int ac, char **av)
 {
 	if (ac != 3) {
-		std::cerr << "Usage: ./a.out <password> <port>" << std::endl;
+		std::cerr << "Usage: ./a.out <port> <password>" << std::endl;
 		return 1;
 	}
  //   Server program(av[1], std::atoi(av[2]), "GreatestServerEver");
 	try
 	{
-		validFormat(PASSWORD, av[1]);
-		validFormat(PORT, av[2]);
-	    Server program(av[1], std::atoi(av[2]), "GreatestServerEver");
+		validFormat(PASSWORD, av[2]);
+		validFormat(PORT, av[1]);
+	    Server program(av[2], std::atoi(av[1]), "GreatestServerEver");
 	    program.launch();
 	    return 0;
 	}

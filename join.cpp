@@ -6,7 +6,7 @@
 /*   By: junhhong <junhhong@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:35:49 by junhhong          #+#    #+#             */
-/*   Updated: 2025/02/25 15:48:41 by junhhong         ###   ########.fr       */
+/*   Updated: 2025/02/25 17:28:43 by junhhong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,14 +18,14 @@ if does not exist, make a new one and return its reference
 if does exist, return its reference */
 
 // Remove #
-int	parseChannelName(std::string tmpChannelTojoin)
+int	parseChannelName(std::string &tmpChannelTojoin)
 {
 	size_t	start;
 
 	start = tmpChannelTojoin.find('#');
 	if (start == std::string::npos)
 		return (-1);
-	tmpChannelTojoin.substr(start);
+	tmpChannelTojoin = tmpChannelTojoin.substr(start + 1);
 	return (0);
 }
 
@@ -52,23 +52,24 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	tmpChannelTojoin = channelTojoin;
 	if (parseChannelName(tmpChannelTojoin) != 0)
 	{
-		std::cout << "Channel name should start with '#'" << std::endl; 
+		std::string msg = "Colon missing. correct format : <target> : <message>\n";
+		send(joiningClient->getSocket(), msg.c_str(), msg.length(), 0);
 		return ;
 	}
 	username = joiningClient->getUserName();
 	if (isChannleExist(channels, joiningClient, tmpChannelTojoin) != 0)
 	{
-		server->createChannel(tmpChannelTojoin);
-		std::cout << "Channel does not exist." << tmpChannelTojoin << " created" << std::endl; 
+		server->createChannel(tmpChannelTojoin, joiningClient->getSocket());
+		std::cout << "Channel does not exist. " << tmpChannelTojoin << " created" << std::endl; 
 	}
 	for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); it++)
 	{
 		if (it->getName() == tmpChannelTojoin) // if channel exists
 		{
 			it->joinClient(*joiningClient);
-			std::string msg = "you joined " + tmpChannelTojoin + " channel. enjoy!\n\n\n";
+			std::string msg = "you joined " + tmpChannelTojoin + " channel. enjoy!\n";
 			send(joiningClient->getSocket(), msg.c_str(), msg.length(), 0);
-			std::cout << "you are joined to" << tmpChannelTojoin << std::endl; 
+			std::cout << "you are joined to " << tmpChannelTojoin << std::endl; 
 			return ;
 		}
 	}

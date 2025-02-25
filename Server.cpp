@@ -12,6 +12,7 @@
 
 #include "Server.hpp"
 #include "utils.hpp"
+#include "Channel.hpp"
 
 const char* SeverExceptionSocket::what() const throw()
 {
@@ -115,21 +116,6 @@ typename std::vector<T>::iterator		Server::findObject(int toFind, std::vector<T>
 }
 
 
-int					Server::initUser(int clientSocket)
-{
-	Client _new;
-	// _new.setUserName(requestName(USERNAME, clientSocket));
-	// _new.setNickName(requestName(NICKNAME, clientSocket));
-	_new.setSocket(clientSocket);
-	this->clients.push_back(_new);
-	{
-		const char *to_client = "Thanks for joining :)\nYou may continue now\n";
-		if (send(clientSocket, to_client, strlen(to_client), 0) == FAILURE)
-			return (FAILURE);
-	}
-	return (0);
-}
-
 bool					Server::existingUser(int clientSocket)
 {
 	std::vector<Client>::iterator it = this->clients.begin();
@@ -147,25 +133,16 @@ int	Server::NewClient(int new_socket)
 {
 	std::cout << "New client connected: " << new_socket << std::endl;
 	
-	initUser(new_socket);
+	Client _new(new_socket);
+	// _new.setUserName(requestName(USERNAME, clientSocket));
+	// _new.setNickName(requestName(NICKNAME, clientSocket));
+	this->clients.push_back(_new);
 	// Add new client to poll lists
 	pollfd client_fd;
 	client_fd.fd = new_socket;
 	client_fd.events = POLLIN;  // Monitor for incoming data
 	poll_fds.push_back(client_fd);
 	return (SUCCESS);
-}
-
-int			Server::clientDisconnect(int client_fd, std::vector<pollfd>::iterator pollfd, int bytes_read)
-{
-	if (bytes_read == 0)
-	{
-		std::cout << "A client just disconnected" << std::endl;
-		deleteClient(findObject(client_fd, this->clients), pollfd);
-		return DISCONNECT;
-	}
-	else
-		return (0);
 }
 
 void		Server::deleteClient(std::vector<Client>::iterator client, std::vector<pollfd>::iterator poll)
@@ -248,24 +225,18 @@ void	Server::launch()
 			throw FailedPollException();
 		}
 		std::vector<pollfd>::iterator it = poll_fds.begin();
-		size_t i = 0;
-		while (it != poll_fds.end() && i < poll_fds.size())
+		for (size_t i = 0; i < poll_fds.size(); i++)
 		{
 			if (it->revents & POLLIN)
 			{
 				if (it->fd == serverSocket)
 				{
 					// Check for new client connections
-					if (newConnection() == FAILURE)
-						continue ;
+					newConnection();
 				}
 				else
-				{
-					if (existingConnection(it) == DISCONNECT) // ***connecting PieroHong part
-						break ;
-				}
+					existingConnection(it);
 			}
-			i++;
 			it++;
 		}
 		// getMessages();
@@ -274,42 +245,119 @@ void	Server::launch()
 	return ;
 }
 
-int Server::newConnection()
+void Server::newConnection()
 {
 	int new_socket = acceptClient();
 	if (new_socket == FAILURE)
-		return FAILURE ;
+		return ;
 	if (NewClient(new_socket) == FAILURE)
-		return FAILURE ;
-	return SUCCESS;
+		return ;
 }
 
-int Server::existingConnection(std::vector<pollfd>::iterator it)
+bool Server::registration(std::vector<Client>::iterator it)
 {
+
+	char buffer[BUFFER_SIZE];
+	int	bytes_read = recv(it->getSocket(), buffer, BUFFER_SIZE, 0);
+	if (bytes_read <= 0)
+		return false;
+	buffer[bytes_read] = '\0';
+
+	std::string input(removeNewline(buffer));
+	if (input == password)
+	{
+		it->setPW();
+		send(it->getSocket(), "Password correct. Please enter your NICK: \n", 45, 0);
+	}
+	else if (input != password)
+	{
+		send(it->getSocket(), "Incorrect password. Closing connection..\n", 42, 0);
+		return false;
+	}
+
+	while (!it->getRegistered())
+	{
+		char buffer[BUFFER_SIZE];
+		int	bytes_read = recv(it->getSocket(), buffer, BUFFER_SIZE, 0);
+		if (bytes_read <= 0)
+			return false;
+		buffer[bytes_read] = '\0';
+	
+		std::string input(removeNewline(buffer));
+
+		if (it->getNickName() == "default_nick")
+		{
+			if (input.empty())
+				continue;
+			else if (!validFormat(NICKNAME,input))
+			{
+				send(it->getSocket(), "Incorrect format. Please try again.\n", 37, 0);
+				continue ;
+			}
+			else
+			{
+				it->setNickName(input);
+				send(it->getSocket(), "Please enter USER:\n", 20, 0);
+				continue ;
+			}
+		}
+		else if (it->getUserName() == "default")
+		{
+			if (input.empty())
+				continue;
+			else if (!validFormat(USERNAME,input))
+			{
+				send(it->getSocket(), "Incorrect format. Please try again.\n", 37, 0);
+				continue ;
+			}
+			else
+			{
+				it->setUserName(input);
+				send(it->getSocket(), "Registration completed.\n", 24, 0);
+				it->setRegistered();
+				return true;
+			}
+		}
+	}
+	return (false);
+}
+
+void	Server::existingConnection(std::vector<pollfd>::iterator it)
+{
+	std::vector<Client>::iterator it_c = findObject(it->fd, this->clients);
+	if (it_c == this->clients.end())
+		return ;
 	Client *client = &(*(findObject(it->fd, this->clients)));
 	char buffer[BUFFER_SIZE];
 	int bytes_read;
 	memset(buffer, 0, sizeof(buffer));
 
+	if (!it_c->getRegistered())
+	{
+		if (!registration(it_c))
+		{
+			std::cout << "Client disconnected: " << it_c->getNickName() << std::endl;
+			deleteClient(it_c, it);
+			return ;
+		}
+	}
+
 	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0); // ***receiving message
-	if (bytes_read <= FAILURE)
+	if (bytes_read <= FAILURE || bytes_read == 0)
 	{
 		std::cout << "#1" << std::endl;
 		deleteClient(findObject(it->fd, this->clients), it);
-		return DISCONNECT;
+		return ;
 	}
-	else if (clientDisconnect(client->getSocket(), it, bytes_read))
-		return DISCONNECT;
-	else
-	if (bytes_read > 0)
+	else if (bytes_read > 0)
 	{
 		std::cout << buffer << std::endl;
 		std::string str = buffer;
 		memset(buffer, 0, BUFFER_SIZE);
 		if (str == "end")
 		{
-			if (clientDisconnect(client->getSocket(), it, 0) == DISCONNECT)
-				return DISCONNECT;
+			deleteClient(findObject(it->fd, this->clients), it);
+			return ;
 		}
 		// else if(!sendToNext(str.c_str(), client->getSocket()))
 		// 	std::cout << "Received(existingConnection): " << str << std::endl;
@@ -319,7 +367,6 @@ int Server::existingConnection(std::vector<pollfd>::iterator it)
 			parseCommand(str, client);
 		}
 	}
-	return SUCCESS;
 }
 
 
@@ -329,7 +376,13 @@ void Server::parseCommand(const std::string &str, Client *client) {
 		"PRIVMSG",
 		"KICK",
 		"INVITE",
-		"TOPIC"
+		"TOPIC",
+		"PART",
+		"QUIT",
+		"MODE",
+		"WHO",
+		"PING",
+		"PONG"
 	};
 
 	std::istringstream iss(str); // Read
@@ -344,7 +397,7 @@ void Server::parseCommand(const std::string &str, Client *client) {
 	std::cout << "  firstWord: " << firstWord << std::endl;
 	std::cout << "  remainingStr: " << remainingStr << std::endl;
 
-	for (int i = 0; i < 5; ++i) {
+	for (int i = 0; i < 11; ++i) {
 		if (firstWord == commands[i]) {
 			std::cout << "Command recognized: " << firstWord << std::endl;
 			handleCommand(remainingStr, firstWord, client);
@@ -365,13 +418,14 @@ void Server::handleCommand(const std::string &remainingStr, std::string &firstWo
 	} else if (firstWord == "KICK") {
 		std::cout << "Handling KICK: " << remainingStr << std::endl;
 	} else if (firstWord == "PRIVMSG") {
+		privmsg(this, client, remainingStr);
 		std::cout << "Handling PRIVMSG: " << remainingStr << std::endl;
 	} else {
 		std::cout << "Wrong message(inside handleCommand()): " << remainingStr << std::endl;
 	}
 }
 
-void	Server::createChannel(std::string name)
+void	Server::createChannel(std::string name, int creatorFd)
 {
 	// // Check if a channel with the given name already exists
 	// for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); ++it)
@@ -380,5 +434,5 @@ void	Server::createChannel(std::string name)
 	// 		return ;
 	// }
 	// // if does not exist, create a new one and add
-	channels.push_back(Channel(name));
+	channels.push_back(Channel(name, creatorFd));
 }

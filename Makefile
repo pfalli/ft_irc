@@ -6,29 +6,33 @@
 #    By: ehedeman <ehedeman@student.42wolfsburg.    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/01/14 14:53:54 by ehedeman          #+#    #+#              #
-#    Updated: 2025/02/13 12:48:59 by ehedeman         ###   ########.fr        #
+#    Updated: 2025/02/14 14:22:38 by ehedeman         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
-server = server
+NAME = server
 
-Server_SRC =	main.cpp	\
-				Server.cpp
+SRC =		main.cpp	\
+			Server.cpp	\
+			utils.cpp	\
+			Channel.cpp \
+			privmsg.cpp \
+			join.cpp 
 
-Server_OBJS_DIR = server_objs/
-Server_OBJS = $(Server_SRC:.cpp=.o)
-Server_OBJS_PREFIXED = $(addprefix $(Server_OBJS_DIR), $(Server_OBJS))
+OBJS_DIR = objs/
+OBJS = $(SRC:.cpp=.o)
+OBJS_PREFIXED = $(addprefix $(OBJS_DIR), $(OBJS))
 
-client = client
+# client = client
 
-client_SRC =	Client.cpp	\
-				Server.cpp
+# client_SRC =	Client.cpp	\
+# 				Server.cpp
 
-client_OBJS_DIR = client_objs/
-client_OBJS = $(client_SRC:.cpp=.o)
-client_OBJS_PREFIXED = $(addprefix $(client_OBJS_DIR), $(client_OBJS))
+# client_OBJS_DIR = client_objs/
+# client_OBJS = $(client_SRC:.cpp=.o)
+# client_OBJS_PREFIXED = $(addprefix $(client_OBJS_DIR), $(client_OBJS))
 
-INCLUDES =	Server.hpp
+INCLUDES =	Server.hpp Client.hpp Common.hpp Channel.hpp utils.hpp
 
 CXX = c++
 
@@ -36,36 +40,34 @@ RM = rm -rf
 MKDIR = mkdir -p
 CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -pedantic
 
-all: server client
+all: $(NAME) #client
 
-server: $(server)
+$(NAME): $(OBJS_PREFIXED)
+	$(CXX) $(CXXFLAGS) $(OBJS_PREFIXED) -o $(NAME)
 
-$(server): $(Server_OBJS_PREFIXED)
-	$(CXX) $(CXXFLAGS) $(Server_OBJS_PREFIXED) -o $(server)
-
-$(Server_OBJS_DIR)%.o : %.cpp $(INCLUDES)
-	$(MKDIR) $(Server_OBJS_DIR)
+$(OBJS_DIR)%.o : %.cpp $(INCLUDES)
+	$(MKDIR) $(OBJS_DIR)
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-client: $(client)
+# client: $(client)
 
-$(client): $(client_OBJS_PREFIXED)
-	$(CXX) $(CXXFLAGS) $(client_OBJS_PREFIXED) -o $(client)
+# $(client): $(client_OBJS_PREFIXED)
+# 	$(CXX) $(CXXFLAGS) $(client_OBJS_PREFIXED) -o $(client)
 
-$(client_OBJS_DIR)%.o : %.cpp $(INCLUDES)
-	$(MKDIR) $(client_OBJS_DIR)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+# $(client_OBJS_DIR)%.o : %.cpp $(INCLUDES)
+# 	$(MKDIR) $(client_OBJS_DIR)
+# 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	$(RM) $(Server_OBJS_DIR)
+	$(RM) $(OBJS_DIR)
 
 fclean: clean
-	$(RM) -f $(server)
+	$(RM) -f $(NAME)
 
 re: fclean all
 
 leaks: all
 	valgrind --leak-check=full	\
-         --show-leak-kinds=all ./$(server)
+         --show-leak-kinds=all ./$(NAME)
 
 .PHONY: all clean re fclean leaks
