@@ -6,17 +6,17 @@
 /*   By: junhhong <junhhong@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 16:12:42 by junhhong          #+#    #+#             */
-/*   Updated: 2025/02/25 17:55:25 by junhhong         ###   ########.fr       */
+/*   Updated: 2025/02/25 18:00:56 by junhhong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.hpp"
 #include "Common.hpp"
 
-void	messageToTargets(std::vector<std::string> &targets)
-{
+// void	messageToTargets(std::vector<std::string> &targets)
+// {
 	
-}
+// }
 
 void	splitTargetUsers(std::string tmpTarget, std::vector<std::string> &targets)
 {
@@ -49,6 +49,7 @@ void	privmsg(Server *server, Client *sender, std::string cmd)
 	std::string tmpTarget;
 	std::vector<std::string> targets;
 
+	(void) server;
 	tmpTarget = cmd;
 	if (parseTarget(sender, tmpTarget) != 0)
 		return ;

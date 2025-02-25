@@ -66,6 +66,12 @@
 // 	std::vector<Client>&					getJoinedClients(){return (this-> _joinedClients);}
 // };
 
+struct Command {
+    std::string command;
+    std::string parameter;
+    std::string message;
+};
+
 class Server
 {
 	private:
@@ -110,8 +116,9 @@ class Server
 	void									existingConnection(std::vector<pollfd>::iterator it);
 	void									newConnection();
 
-	void parseCommand(const std::string &str, Client *client);
-	void handleCommand(const std::string &remainingStr, std::string &firstWord, Client *client);
+	void parseCommand(const std::string &str, Command &cmd);
+	void handleCommand(const Command &cmd);
+
 
 
 	void									deleteClient(std::vector<Client>::iterator client, std::vector<pollfd>::iterator poll);

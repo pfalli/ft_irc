@@ -364,64 +364,51 @@ void	Server::existingConnection(std::vector<pollfd>::iterator it)
 		else
 		{
 			std::cout << "Received(existingConnection): " << str << std::endl;
-			parseCommand(str, client);
+			Command cmd;
+			parseCommand(str, cmd);
+			handleCommand(cmd);
 		}
 	}
 }
 
 
-void Server::parseCommand(const std::string &str, Client *client) {
-	const char* commands[] = {
-		"JOIN",
-		"PRIVMSG",
-		"KICK",
-		"INVITE",
-		"TOPIC",
-		"PART",
-		"QUIT",
-		"MODE",
-		"WHO",
-		"PING",
-		"PONG"
-	};
-
-	std::istringstream iss(str); // Read
-	std::string firstWord;
-	iss >> firstWord;
-
-	std::string remainingStr;
-	std::getline(iss, remainingStr); // Read the rest of the string
-	// iss >> remainingStr;
-
-	std::cout << "  parse: " << str << std::endl;
-	std::cout << "  firstWord: " << firstWord << std::endl;
-	std::cout << "  remainingStr: " << remainingStr << std::endl;
-
-	for (int i = 0; i < 11; ++i) {
-		if (firstWord == commands[i]) {
-			std::cout << "Command recognized: " << firstWord << std::endl;
-			handleCommand(remainingStr, firstWord, client);
-			return;
+void Server::parseCommand(const std::string &str, Command &cmd) {
+	std::istringstream iss(str);
+	iss >> cmd.command;	
+	std::string word;
+	bool messageStarted = false;
+	while (iss >> word) {
+		if (word[0] == ':') {
+			messageStarted = true;
+			cmd.message = word.substr(1);
+			std::getline(iss, word);
+			cmd.message += word;
+			break;
+		} else if (!messageStarted) {
+			if (!cmd.parameter.empty()) {
+				cmd.parameter += " ";
+			}
+			cmd.parameter += word;
 		}
-	}
-	std::cout << "Wrong message: " << firstWord << std::endl;
-	// what to do if client wrote wrong?
+	}	
+	std::cout << "\n-------------------\nParsed command: " << cmd.command << std::endl;
+	std::cout << "Parameter: " << cmd.parameter << std::endl;
+	std::cout << "Message: " << cmd.message << "\n-------------------\n" << std::endl;
 }
 
-void Server::handleCommand(const std::string &remainingStr, std::string &firstWord, Client *client) {
-	if (firstWord == "JOIN") 
-	{
-		join(this, client, remainingStr);
-		std::cout << "Handling JOIN: " << remainingStr << std::endl;
-	} else if (firstWord == "MODE") {
-		std::cout << "Handling MODE: "<< remainingStr << std::endl;
-	} else if (firstWord == "KICK") {
-		std::cout << "Handling KICK: " << remainingStr << std::endl;
-	} else if (firstWord == "PRIVMSG") {
-		privmsg(this, client, remainingStr);
-		std::cout << "Handling PRIVMSG: " << remainingStr << std::endl;
+
+
+void Server::handleCommand(const Command &cmd) {
+	if (cmd.command == "JOIN") {
+		std::cout << "Handling JOIN: " << cmd.parameter + cmd.message<< std::endl;
+	} else if (cmd.command == "MODE") {
+		std::cout << "Handling MODE: "<< cmd.parameter + cmd.message<< std::endl;
+	} else if (cmd.command == "KICK") {
+		std::cout << "Handling KICK: " << cmd.parameter + cmd.message<< std::endl;
+	} else if (cmd.command == "PRIVMSG") {
+		std::cout << "Handling PRIVMSG: " << cmd.parameter + cmd.message<< std::endl;
 	} else {
-		std::cout << "Wrong message(inside handleCommand()): " << remainingStr << std::endl;
+		std::cout << "Command not found: " << cmd.command << std::endl;
 	}
 }
 
