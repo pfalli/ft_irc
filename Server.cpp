@@ -156,18 +156,6 @@ int	Server::NewClient(int new_socket)
 	return (SUCCESS);
 }
 
-int			Server::clientDisconnect(int client_fd, std::vector<pollfd>::iterator pollfd, int bytes_read)
-{
-	if (bytes_read == 0)
-	{
-		std::cout << "A client just disconnected" << std::endl;
-		deleteClient(findObject(client_fd, this->clients), pollfd);
-		return DISCONNECT;
-	}
-	else
-		return (0);
-}
-
 void		Server::deleteClient(std::vector<Client>::iterator client, std::vector<pollfd>::iterator poll)
 {
 	std::cout	<< "Client disconnected: "	<< (*client).getUserName() + "," <<
@@ -294,23 +282,20 @@ int Server::existingConnection(std::vector<pollfd>::iterator it)
 	memset(buffer, 0, sizeof(buffer));
 
 	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0); // ***receiving message
-	if (bytes_read <= FAILURE)
+	if (bytes_read <= FAILURE || bytes_read == 0)
 	{
 		deleteClient(findObject(it->fd, this->clients), it);
 		return DISCONNECT;
 	}
-	else if (clientDisconnect(client->getSocket(), it, bytes_read))
-		return DISCONNECT;
-	else
-	if (bytes_read > 0)
+	else if (bytes_read > 0)
 	{
 		std::cout << buffer << std::endl;
 		std::string str = buffer;
 		memset(buffer, 0, BUFFER_SIZE);
 		if (str == "end")
 		{
-			if (clientDisconnect(client->getSocket(), it, 0) == DISCONNECT)
-				return DISCONNECT;
+			deleteClient(findObject(it->fd, this->clients), it);
+			return DISCONNECT;
 		}
 		// else if(!sendToNext(str.c_str(), client->getSocket()))
 		// 	std::cout << "Received(existingConnection): " << str << std::endl;
