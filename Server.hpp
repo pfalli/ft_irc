@@ -97,18 +97,18 @@ class Server
 
 	void									createChannel(std::string name);
 
+	bool 									registration(std::vector<Client>::iterator it);
 	void									startServer();
 	void									launch();
 	bool									existingUser(int clientSocket);
-	int										initUser(int clientSocket);
 	std::string								requestName(int format, int clientSocket);
 	void									getMessages();
 	int										NewClient(int new_socket);
 	int										clientDisconnect(int client_fd, std::vector<pollfd>::iterator it, int bytes_read);
 	int										acceptClient();
 	bool									sendToNext(std::string buff, int client_fd);
-	int										existingConnection(std::vector<pollfd>::iterator it);
-	int										newConnection();
+	void									existingConnection(std::vector<pollfd>::iterator it);
+	void									newConnection();
 
 	void parseCommand(const std::string &str);
 	void handleCommand(const std::string &remainingStr, std::string &firstWord);

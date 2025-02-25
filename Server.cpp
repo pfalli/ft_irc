@@ -115,21 +115,6 @@ typename std::vector<T>::iterator		Server::findObject(int toFind, std::vector<T>
 }
 
 
-int					Server::initUser(int clientSocket)
-{
-	Client _new;
-	// _new.setUserName(requestName(USERNAME, clientSocket));
-	// _new.setNickName(requestName(NICKNAME, clientSocket));
-	_new.setSocket(clientSocket);
-	this->clients.push_back(_new);
-	{
-		const char *to_client = "Thanks for joining :)\nYou may continue now\n";
-		if (send(clientSocket, to_client, strlen(to_client), 0) == FAILURE)
-			return (FAILURE);
-	}
-	return (0);
-}
-
 bool					Server::existingUser(int clientSocket)
 {
 	std::vector<Client>::iterator it = this->clients.begin();
@@ -147,7 +132,10 @@ int	Server::NewClient(int new_socket)
 {
 	std::cout << "New client connected: " << new_socket << std::endl;
 	
-	initUser(new_socket);
+	Client _new(new_socket);
+	// _new.setUserName(requestName(USERNAME, clientSocket));
+	// _new.setNickName(requestName(NICKNAME, clientSocket));
+	this->clients.push_back(_new);
 	// Add new client to poll lists
 	pollfd client_fd;
 	client_fd.fd = new_socket;
@@ -243,15 +231,10 @@ void	Server::launch()
 				if (it->fd == serverSocket)
 				{
 					// Check for new client connections
-					if (newConnection() == FAILURE)
-						continue ;
+					newConnection();
 				}
 				else
-				{
-					int error = existingConnection(it);
-					if (error == DISCONNECT || error == FAILURE)
-						break ;
-				}
+					existingConnection(it);
 			}
 			it++;
 		}
@@ -261,31 +244,108 @@ void	Server::launch()
 	return ;
 }
 
-int Server::newConnection()
+void Server::newConnection()
 {
 	int new_socket = acceptClient();
 	if (new_socket == FAILURE)
-		return FAILURE ;
+		return ;
 	if (NewClient(new_socket) == FAILURE)
-		return FAILURE ;
-	return SUCCESS;
+		return ;
 }
 
-int Server::existingConnection(std::vector<pollfd>::iterator it)
+bool Server::registration(std::vector<Client>::iterator it)
+{
+
+	char buffer[BUFFER_SIZE];
+	int	bytes_read = recv(it->getSocket(), buffer, BUFFER_SIZE, 0);
+	if (bytes_read <= 0)
+		return false;
+	buffer[bytes_read] = '\0';
+
+	std::string input(removeNewline(buffer));
+	if (input == password)
+	{
+		it->setPW();
+		send(it->getSocket(), "Password correct. Please enter your NICK: \n", 45, 0);
+	}
+	else if (input != password)
+	{
+		send(it->getSocket(), "Incorrect password. Closing connection..\n", 42, 0);
+		return false;
+	}
+
+	while (!it->getRegistered())
+	{
+		char buffer[BUFFER_SIZE];
+		int	bytes_read = recv(it->getSocket(), buffer, BUFFER_SIZE, 0);
+		if (bytes_read <= 0)
+			return false;
+		buffer[bytes_read] = '\0';
+	
+		std::string input(removeNewline(buffer));
+
+		if (it->getNickName() == "default_nick")
+		{
+			if (input.empty())
+				continue;
+			else if (!validFormat(NICKNAME,input))
+			{
+				send(it->getSocket(), "Incorrect format. Please try again.\n", 37, 0);
+				continue ;
+			}
+			else
+			{
+				it->setNickName(input);
+				send(it->getSocket(), "Please enter USER:\n", 20, 0);
+				continue ;
+			}
+		}
+		else if (it->getUserName() == "default")
+		{
+			if (input.empty())
+				continue;
+			else if (!validFormat(USERNAME,input))
+			{
+				send(it->getSocket(), "Incorrect format. Please try again.\n", 37, 0);
+				continue ;
+			}
+			else
+			{
+				it->setUserName(input);
+				send(it->getSocket(), "Registration completed.\n", 24, 0);
+				it->setRegistered();
+				return true;
+			}
+		}
+	}
+	return (false);
+}
+
+void	Server::existingConnection(std::vector<pollfd>::iterator it)
 {
 	std::vector<Client>::iterator it_c = findObject(it->fd, this->clients);
 	if (it_c == this->clients.end())
-		return (FAILURE);
+		return ;
 	Client *client = &(*(findObject(it->fd, this->clients)));
 	char buffer[BUFFER_SIZE];
 	int bytes_read;
 	memset(buffer, 0, sizeof(buffer));
 
+	if (!it_c->getRegistered())
+	{
+		if (!registration(it_c))
+		{
+			std::cout << "Client disconnected: " << it_c->getNickName() << std::endl;
+			deleteClient(it_c, it);
+			return ;
+		}
+	}
+
 	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0); // ***receiving message
 	if (bytes_read <= FAILURE || bytes_read == 0)
 	{
 		deleteClient(findObject(it->fd, this->clients), it);
-		return DISCONNECT;
+		return ;
 	}
 	else if (bytes_read > 0)
 	{
@@ -295,7 +355,7 @@ int Server::existingConnection(std::vector<pollfd>::iterator it)
 		if (str == "end")
 		{
 			deleteClient(findObject(it->fd, this->clients), it);
-			return DISCONNECT;
+			return ;
 		}
 		// else if(!sendToNext(str.c_str(), client->getSocket()))
 		// 	std::cout << "Received(existingConnection): " << str << std::endl;
@@ -305,7 +365,6 @@ int Server::existingConnection(std::vector<pollfd>::iterator it)
 			parseCommand(str);
 		}
 	}
-	return SUCCESS;
 }
 
 
