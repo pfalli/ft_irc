@@ -6,7 +6,7 @@
 /*   By: junhhong <junhhong@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:35:49 by junhhong          #+#    #+#             */
-/*   Updated: 2025/02/25 15:04:06 by junhhong         ###   ########.fr       */
+/*   Updated: 2025/02/25 15:48:41 by junhhong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,6 +29,20 @@ int	parseChannelName(std::string tmpChannelTojoin)
 	return (0);
 }
 
+int		isChannleExist(std::vector<Channel>&	channels, Client *joiningClient, std::string tmpChannelTojoin)
+{
+	for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); it++)
+	{
+		if (it->getName() == tmpChannelTojoin) // if channel exists
+		{
+			it->joinClient(*joiningClient);
+			std::cout << "you are joined to" << tmpChannelTojoin << std::endl; 
+			return (0);
+		}
+	}
+	return (1);
+}
+
 void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 {
 	std::vector<Channel>&	channels = server->getChannelsref();
@@ -36,28 +50,26 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	std::string				tmpChannelTojoin;
 
 	tmpChannelTojoin = channelTojoin;
-	std::cout << "join in" << std::endl; 
-	std::cout << "channelTojoin: " << channelTojoin << std::endl; 
-	std::cout << "tmpChannelTojoin: " << tmpChannelTojoin << std::endl; 
 	if (parseChannelName(tmpChannelTojoin) != 0)
 	{
 		std::cout << "Channel name should start with '#'" << std::endl; 
 		return ;
 	}
 	username = joiningClient->getUserName();
+	if (isChannleExist(channels, joiningClient, tmpChannelTojoin) != 0)
+	{
+		server->createChannel(tmpChannelTojoin);
+		std::cout << "Channel does not exist." << tmpChannelTojoin << " created" << std::endl; 
+	}
 	for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); it++)
 	{
 		if (it->getName() == tmpChannelTojoin) // if channel exists
 		{
 			it->joinClient(*joiningClient);
+			std::string msg = "you joined " + tmpChannelTojoin + " channel. enjoy!\n\n\n";
+			send(joiningClient->getSocket(), msg.c_str(), msg.length(), 0);
 			std::cout << "you are joined to" << tmpChannelTojoin << std::endl; 
 			return ;
 		}
 	}
-	server->createChannel(tmpChannelTojoin);
-	std::cout << "making new channel : " << tmpChannelTojoin << std::endl; 
-	it->joinClient(*joiningClient);
-	std::cout << "you are joined to" << tmpChannelTojoin << std::endl; 
-	return ;
-
 }

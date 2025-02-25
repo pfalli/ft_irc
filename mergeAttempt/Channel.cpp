@@ -6,7 +6,7 @@
 /*   By: junhhong <junhhong@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 14:25:10 by junhhong          #+#    #+#             */
-/*   Updated: 2025/02/24 15:35:27 by junhhong         ###   ########.fr       */
+/*   Updated: 2025/02/25 15:48:12 by junhhong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,14 @@
 	Channel::Channel()
 	{
 		this->_name = "Default";
+		this->_channelCreator = 9999;
 	}
 
-	Channel::Channel(std::string name)
+	Channel::Channel(std::string name, int channelCreator)
 	{
 		this->_name = name;
+		this->_channelCreator = channelCreator;
+		this->_topic = "No topic set";
 	}
 
 	Channel::~Channel()

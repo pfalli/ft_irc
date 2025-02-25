@@ -6,7 +6,7 @@
 /*   By: junhhong <junhhong@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 14:22:21 by junhhong          #+#    #+#             */
-/*   Updated: 2025/02/24 15:58:52 by junhhong         ###   ########.fr       */
+/*   Updated: 2025/02/25 15:47:50 by junhhong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,11 +24,13 @@ class Channel {
 	private:
 	std::string								_name;
 	std::string								nameClientList;
+	std::string								_topic;
 	std::vector<Client>						_joinedClients;
+	int										_channelCreator;
 
 	public:
 											Channel();
-											Channel(std::string name);
+											Channel(std::string name, int channelCreator);
 											~Channel();
 	void									setName(std::string _name){this->_name = _name;}
 	void									joinClient(const Client &client);
