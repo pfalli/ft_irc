@@ -345,7 +345,6 @@ void	Server::existingConnection(std::vector<pollfd>::iterator it)
 	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0); // ***receiving message
 	if (bytes_read <= FAILURE || bytes_read == 0)
 	{
-		std::cout << "#1" << std::endl;
 		deleteClient(findObject(it->fd, this->clients), it);
 		return ;
 	}
@@ -365,8 +364,9 @@ void	Server::existingConnection(std::vector<pollfd>::iterator it)
 		{
 			std::cout << "Received(existingConnection): " << str << std::endl;
 			Command cmd;
+			Client &client = *findObject(it->fd, this->clients);
 			parseCommand(str, cmd);
-			handleCommand(cmd);
+			handleCommand(client, cmd);
 		}
 	}
 }
@@ -398,14 +398,16 @@ void Server::parseCommand(const std::string &str, Command &cmd) {
 
 
 
-void Server::handleCommand(const Command &cmd) {
+void Server::handleCommand(Client &client, const Command &cmd) {
 	if (cmd.command == "JOIN") {
+		join(this, &client, cmd.parameter);
 		std::cout << "Handling JOIN: " << cmd.parameter + cmd.message<< std::endl;
 	} else if (cmd.command == "MODE") {
 		std::cout << "Handling MODE: "<< cmd.parameter + cmd.message<< std::endl;
 	} else if (cmd.command == "KICK") {
 		std::cout << "Handling KICK: " << cmd.parameter + cmd.message<< std::endl;
 	} else if (cmd.command == "PRIVMSG") {
+		privmsg(this, &client, cmd);
 		std::cout << "Handling PRIVMSG: " << cmd.parameter + cmd.message<< std::endl;
 	} else {
 		std::cout << "Command not found: " << cmd.command << std::endl;

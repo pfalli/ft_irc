@@ -117,7 +117,7 @@ class Server
 	void									newConnection();
 
 	void parseCommand(const std::string &str, Command &cmd);
-	void handleCommand(const Command &cmd);
+	void handleCommand(Client &client, const Command &cmd);
 
 
 

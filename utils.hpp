@@ -23,4 +23,4 @@ std::string		requestName(int format, int clientSocket, std::vector<Client> &clie
 void			join(Server *server, Client *joiningClient, std::string channelTojoin);
 
 /* privmsg */
-void			privmsg(Server *server, Client *sender, std::string cmd);
+void	privmsg(Server *server, Client *sender, const Command &cmd);
