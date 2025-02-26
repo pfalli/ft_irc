@@ -366,7 +366,8 @@ void	Server::existingConnection(std::vector<pollfd>::iterator it)
 			std::cout << "Received(existingConnection): " << str << std::endl;
 			Command cmd;
 			parseCommand(str, cmd);
-			handleCommand(cmd);
+			handleCommand(cmd, client->getSocket());
+			std::cout << "-----------------------------------------------------" << std::endl;
 		}
 	}
 }
@@ -398,7 +399,7 @@ void Server::parseCommand(const std::string &str, Command &cmd) {
 
 
 
-void Server::handleCommand(const Command &cmd) {
+void Server::handleCommand(const Command &cmd, int clientSocket) {
 	if (cmd.command == "JOIN") {
 		std::cout << "Handling JOIN: " << cmd.parameter + cmd.message<< std::endl;
 	} else if (cmd.command == "MODE") {
@@ -407,9 +408,32 @@ void Server::handleCommand(const Command &cmd) {
 		std::cout << "Handling KICK: " << cmd.parameter + cmd.message<< std::endl;
 	} else if (cmd.command == "PRIVMSG") {
 		std::cout << "Handling PRIVMSG: " << cmd.parameter + cmd.message<< std::endl;
-	} else {
+	} else if (cmd.command == "QUIT") {
+		handleQuit(clientSocket);
+	}
+	else {
 		std::cout << "Command not found: " << cmd.command << std::endl;
 	}
+}
+
+void Server::handleQuit(int clientSocket) {
+	std::vector<Client>::iterator clientIt = findObject(clientSocket, clients);
+	if (clientIt == clients.end()) {
+		std::cerr << "Debug: Client not found for QUIT command" << std::endl;
+		return;
+	}
+	std::vector<pollfd>::iterator pollIt = poll_fds.begin();
+	while (pollIt != poll_fds.end()) {
+		if (pollIt->fd == clientSocket) {
+			break;
+		}
+		pollIt++;
+	}
+	if (pollIt == poll_fds.end()) {
+		std::cerr << "Debug: Poll not found for QUIT command" << std::endl;
+		return;
+	}	
+	deleteClient(clientIt, pollIt);
 }
 
 void	Server::createChannel(std::string name, int creatorFd)
