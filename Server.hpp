@@ -72,6 +72,7 @@ struct Command {
     std::string message;
 };
 
+
 class Server
 {
 	private:
@@ -80,7 +81,7 @@ class Server
 	const std::string						password;
 	const int								port;
 	std::vector<Client>						clients;
-	std::vector<Channel>					channels; // **#team
+	std::vector<Channel>					channels;
 	int										serverSocket;
 	sockaddr_in								serverAddress;
 	std::vector<struct pollfd>				poll_fds;
@@ -116,8 +117,13 @@ class Server
 	void									existingConnection(std::vector<pollfd>::iterator it);
 	void									newConnection();
 
+	// Piero functions
 	void parseCommand(const std::string &str, Command &cmd);
-	void handleCommand(Client &client, const Command &cmd);
+	void handleCommand(const Command &cmd, Client &client, int clientSocket);
+	void handlePing(int clientSocket, const Command &cmd);
+	void handlePong(int clientSocket);
+	void handleQuit(int clientSocket, const Command &cmd);
+
 
 
 

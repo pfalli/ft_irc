@@ -13,6 +13,7 @@
 #include "Server.hpp"
 #include "utils.hpp"
 #include "Channel.hpp"
+#include "NumericMessages.hpp"
 
 const char* SeverExceptionSocket::what() const throw()
 {
@@ -322,6 +323,7 @@ bool Server::registration(std::vector<Client>::iterator it)
 	return (false);
 }
 
+
 void	Server::existingConnection(std::vector<pollfd>::iterator it)
 {
 	std::vector<Client>::iterator it_c = findObject(it->fd, this->clients);
@@ -345,6 +347,7 @@ void	Server::existingConnection(std::vector<pollfd>::iterator it)
 	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0); // ***receiving message
 	if (bytes_read <= FAILURE || bytes_read == 0)
 	{
+		std::cout << "#1" << std::endl;
 		deleteClient(findObject(it->fd, this->clients), it);
 		return ;
 	}
@@ -364,13 +367,12 @@ void	Server::existingConnection(std::vector<pollfd>::iterator it)
 		{
 			std::cout << "Received(existingConnection): " << str << std::endl;
 			Command cmd;
-			Client &client = *findObject(it->fd, this->clients);
 			parseCommand(str, cmd);
-			handleCommand(client, cmd);
+			handleCommand(cmd, *client, client->getSocket());
+			std::cout << "-----------------------------------------------------" << std::endl;
 		}
 	}
 }
-
 
 void Server::parseCommand(const std::string &str, Command &cmd) {
 	std::istringstream iss(str);
@@ -397,8 +399,7 @@ void Server::parseCommand(const std::string &str, Command &cmd) {
 }
 
 
-
-void Server::handleCommand(Client &client, const Command &cmd) {
+void Server::handleCommand(const Command &cmd, Client &client, int clientSocket) {
 	if (cmd.command == "JOIN") {
 		join(this, &client, cmd.parameter);
 		std::cout << "Handling JOIN: " << cmd.parameter + cmd.message<< std::endl;
@@ -409,9 +410,64 @@ void Server::handleCommand(Client &client, const Command &cmd) {
 	} else if (cmd.command == "PRIVMSG") {
 		privmsg(this, &client, cmd);
 		std::cout << "Handling PRIVMSG: " << cmd.parameter + cmd.message<< std::endl;
-	} else {
+	} else if (cmd.command == "QUIT") {
+		handleQuit(clientSocket, cmd);
+	}
+	else if (cmd.command == "PING") {
+		handlePing(clientSocket, cmd);
+	}
+	else if (cmd.command == "PONG") {
+		handlePong(clientSocket);
+	}
+	else {
 		std::cout << "Command not found: " << cmd.command << std::endl;
 	}
+}
+
+void Server::handleQuit(int clientSocket, const Command &cmd) {
+	std::vector<Client>::iterator clientIt = findObject(clientSocket, clients);
+	if (clientIt == clients.end()) {
+		std::cerr << "Debug: Client not found for QUIT command" << std::endl;
+		return;
+	}
+	std::vector<pollfd>::iterator pollIt = poll_fds.begin();
+	while (pollIt != poll_fds.end()) {
+		if (pollIt->fd == clientSocket) {
+			break;
+		}
+		pollIt++;
+	}
+	if (pollIt == poll_fds.end()) {
+		std::cerr << "Debug: Poll not found for QUIT command" << std::endl;
+		return;
+	}
+	const std::string str = RPL_QUIT(clientIt->getNickName(), clientIt->getUserName(), cmd.message);
+	send(clientSocket, str.c_str(), str.length(), 0);
+	deleteClient(clientIt, pollIt);
+}
+
+void Server::handlePing(int clientSocket, const Command &cmd) {
+	std::vector<Client>::iterator clientIt = findObject(clientSocket, clients);
+	if (clientIt == clients.end()) {
+		std::cerr << "Debug: Client not found for QUIT command" << std::endl;
+		return;
+	}
+	const std::string str = ERR_NEEDMOREPARAMS(clientIt->getUserName());
+	if (cmd.parameter.empty()) {
+		send(clientSocket, str.c_str(), str.length(), 0);
+		return ;
+	}
+	else {
+		std::string line = "PONG " + cmd.parameter + "\r\n";
+		send(clientSocket, line.c_str(), line.length(), 0);
+		return ;
+	}
+
+}
+
+void Server::handlePong(int clientSocket) {
+	(void)clientSocket;
+	return ;
 }
 
 void	Server::createChannel(std::string name, int creatorFd)
