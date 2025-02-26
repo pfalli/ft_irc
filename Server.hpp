@@ -81,7 +81,7 @@ class Server
 	const std::string						password;
 	const int								port;
 	std::vector<Client>						clients;
-	std::vector<Channel>					channels; // **#team
+	std::vector<Channel>					channels;
 	int										serverSocket;
 	sockaddr_in								serverAddress;
 	std::vector<struct pollfd>				poll_fds;
@@ -118,9 +118,11 @@ class Server
 	void									newConnection();
 
 	// Piero functions
-	void	handleQuit(int clientSocket);
 	void parseCommand(const std::string &str, Command &cmd);
 	void handleCommand(const Command &cmd, int clientSocket);
+	void handlePing(int clientSocket, const Command &cmd);
+	void handlePong(int clientSocket);
+	void handleQuit(int clientSocket, const Command &cmd);
 
 
 

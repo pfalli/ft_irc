@@ -34,6 +34,8 @@
 #include <pthread.h>
 #include <sstream>
 
+#include "NumericMessages.hpp"
+
 #define RESET "\033[0m"
 #define BLACK "\033[0;30m"
 #define RED "\033[0;31m"

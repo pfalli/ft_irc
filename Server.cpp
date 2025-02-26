@@ -13,6 +13,7 @@
 #include "Server.hpp"
 #include "utils.hpp"
 #include "Channel.hpp"
+#include "NumericMessages.hpp"
 
 const char* SeverExceptionSocket::what() const throw()
 {
@@ -409,14 +410,20 @@ void Server::handleCommand(const Command &cmd, int clientSocket) {
 	} else if (cmd.command == "PRIVMSG") {
 		std::cout << "Handling PRIVMSG: " << cmd.parameter + cmd.message<< std::endl;
 	} else if (cmd.command == "QUIT") {
-		handleQuit(clientSocket);
+		handleQuit(clientSocket, cmd);
+	}
+	else if (cmd.command == "PING") {
+		handlePing(clientSocket, cmd);
+	}
+	else if (cmd.command == "PONG") {
+		handlePong(clientSocket);
 	}
 	else {
 		std::cout << "Command not found: " << cmd.command << std::endl;
 	}
 }
 
-void Server::handleQuit(int clientSocket) {
+void Server::handleQuit(int clientSocket, const Command &cmd) {
 	std::vector<Client>::iterator clientIt = findObject(clientSocket, clients);
 	if (clientIt == clients.end()) {
 		std::cerr << "Debug: Client not found for QUIT command" << std::endl;
@@ -432,8 +439,34 @@ void Server::handleQuit(int clientSocket) {
 	if (pollIt == poll_fds.end()) {
 		std::cerr << "Debug: Poll not found for QUIT command" << std::endl;
 		return;
-	}	
+	}
+	const std::string str = RPL_QUIT(clientIt->getNickName(), clientIt->getUserName(), cmd.message);
+	send(clientSocket, str.c_str(), str.length(), 0);
 	deleteClient(clientIt, pollIt);
+}
+
+void Server::handlePing(int clientSocket, const Command &cmd) {
+	std::vector<Client>::iterator clientIt = findObject(clientSocket, clients);
+	if (clientIt == clients.end()) {
+		std::cerr << "Debug: Client not found for QUIT command" << std::endl;
+		return;
+	}
+	const std::string str = ERR_NEEDMOREPARAMS(clientIt->getUserName());
+	if (cmd.parameter.empty()) {
+		send(clientSocket, str.c_str(), str.length(), 0);
+		return ;
+	}
+	else {
+		std::string line = "PONG " + cmd.parameter + "\r\n";
+		send(clientSocket, line.c_str(), line.length(), 0);
+		return ;
+	}
+
+}
+
+void Server::handlePong(int clientSocket) {
+	(void)clientSocket;
+	return ;
 }
 
 void	Server::createChannel(std::string name, int creatorFd)
