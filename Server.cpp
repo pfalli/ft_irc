@@ -378,16 +378,14 @@ void Server::handleCommand(const Command &cmd, Client &client, int clientSocket)
 		return ;
 	if (cmd.command == "JOIN") {
 		join(this, &client, cmd.parameter);
-		std::cout << "Handling JOIN: " << cmd.parameter + cmd.message<< std::endl;
 	} else if (cmd.command == "MODE") {
 		std::cout << "Handling MODE: "<< cmd.parameter + cmd.message<< std::endl;
 	} else if (cmd.command == "KICK") {
 		std::cout << "Handling KICK: " << cmd.parameter + cmd.message<< std::endl;
 	} else if (cmd.command == "PRIVMSG") {
 		privmsg(this, &client, cmd);
-		std::cout << "Handling PRIVMSG: " << cmd.parameter + cmd.message<< std::endl;
 	} else if (cmd.command == "QUIT") {
-		handleQuit(clientSocket, cmd);
+		handleQuit(&client, cmd);
 	}
 	else if (cmd.command == "PING") {
 		handlePing(clientSocket, cmd);
@@ -395,20 +393,72 @@ void Server::handleCommand(const Command &cmd, Client &client, int clientSocket)
 	else if (cmd.command == "PONG") {
 		handlePong(clientSocket);
 	}
+	else if (cmd.command == "KICK") {
+		handleKick(&client, cmd);
+	}
 	else {
 		std::cout << "Command not found: " << cmd.command << std::endl;
 	}
 }
 
-void Server::handleQuit(int clientSocket, const Command &cmd) {
-	std::vector<Client>::iterator clientIt = findObject(clientSocket, clients);
+
+
+
+void Server::handleKick(Client* handleClient, const Command &cmd) {
+	std::vector<Client>::iterator clientIt = findObject(handleClient->getSocket(), clients);
+	if (clientIt == clients.end()) {
+		std::cerr << "Debug: Client not found for KICK command" << std::endl;
+		return;
+	}	
+	std::istringstream iss(cmd.parameter); // cmd.parameter has two words
+	std::string channelName, targetNick;
+	iss >> channelName >> targetNick;	
+	if (channelName.empty() || targetNick.empty()) {
+		const std::string str = ERR_NEEDMOREPARAMS(clientIt->getUserName());
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+		return;
+	}	
+	std::vector<Channel>::iterator channelIt = channels.begin();
+	while (channelIt != channels.end()) {
+		if (channelIt->getName() == channelName) {
+			break;
+		}
+		channelIt++;
+	}	
+	if (channelIt == channels.end()) {
+		std::cerr << "Debug: Channel not found for KICK command" << std::endl;
+		return;
+	}	
+	std::vector<Client>::iterator targetIt = channelIt->getJoinedClients().begin();
+	while (targetIt != channelIt->getJoinedClients().end()) {
+		if (targetIt->getNickName() == targetNick) {
+			break;
+		}
+		targetIt++;
+	}	
+	if (targetIt == channelIt->getJoinedClients().end()) {
+		std::cerr << "Debug: Target client not found in channel for KICK command" << std::endl;
+		return;
+	}	
+	channelIt->getJoinedClients().erase(targetIt);
+	const std::string msg = "You have been kicked from " + channelName + " by " + clientIt->getNickName() + "\r\n";
+	send(targetIt->getSocket(), msg.c_str(), msg.length(), 0);
+	std::cout << "Client " << targetNick << " kicked from channel " << channelName << std::endl;
+}
+
+
+
+
+
+void Server::handleQuit(Client *handleClient, const Command &cmd) {
+	std::vector<Client>::iterator clientIt = findObject(handleClient->getSocket(), clients);
 	if (clientIt == clients.end()) {
 		std::cerr << "Debug: Client not found for QUIT command" << std::endl;
 		return;
 	}
 	std::vector<pollfd>::iterator pollIt = poll_fds.begin();
 	while (pollIt != poll_fds.end()) {
-		if (pollIt->fd == clientSocket) {
+		if (pollIt->fd == handleClient->getSocket()) {
 			break;
 		}
 		pollIt++;
@@ -418,9 +468,11 @@ void Server::handleQuit(int clientSocket, const Command &cmd) {
 		return;
 	}
 	const std::string str = RPL_QUIT(clientIt->getNickName(), clientIt->getUserName(), cmd.message);
-	send(clientSocket, str.c_str(), str.length(), 0);
+	send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 	deleteClient(clientIt, pollIt);
 }
+
+
 
 void Server::handlePing(int clientSocket, const Command &cmd) {
 	std::vector<Client>::iterator clientIt = findObject(clientSocket, clients);

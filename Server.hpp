@@ -127,7 +127,8 @@ class Server
 	void handleCommand(const Command &cmd, Client &client, int clientSocket);
 	void handlePing(int clientSocket, const Command &cmd);
 	void handlePong(int clientSocket);
-	void handleQuit(int clientSocket, const Command &cmd);
+	void handleQuit(Client *handleClient, const Command &cmd);
+	void handleKick(Client* handleClient, const Command &cmd);
 
 
 
