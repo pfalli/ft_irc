@@ -384,7 +384,7 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 	} else if (cmd.command == "MODE") {
 		std::cout << "Handling MODE: "<< cmd.parameter + cmd.message<< std::endl;
 	} else if (cmd.command == "KICK") {
-		std::cout << "Handling KICK: " << cmd.parameter + cmd.message<< std::endl;
+		handleKick(&client, cmd);
 	} else if (cmd.command == "PRIVMSG") {
 		privmsg(this, &client, cmd);
 	} else if (cmd.command == "QUIT") {
@@ -456,14 +456,14 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 		return;
 	}
 	// Search for the target client in the channel
-	std::vector<Client>::iterator targetIt = clients.begin();
-	while (targetIt != clients.end()) {
+	std::vector<Client>::iterator targetIt = channelIt->getJoinedClients().begin();
+	while (targetIt != channelIt->getJoinedClients().end()) {
 		if (targetIt->getNickName() == targetNick) {
 			break;
 		}
 		targetIt++;
 	}
-	if (targetIt == clients.end()) {
+	if (targetIt == channelIt->getJoinedClients().end()) {
 		send(handleClient->getSocket(), "Client inside Channel not found.\n", 34, 0);
 		return;
 	}
