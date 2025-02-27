@@ -145,6 +145,8 @@ int	Server::NewClient(int new_socket)
 	client_fd.fd = new_socket;
 	client_fd.events = POLLIN;  // Monitor for incoming data
 	poll_fds.push_back(client_fd);
+	std::string str = WELCOME_MESSAGE;
+	send(new_socket, str.c_str(), strlen(str.c_str()), 0);
 	return (SUCCESS);
 }
 
@@ -245,14 +247,10 @@ void	Server::existingConnection(std::vector<pollfd>::iterator it)
 	int bytes_read;
 	memset(buffer, 0, sizeof(buffer));
 
+	std::cout << "test" << std::endl;
 	if (server_shutdown)
 		return ;
 	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0); // ***receiving message
-	// if (*buffer == EOF)
-	// {
-	// 	deleteClient(it_c, it);
-	// 	return ;
-	// }
 	if (bytes_read <= FAILURE || bytes_read == 0)
 	{
 		std::cout << "#1" << std::endl;
@@ -308,9 +306,6 @@ typename std::vector<T>::iterator		Server::findObject(int toFind, std::vector<T>
 
 void					Server::_register(Client &client, const Command &cmd, int mode)
 {
-	
-	if (mode == PASSWORD)
-	{
 	if (cmd.parameter.empty())
 	{
 		const std::string str = ERR_NEEDMOREPARAMS(client.getUserName());
@@ -323,21 +318,27 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		send(client.getSocket(), str.c_str(), str.length(), 0);
 		return ;
 	}
-	else {
+	if (mode == PASSWORD)
+	{
 		if (this->password == cmd.parameter)
 			client.setPW();
 		else
 			send(client.getSocket(), "Incorrect Password. Please try again.\n", 39, 0);
-		return ;
 	}
-	}
-	if (mode == USERNAME)
+	else if (mode == USERNAME)
 	{
-		return ;
+		client.setUserName(cmd.parameter);
+		client.setUser();
 	}
-	if (mode == NICKNAME)
+	else if (mode == NICKNAME)
 	{
-		return ;
+		client.setNickName(cmd.parameter);
+		client.setNick();
+	}
+	if (client.getNick() == true && client.getPW() == true && client.getUser() == true)
+	{
+		client.setRegistered();
+		send(client.getSocket(), "Registration complete!\n", 24, 0);
 	}
 }
 
@@ -374,7 +375,7 @@ void Server::handleCommand(const Command &cmd, Client &client, int clientSocket)
 	else if (cmd.command == "NICK")
 		_register(client, cmd, NICKNAME);
 	if (!client.getRegistered())
-		send(clientSocket, "Youre not registered yet.", 26, 0);
+		return ;
 	if (cmd.command == "JOIN") {
 		join(this, &client, cmd.parameter);
 		std::cout << "Handling JOIN: " << cmd.parameter + cmd.message<< std::endl;

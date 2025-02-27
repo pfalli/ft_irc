@@ -34,19 +34,23 @@ class Client
 												user_name = "default";
 												nick_name = "default_nick";
 												clientSocket = socket;
-												send(socket, "Please enter the password:\n", 28, 0);
 											};
 											~Client(){};
 	void									setUserName(std::string _name){this->user_name = _name;}
 	void									setNickName(std::string _name){this->nick_name = _name;}
-	void									setPW(){this->password = true;}
 	void									setRegistered(){this->registered = true;}
 	void									setSocket(int socket){this->clientSocket = socket;}
+	void									setPW(){this->password = true;}
+	void									setUser(){this->user = true;}
+	void									setNick(){this->nick = true;}
+
 	std::string								getUserName() const{return (this->user_name);}
 	std::string								getNickName() const{return (this->nick_name);}
 	int										getSocket()const{return (this->clientSocket);}
 	bool									getRegistered()const{return (this->registered);}
 	bool									getPW()const{return (this->password);}
+	bool									getUser()const{return (this->user);}
+	bool									getNick()const{return (this->nick);}
 };
 
 #endif
