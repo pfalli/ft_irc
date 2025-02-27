@@ -321,8 +321,6 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		send(client.getSocket(), str.c_str(), str.length(), 0);
 		return ;
 	}
-	std::cout << "1#id ::" << client.getNickName() << std::endl;
-	std::cout << "1#socket ::" << client.getSocket() << std::endl;
 	if (mode == PASSWORD)
 	{
 		if (this->password == cmd.parameter)
@@ -340,8 +338,6 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		client.setNickName(cmd.parameter);
 		client.setNick();
 	}
-	std::cout << "2#id ::" << client.getNickName() << std::endl;
-	std::cout << "2#socket ::" << client.getSocket() << std::endl;
 	if (client.getNick() == true && client.getPW() == true && client.getUser() == true)
 	{
 		client.setRegistered();
