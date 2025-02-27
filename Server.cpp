@@ -139,10 +139,13 @@ int	Server::NewClient(int new_socket)
 	Client _new(new_socket);
 	// _new.setUserName(requestName(USERNAME, clientSocket));
 	// _new.setNickName(requestName(NICKNAME, clientSocket));
+	std::cout << "new_socket#0 : " << new_socket << std::endl;
 	this->clients.push_back(_new);
 	// Add new client to poll lists
 	pollfd client_fd;
 	client_fd.fd = new_socket;
+	std::cout << "new_socket#1 : " << new_socket << std::endl;
+	std::cout << "clients_socket#1 : " << _new.getSocket() << std::endl;
 	client_fd.events = POLLIN;  // Monitor for incoming data
 	poll_fds.push_back(client_fd);
 	std::string str = WELCOME_MESSAGE;
@@ -247,13 +250,11 @@ void	Server::existingConnection(std::vector<pollfd>::iterator it)
 	int bytes_read;
 	memset(buffer, 0, sizeof(buffer));
 
-	std::cout << "test" << std::endl;
 	if (server_shutdown)
 		return ;
 	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0); // ***receiving message
 	if (bytes_read <= FAILURE || bytes_read == 0)
 	{
-		std::cout << "#1" << std::endl;
 		deleteClient(findObject(it->fd, this->clients), it);
 		return ;
 	}
@@ -306,6 +307,8 @@ typename std::vector<T>::iterator		Server::findObject(int toFind, std::vector<T>
 
 void					Server::_register(Client &client, const Command &cmd, int mode)
 {
+	std::cout << "0#id ::" << client.getNickName() << std::endl;
+	std::cout << "0#socket ::" << client.getSocket() << std::endl;
 	if (cmd.parameter.empty())
 	{
 		const std::string str = ERR_NEEDMOREPARAMS(client.getUserName());
@@ -318,6 +321,8 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		send(client.getSocket(), str.c_str(), str.length(), 0);
 		return ;
 	}
+	std::cout << "1#id ::" << client.getNickName() << std::endl;
+	std::cout << "1#socket ::" << client.getSocket() << std::endl;
 	if (mode == PASSWORD)
 	{
 		if (this->password == cmd.parameter)
@@ -335,6 +340,8 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		client.setNickName(cmd.parameter);
 		client.setNick();
 	}
+	std::cout << "2#id ::" << client.getNickName() << std::endl;
+	std::cout << "2#socket ::" << client.getSocket() << std::endl;
 	if (client.getNick() == true && client.getPW() == true && client.getUser() == true)
 	{
 		client.setRegistered();

@@ -6,32 +6,46 @@
 /*   By: junhhong <junhhong@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 16:12:42 by junhhong          #+#    #+#             */
-/*   Updated: 2025/02/26 14:59:02 by junhhong         ###   ########.fr       */
+/*   Updated: 2025/02/27 16:39:51 by junhhong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "utils.hpp"
 #include "Common.hpp"
 
+#include "utils.hpp"
+#include "Common.hpp"
+#include "NumericMessages.hpp"
+
+
+/* find if nickName is in server. 
+	if exist, return socket
+	if not, return -1 */
+int isUserInServer(Server *server, std::string nickName)
+{
+	std::vector<Client> clients = server->getClients();
+	
+	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end(); it++)
+	{
+		if (it->getNickName() == nickName)
+			return it->getSocket();
+	}
+	return -1;
+}
+
 void	messageToTargets(Client *sender, Server *server, std::vector<std::string> &targets, std::string msg)
 {
-	for (std::vector<std::string>::iterator it = targets.begin(); it != targets.end(); it++)
+	for (std::vector<std::string>::iterator recipient = targets.begin(); recipient != targets.end(); recipient++)
 	{
-		for (std::vector<Client>::iterator it2 = server->getClients().begin(); it2 != server->getClients().end(); it2++)
+		int	fd = isUserInServer(server, *recipient);
+		if (fd != -1) // if exist
 		{
-			std::cout << "target : " << *it << std::endl;
-			if (*it == it2->getNickName())
-			{
-				send(it2->getSocket(), msg.c_str(), msg.length(), 0);
-				break ;
-			}
-			if (it2 == server->getClients().end())
-			{
-				std::cout << "does not exist" << std::endl;
-				std::string errmsg = std::string(RED) + *it + " Does not exist\n" RESET;
-				send(sender->getSocket(), errmsg.c_str(), errmsg.length(), 0);
-			}
+			std::string success_message = SUCCESS_PRIVMSG(sender->getNickName(), *recipient, msg);
+			send(fd, success_message.c_str(), success_message.length(), 0);
+			send(sender->getSocket(), success_message.c_str(), success_message.length(), 0);
 		}
+		else
+			send(sender->getSocket(), ERR_NOSUCHNICK(sender->getNickName(), *recipient).c_str(), ERR_NOSUCHNICK(sender->getNickName(), *recipient).length(), 0);
 	}
 }
 
@@ -45,29 +59,6 @@ void	splitTargetUsers(std::string tmpTarget, std::vector<std::string> &targets)
 		targets.push_back(user);
 	}
 }
-
-/* find colon */
-// int	parseTarget(Client *sender, std::string &tmpTarget)
-// {
-// 	size_t	locationColon;
-// 	locationColon = tmpTarget.find(':');
-// 	if (locationColon == std::string::npos)
-// 	{
-// 		std::string msg =  RED "Colon missing. correct format : <target> : <message>\n" RESET;
-// 		send(sender->getSocket(), msg.c_str(), msg.length(), 0);
-// 		return (1);
-// 	}
-// 	tmpTarget = tmpTarget.substr(0, locationColon);
-// 	return (0);
-// }
-
-// void	parseMessage(std::string &message)
-// {
-// 	size_t	locationColon;
-
-// 	locationColon = message.find(':');
-// 	message = message.substr(locationColon, message.size());
-// }
 
 void	privmsg(Server *server, Client *sender, const Command &cmd)
 {
