@@ -124,11 +124,13 @@ class Server
 
 	// Piero functions
 	void parseCommand(const std::string &str, Command &cmd);
-	void handleCommand(const Command &cmd, Client &client, int clientSocket);
-	void handlePing(int clientSocket, const Command &cmd);
-	void handlePong(int clientSocket);
+	void handleCommand(const Command &cmd, Client &client);
+	void handlePing(Client *handleClient, const Command &cmd);
+	void handlePong(Client *handleClient);
 	void handleQuit(Client *handleClient, const Command &cmd);
 	void handleKick(Client* handleClient, const Command &cmd);
+	void printInfo(Client* handleClient, const Command &cmd);
+	bool findChannelByName(const std::string& str);
 
 
 
