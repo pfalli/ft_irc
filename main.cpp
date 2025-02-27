@@ -1,6 +1,7 @@
 #include "Server.hpp"
 #include "utils.hpp"
 
+Server *global_server;
 
 int main(int ac, char **av)
 {

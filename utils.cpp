@@ -192,3 +192,12 @@ std::string					requestName(int format, int clientSocket, std::vector<Client> &c
 	}
 	return (_name);
 }
+
+
+void	signal_handler(int signal)
+{
+	signal++;
+
+	Server &server = static_cast<Server &>(*global_server);
+	server.setServerShutdown();
+}

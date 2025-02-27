@@ -47,6 +47,8 @@ Server::Server(): \
 	this->serverAddress.sin_port = htons(port);
 	this->serverAddress.sin_addr.s_addr = INADDR_ANY;
 	inet_pton(AF_INET, "0.0.0.0", &serverAddress.sin_addr);
+	signal(SIGINT, signal_handler);
+	global_server = this;
 }
 
 Server::Server(std::string _password, int _port, std::string _name): \
@@ -61,6 +63,13 @@ Server::Server(std::string _password, int _port, std::string _name): \
 	this->serverAddress.sin_port = htons(port);
 	this->serverAddress.sin_addr.s_addr = INADDR_ANY;
 	inet_pton(AF_INET, "0.0.0.0", &serverAddress.sin_addr); 	 // convert a number to an array of integers: 127.0.0.1
+
+	signal(SIGINT, signal_handler);
+	global_server = static_cast<Server *>(this);
+	// std::cout << global_server << std::endl;
+	signal(SIGKILL, signal_handler);
+	signal(SIGTERM, signal_handler);
+	signal(SIGQUIT, signal_handler);
 }
 
 Server::~Server()
@@ -77,16 +86,22 @@ int							Server::getPort()const{return (port);}
 std::string					Server::getName()const{return (name);}
 std::string					Server::getPassword()const{return (password);}
 std::vector<Client>			Server::getClients()const{return (clients);}
+int							Server::getServSocket()const{return (serverSocket);}
 std::vector<Channel>		Server::getChannels()const{return (channels);}
 std::vector<Channel>& 		Server::getChannelsref() {return channels;}
 bool						Server::getServerShutdown()const{return (server_shutdown);}
+std::vector<struct pollfd>	Server::getPollFds()const{return (this->poll_fds);}
+
+void						Server::setServerShutdown(){this->server_shutdown = true;}
 
 Server					&Server::operator=(const Server &src)
 {
 	if (this == &src)
 		return *this;
-	this->channels.erase(channels.begin(), channels.end());
-	this->clients.erase(clients.begin(), clients.end());
+	if (this->channels.size() > 0)
+		this->channels.erase(channels.begin(), channels.end());
+	if (this->clients.size() > 0)
+		this->clients.erase(clients.begin(), clients.end());
 	std::vector<Client>::iterator _clients = src.getClients().begin();
 	while (_clients != src.getClients().end())
 	{
@@ -101,19 +116,6 @@ Server					&Server::operator=(const Server &src)
 	}
 	this->server_shutdown = src.getServerShutdown();
 	return (*this);
-}
-
-template <typename T>
-typename std::vector<T>::iterator		Server::findObject(int toFind, std::vector<T> &array)
-{
-	typename std::vector<T>::iterator it = array.begin();
-	while (it != array.end())
-	{
-		if ((*it).getSocket() == toFind)
-			break;
-		it++;
-	}
-	return (it);
 }
 
 
@@ -133,7 +135,7 @@ bool					Server::existingUser(int clientSocket)
 int	Server::NewClient(int new_socket)
 {
 	std::cout << "New client connected: " << new_socket << std::endl;
-	
+
 	Client _new(new_socket);
 	// _new.setUserName(requestName(USERNAME, clientSocket));
 	// _new.setNickName(requestName(NICKNAME, clientSocket));
@@ -153,31 +155,6 @@ void		Server::deleteClient(std::vector<Client>::iterator client, std::vector<pol
 	close(client->getSocket());
 	this->clients.erase(client);
 	this->poll_fds.erase(poll);
-}
-
-bool									Server::sendToNext(std::string buff, int client_fd)
-{
-	if (this->clients.size() < 2){
-		std::cout << "***only one client***\n"; 
-		return false;
-	}
-	std::vector<Client>::iterator it = this->clients.begin();
-	std::vector<Client>::iterator send_to;
-	while (it != this->clients.end())
-	{
-		if ((*it).getSocket() == client_fd)
-			break ;
-		it++;
-	}
-	if (it + 1 == this->clients.end())
-		send_to = (it - 1);
-	else
-		send_to = (it + 1);
-	//complicated i know, couldnt think of anything else
-	std::string temp = (*it).getNickName() + ": " + buff + "\n"; 
-	const char *message = temp.c_str();
-	send((*send_to).getSocket(), message, strlen(message), 0);
-	return true;
 }
 
 int									Server::acceptClient()
@@ -218,6 +195,7 @@ void	Server::launch()
 
 	while (!server_shutdown)
 	{
+		std::cout << "Server Shutdown: " << server_shutdown << std::endl;
 		int activity = poll(&poll_fds[0], poll_fds.size(), -1);  // Wait indefinitely
 		if (activity == FAILURE || activity == POLL_TIMEOUT)
 		{
@@ -242,6 +220,8 @@ void	Server::launch()
 		}
 		// getMessages();
 	}
+	if (server_shutdown)
+		clean();
 	close(serverSocket);
 	return ;
 }
@@ -255,6 +235,84 @@ void Server::newConnection()
 		return ;
 }
 
+void	Server::existingConnection(std::vector<pollfd>::iterator it)
+{
+	std::vector<Client>::iterator it_c = findObject(it->fd, this->clients);
+	if (it_c == this->clients.end())
+		return ;
+	Client *client = &(*(findObject(it->fd, this->clients)));
+	char buffer[BUFFER_SIZE];
+	int bytes_read;
+	memset(buffer, 0, sizeof(buffer));
+
+	if (!it_c->getRegistered())
+	{
+		if (!registration(it_c))
+		{
+			deleteClient(it_c, it);
+			return ;
+		}
+	}
+
+	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0); // ***receiving message
+	// if (*buffer == EOF)
+	// {
+	// 	deleteClient(it_c, it);
+	// 	return ;
+	// }
+	if (bytes_read <= FAILURE || bytes_read == 0)
+	{
+		std::cout << "#1" << std::endl;
+		deleteClient(findObject(it->fd, this->clients), it);
+		return ;
+	}
+	else if (bytes_read > 0)
+	{
+		std::cout << client->getSocket() << std::endl;
+		std::cout << buffer << std::endl;
+		std::string str = buffer;
+		memset(buffer, 0, BUFFER_SIZE);
+		if (str == "end")
+		{
+			deleteClient(findObject(it->fd, this->clients), it);
+			return ;
+		}
+		else
+		{
+			std::cout << "Received(existingConnection): " << str << std::endl;
+			Command cmd;
+			parseCommand(str, cmd);
+			handleCommand(cmd, *client, client->getSocket());
+			std::cout << "-----------------------------------------------------" << std::endl;
+		}
+	}
+}
+
+void									Server::clean()
+{
+	std::vector<Client>::iterator client = this->clients.begin();
+	while (client != this->clients.end())
+	{
+		std::cout << std::endl << client->getNickName() << " " << client->getSocket() << std::endl;
+		send(client->getSocket(), "Server closed unexpectedly.\n", 29, 0);
+		client++;
+	}
+	std::cout << std::endl;
+}
+
+template <typename T>
+typename std::vector<T>::iterator		Server::findObject(int toFind, std::vector<T> &array)
+{
+	typename std::vector<T>::iterator it = array.begin();
+	while (it != array.end())
+	{
+		if ((*it).getSocket() == toFind)
+			break;
+		it++;
+	}
+	return (it);
+}
+
 bool Server::registration(std::vector<Client>::iterator it)
 {
 
@@ -263,7 +321,8 @@ bool Server::registration(std::vector<Client>::iterator it)
 	if (bytes_read <= 0)
 		return false;
 	buffer[bytes_read] = '\0';
-
+	if (server_shutdown)
+		return true;
 	std::string input(removeNewline(buffer));
 	if (input == password)
 	{
@@ -278,6 +337,8 @@ bool Server::registration(std::vector<Client>::iterator it)
 
 	while (!it->getRegistered())
 	{
+		if (server_shutdown)
+			return true;
 		char buffer[BUFFER_SIZE];
 		int	bytes_read = recv(it->getSocket(), buffer, BUFFER_SIZE, 0);
 		if (bytes_read <= 0)
@@ -321,57 +382,6 @@ bool Server::registration(std::vector<Client>::iterator it)
 		}
 	}
 	return (false);
-}
-
-
-void	Server::existingConnection(std::vector<pollfd>::iterator it)
-{
-	std::vector<Client>::iterator it_c = findObject(it->fd, this->clients);
-	if (it_c == this->clients.end())
-		return ;
-	Client *client = &(*(findObject(it->fd, this->clients)));
-	char buffer[BUFFER_SIZE];
-	int bytes_read;
-	memset(buffer, 0, sizeof(buffer));
-
-	if (!it_c->getRegistered())
-	{
-		if (!registration(it_c))
-		{
-			std::cout << "Client disconnected: " << it_c->getNickName() << std::endl;
-			deleteClient(it_c, it);
-			return ;
-		}
-	}
-
-	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0); // ***receiving message
-	if (bytes_read <= FAILURE || bytes_read == 0)
-	{
-		std::cout << "#1" << std::endl;
-		deleteClient(findObject(it->fd, this->clients), it);
-		return ;
-	}
-	else if (bytes_read > 0)
-	{
-		std::cout << buffer << std::endl;
-		std::string str = buffer;
-		memset(buffer, 0, BUFFER_SIZE);
-		if (str == "end")
-		{
-			deleteClient(findObject(it->fd, this->clients), it);
-			return ;
-		}
-		// else if(!sendToNext(str.c_str(), client->getSocket()))
-		// 	std::cout << "Received(existingConnection): " << str << std::endl;
-		else
-		{
-			std::cout << "Received(existingConnection): " << str << std::endl;
-			Command cmd;
-			parseCommand(str, cmd);
-			handleCommand(cmd, *client, client->getSocket());
-			std::cout << "-----------------------------------------------------" << std::endl;
-		}
-	}
 }
 
 void Server::parseCommand(const std::string &str, Command &cmd) {
@@ -481,3 +491,4 @@ void	Server::createChannel(std::string name, int creatorFd)
 	// // if does not exist, create a new one and add
 	channels.push_back(Channel(name, creatorFd));
 }
+

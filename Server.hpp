@@ -97,10 +97,14 @@ class Server
 	int										getPort()const;
 	std::string								getName()const;
 	std::string								getPassword()const;
+	int										getServSocket()const;
 	std::vector<Client>						getClients()const;
 	std::vector<Channel>					getChannels()const;
 	std::vector<Channel>&					getChannelsref();
 	bool									getServerShutdown()const;
+	std::vector<struct pollfd>				getPollFds()const;
+
+	void									setServerShutdown();
 
 	void									createChannel(std::string name, int creatorFd);
 
@@ -116,6 +120,7 @@ class Server
 	bool									sendToNext(std::string buff, int client_fd);
 	void									existingConnection(std::vector<pollfd>::iterator it);
 	void									newConnection();
+	void									clean();
 
 	// Piero functions
 	void parseCommand(const std::string &str, Command &cmd);
@@ -132,6 +137,7 @@ class Server
 	typename std::vector<T>::iterator		findObject(int toFind, std::vector<T> &array);
 };
 
+extern Server *global_server;
 
 class SeverExceptionSocket : public std::exception
 {

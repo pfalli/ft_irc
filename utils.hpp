@@ -24,3 +24,6 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin);
 
 /* privmsg */
 void	privmsg(Server *server, Client *sender, const Command &cmd);
+void	signal_handler(int signal);
+
+template <typename T> typename std::vector<T>::iterator		findObject(int toFind, std::vector<T> &array);
