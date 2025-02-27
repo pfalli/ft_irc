@@ -21,6 +21,8 @@ class Client
 	std::string								user_name;
 	std::string								nick_name;
 	bool									password;
+	bool									user;
+	bool									nick;
 	bool									registered;
 
 	std::string								buffer_in;

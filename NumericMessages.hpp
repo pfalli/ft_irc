@@ -3,6 +3,7 @@
 
 // **ERRORS
 # define ERR_NEEDMOREPARAMS(username) ":serverhost 461 " + username + " :Not enough parameters\r\n"
+# define ERR_TOOMANYPARAMS(username) ":serverhost 461 " + username + " :Too many parameters\r\n"
 
 
 // **REPLIES

@@ -106,9 +106,8 @@ class Server
 
 	void									setServerShutdown();
 
+	void									_register(Client &client, const Command &cmd, int mode);
 	void									createChannel(std::string name, int creatorFd);
-
-	bool 									registration(std::vector<Client>::iterator it);
 	void									startServer();
 	void									launch();
 	bool									existingUser(int clientSocket);
@@ -121,6 +120,7 @@ class Server
 	void									existingConnection(std::vector<pollfd>::iterator it);
 	void									newConnection();
 	void									clean();
+
 
 	// Piero functions
 	void parseCommand(const std::string &str, Command &cmd);

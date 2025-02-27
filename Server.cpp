@@ -245,15 +245,8 @@ void	Server::existingConnection(std::vector<pollfd>::iterator it)
 	int bytes_read;
 	memset(buffer, 0, sizeof(buffer));
 
-	if (!it_c->getRegistered())
-	{
-		if (!registration(it_c))
-		{
-			deleteClient(it_c, it);
-			return ;
-		}
-	}
-
+	if (server_shutdown)
+		return ;
 	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0); // ***receiving message
 	// if (*buffer == EOF)
 	// {
@@ -313,75 +306,39 @@ typename std::vector<T>::iterator		Server::findObject(int toFind, std::vector<T>
 	return (it);
 }
 
-bool Server::registration(std::vector<Client>::iterator it)
+void					Server::_register(Client &client, const Command &cmd, int mode)
 {
-
-	char buffer[BUFFER_SIZE];
-	int	bytes_read = recv(it->getSocket(), buffer, BUFFER_SIZE, 0);
-	if (bytes_read <= 0)
-		return false;
-	buffer[bytes_read] = '\0';
-	if (server_shutdown)
-		return true;
-	std::string input(removeNewline(buffer));
-	if (input == password)
-	{
-		it->setPW();
-		send(it->getSocket(), "Password correct. Please enter your NICK: \n", 45, 0);
-	}
-	else if (input != password)
-	{
-		send(it->getSocket(), "Incorrect password. Closing connection..\n", 42, 0);
-		return false;
-	}
-
-	while (!it->getRegistered())
-	{
-		if (server_shutdown)
-			return true;
-		char buffer[BUFFER_SIZE];
-		int	bytes_read = recv(it->getSocket(), buffer, BUFFER_SIZE, 0);
-		if (bytes_read <= 0)
-			return false;
-		buffer[bytes_read] = '\0';
 	
-		std::string input(removeNewline(buffer));
-
-		if (it->getNickName() == "default_nick")
-		{
-			if (input.empty())
-				continue;
-			else if (!validFormat(NICKNAME,input))
-			{
-				send(it->getSocket(), "Incorrect format. Please try again.\n", 37, 0);
-				continue ;
-			}
-			else
-			{
-				it->setNickName(input);
-				send(it->getSocket(), "Please enter USER:\n", 20, 0);
-				continue ;
-			}
-		}
-		else if (it->getUserName() == "default")
-		{
-			if (input.empty())
-				continue;
-			else if (!validFormat(USERNAME,input))
-			{
-				send(it->getSocket(), "Incorrect format. Please try again.\n", 37, 0);
-				continue ;
-			}
-			else
-			{
-				it->setUserName(input);
-				send(it->getSocket(), "Registration completed.\n", 24, 0);
-				it->setRegistered();
-				return true;
-			}
-		}
+	if (mode == PASSWORD)
+	{
+	if (cmd.parameter.empty())
+	{
+		const std::string str = ERR_NEEDMOREPARAMS(client.getUserName());
+		send(client.getSocket(), str.c_str(), str.length(), 0);
+		return ;
 	}
-	return (false);
+	else if (!cmd.message.empty())
+	{
+		const std::string str = ERR_TOOMANYPARAMS(client.getUserName());
+		send(client.getSocket(), str.c_str(), str.length(), 0);
+		return ;
+	}
+	else {
+		if (this->password == cmd.parameter)
+			client.setPW();
+		else
+			send(client.getSocket(), "Incorrect Password. Please try again.\n", 39, 0);
+		return ;
+	}
+	}
+	if (mode == USERNAME)
+	{
+		return ;
+	}
+	if (mode == NICKNAME)
+	{
+		return ;
+	}
 }
 
 void Server::parseCommand(const std::string &str, Command &cmd) {
@@ -410,6 +367,14 @@ void Server::parseCommand(const std::string &str, Command &cmd) {
 
 
 void Server::handleCommand(const Command &cmd, Client &client, int clientSocket) {
+	if (cmd.command == "PASS")
+		_register(client, cmd, PASSWORD);
+	else if (cmd.command == "USER")
+		_register(client, cmd, USERNAME);
+	else if (cmd.command == "NICK")
+		_register(client, cmd, NICKNAME);
+	if (!client.getRegistered())
+		send(clientSocket, "Youre not registered yet.", 26, 0);
 	if (cmd.command == "JOIN") {
 		join(this, &client, cmd.parameter);
 		std::cout << "Handling JOIN: " << cmd.parameter + cmd.message<< std::endl;
