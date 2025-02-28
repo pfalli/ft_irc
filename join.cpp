@@ -6,7 +6,7 @@
 /*   By: junhhong <junhhong@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:35:49 by junhhong          #+#    #+#             */
-/*   Updated: 2025/02/28 16:51:47 by junhhong         ###   ########.fr       */
+/*   Updated: 2025/02/28 16:54:01 by junhhong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -58,8 +58,6 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	channel = isChannelExist(channels, channelTojoin);
 	if (channel == 0)
 	{
-		std::cout << "does not exist, creat new one" << std::endl;
-
 		server->createChannel(channelTojoin, joiningClient->getSocket());
 		channel = isChannelExist(channels, channelTojoin);
 		channel->joinClient(*joiningClient);
@@ -79,7 +77,6 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	}
 	else
 	{
-		std::cout << "exist, joining old one" << std::endl;
 		channel->joinClient(*joiningClient);
 
 		std::string welcomemsg = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin);
