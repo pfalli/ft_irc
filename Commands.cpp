@@ -67,10 +67,72 @@ void Server::printInfo(Client* handleClient, const Command &cmd) {
 
 }
 
+// INVITE <nickname> <channel>
+// 2 Issues: 1. when try to invite someone not inside the channel
 void Server::handleInvite(Client* handleClient, const Command &cmd) {
-    
+	std::istringstream iss(cmd.parameter);
+	std::string channelName, targetNick;
+	iss >> targetNick >> channelName;	
+	if (channelName.empty() || targetNick.empty()) {
+		std::string str = ERR_NEEDMOREPARAMS(handleClient->getUserName());
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+		return;
+	}
+	// channel exist? -ERR_NOSUCHCHANNEL
+	std::vector<Channel>::iterator channelIt = channels.begin();
+	while (channelIt != channels.end()) {
+		if (channelIt->getName() == channelName) {
+			break;
+		}
+		channelIt++;
+	}
+	if (channelIt == channels.end()) {
+        std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelIt->getName());
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+		return;
+	}
+	// is inviter on channel? -ERR_NOTONCHANNEL
+	std::vector<Client>::iterator inviterIt = channelIt->getJoinedClients().begin();
+	while (inviterIt != channelIt->getJoinedClients().end()) {
+		if (inviterIt->getNickName() == handleClient->getNickName()) {
+			break;
+		}
+		inviterIt++;
+	}
+	if (inviterIt == channelIt->getJoinedClients().end()) {
+        std::string str = ERR_NOTONCHANNEL(handleClient->getNickName(), channelIt->getName());
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+		return;
+	}
+	// target already in channel -ERR_USERONCHANNEL
+	std::vector<Client>::iterator targetIt = channelIt->getJoinedClients().begin();
+	while (targetIt != channelIt->getJoinedClients().end()) {
+		if (targetIt->getNickName() == targetNick) {
+			std::string str = ERR_USERONCHANNEL(handleClient->getUserName(), targetIt->getNickName(), channelIt->getName());
+			send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+			return;
+		}
+		targetIt++;
+	}
+	// target exist?
+	std::vector<Client>::iterator targetIt = channelIt->getJoinedClients().begin();
+	while (targetIt != channelIt->getJoinedClients().end()) {
+		if (targetIt->getNickName() == targetNick) {
+			std::string str = ERR_USERONCHANNEL(handleClient->getUserName(), targetIt->getNickName(), channelIt->getName());
+			send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+			return;
+		}
+		targetIt++;
+	}
+	channelIt->getJoinedClients().push_back(*targetIt);
+	std::string str = RPL_INVITING(handleClient->getUserName(), handleClient->getNickName(), targetIt->getNickName(), channelIt->getName());
+	send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+
+
 }
 
+// Issue: 1. when channel and name are inverted!!!
+// ***it doesn't kick multiple clients*** only member of channel can kick clients!!! + ADD COMMENT
 void Server::handleKick(Client* handleClient, const Command &cmd) {
 	std::istringstream iss(cmd.parameter); // cmd.parameter has two words
 	std::string channelName, targetNick;
@@ -102,14 +164,14 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 		targetIt++;
 	}
 	if (targetIt == channelIt->getJoinedClients().end()) {
-        std::string str = ERR_USERNOTINCHANNEL(handleClient->getUserName(), targetIt->getNickName() channelIt->getName());
+        std::string str = ERR_USERNOTINCHANNEL(handleClient->getUserName(), targetIt->getNickName(), channelIt->getName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
 	// Remove the client from the channel
 	channelIt->removeClientFromList(targetIt);
 	const std::string str = RPL_KICK(handleClient->getNickName(),  handleClient->getUserName(), channelIt->getName(), targetIt->getUserName());
-	send(targetIt->getSocket(), str.c_str(), str.length(), 0);
+	send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 	// std::cout << "Client " << targetNick << " kicked from channel " << channelName << std::endl;
 }
 

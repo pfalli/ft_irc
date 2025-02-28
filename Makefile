@@ -39,7 +39,7 @@ CXX = c++
 
 RM = rm -rf
 MKDIR = mkdir -p
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -pedantic
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g
 
 all: $(NAME) #client
 
