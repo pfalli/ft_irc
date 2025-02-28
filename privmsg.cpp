@@ -6,7 +6,7 @@
 /*   By: junhhong <junhhong@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 16:12:42 by junhhong          #+#    #+#             */
-/*   Updated: 2025/02/27 17:52:55 by junhhong         ###   ########.fr       */
+/*   Updated: 2025/02/28 14:29:42 by junhhong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,15 +70,25 @@ void	parseChannelName2(std::string &targetChannel)
 	std::cout << "targetChannel :" << targetChannel << std::endl;
 }
 
-void	sendToChannel(Channel &channel, std::string senderNickname, std::string channelName, std::string msg)
+void	sendToChannel(Channel &channel, std::string msg)
 {
 	std::vector<Client> clients = channel.getJoinedClients();
 	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end() ;it++)
 	{
-		std::string	msgToChannel = TO_ALL_CHANNEL(senderNickname, channelName, msg);
-		send(it->getSocket(), msgToChannel.c_str(), msgToChannel.length(), 0);
+		send(it->getSocket(), msg.c_str(), msg.length(), 0);
 	}
 }
+
+
+// void	sendToChannel(Channel &channel, std::string senderNickname, std::string channelName, std::string msg)
+// {
+// 	std::vector<Client> clients = channel.getJoinedClients();
+// 	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end() ;it++)
+// 	{
+// 		std::string	msgToChannel = TO_ALL_CHANNEL(senderNickname, channelName, msg);
+// 		send(it->getSocket(), msgToChannel.c_str(), msgToChannel.length(), 0);
+// 	}
+// }
 
 void	messageToAllChannel(Server *server, Client *sender, const Command &cmd)
 {
@@ -91,7 +101,8 @@ void	messageToAllChannel(Server *server, Client *sender, const Command &cmd)
 	{
 		if (it->getName() == targetChannel)
 		{
-			sendToChannel(*it, senderNickname, targetChannel, cmd.message);
+			std::string msg = TO_ALL_CHANNEL(senderNickname, targetChannel, cmd.message);
+			sendToChannel(*it, msg);
 			return ;
 		}
 	}

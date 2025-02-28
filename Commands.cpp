@@ -32,8 +32,11 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 	else if (cmd.command == "KICK") {
 		handleKick(&client, cmd);
 	}
+	// if (cmd.command == "TOPIC") {
+	// 	topic(client, cmd);
+	// }
     else if (cmd.command == "INVITE") {
-		handleInvite(&client, cmd);
+		//handleInvite(&client, cmd);
 	}
 	else if (cmd.command == "INFO") {
 		printInfo(&client, cmd);
@@ -115,14 +118,17 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 		targetIt++;
 	}
 	// target exist?
-	std::vector<Client>::iterator targetIt = channelIt->getJoinedClients().begin();
-	while (targetIt != channelIt->getJoinedClients().end()) {
-		if (targetIt->getNickName() == targetNick) {
-			std::string str = ERR_USERONCHANNEL(handleClient->getUserName(), targetIt->getNickName(), channelIt->getName());
-			send(handleClient->getSocket(), str.c_str(), str.length(), 0);
-			return;
+	std::vector<Client>::iterator targetExistIt = this->getClients().begin();
+	while (targetExistIt != this->getClients().end()) {
+		if (targetExistIt->getNickName() == targetNick) {
+			break;
 		}
-		targetIt++;
+		targetExistIt++;
+	}
+	if (targetExistIt == this->getClients().end()) {
+		std::string str = ERR_NOTEXIST(targetExistIt->getNickName());
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+		return;
 	}
 	channelIt->getJoinedClients().push_back(*targetIt);
 	std::string str = RPL_INVITING(handleClient->getUserName(), handleClient->getNickName(), targetIt->getNickName(), channelIt->getName());

@@ -6,19 +6,20 @@
 /*   By: junhhong <junhhong@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:35:49 by junhhong          #+#    #+#             */
-/*   Updated: 2025/02/27 17:45:44 by junhhong         ###   ########.fr       */
+/*   Updated: 2025/02/28 16:54:01 by junhhong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "Server.hpp"
 #include "utils.hpp"
+#include "Channel.hpp"
 
 /* Check if channelTojoin exist in the Server 
 if does not exist, make a new one and return its reference 
 if does exist, return its reference */
 
 // Remove #
-int	parseChannelName(std::string &tmpChannelTojoin)
+int		removeHash(std::string &tmpChannelTojoin)
 {
 	size_t	start;
 
@@ -29,48 +30,69 @@ int	parseChannelName(std::string &tmpChannelTojoin)
 	return (0);
 }
 
-int		isChannleExist(std::vector<Channel>&	channels, Client *joiningClient, std::string tmpChannelTojoin)
+Channel*		isChannelExist(std::vector<Channel>&	channels, std::string channelTojoin)
 {
 	for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); it++)
 	{
-		if (it->getName() == tmpChannelTojoin) // if channel exists
-		{
-			it->joinClient(*joiningClient);
-			std::cout << "you are joined to" << tmpChannelTojoin << std::endl; 
-			return (0);
-		}
+		if (it->getName() == channelTojoin) // if channel exists
+			return &(*it);
 	}
-	return (1);
+	return (0);
 }
 
 void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 {
 	std::vector<Channel>&	channels = server->getChannelsref();
 	std::string				username;
-	std::string				tmpChannelTojoin;
+	//std::string				tmpChannelTojoin;
+	Channel					*channel;
 
-	tmpChannelTojoin = channelTojoin;
-	if (parseChannelName(tmpChannelTojoin) != 0)
-	{
-		std::string msg = "Colon missing. correct format : <target> : <message>\n";
-		send(joiningClient->getSocket(), msg.c_str(), msg.length(), 0);
-		return ;
-	}
 	username = joiningClient->getUserName();
-	if (isChannleExist(channels, joiningClient, tmpChannelTojoin) != 0)
+	//tmpChannelTojoin = channelTojoin;
+	// if (removeHash(tmpChannelTojoin) != 0)
+	// {
+	// 	std::string	hashMsg = ERR_NEEDMOREPARAMS2(username, "JOIN");
+	// 	send(joiningClient->getSocket(), hashMsg.c_str(), hashMsg.length(), 0);
+	// 	return ;
+	// }
+	channel = isChannelExist(channels, channelTojoin);
+	if (channel == 0)
 	{
-		server->createChannel(tmpChannelTojoin, joiningClient->getSocket());
-		std::cout << "Channel does not exist. " << tmpChannelTojoin << " created" << std::endl; 
-	}
-	for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); it++)
-	{
-		if (it->getName() == tmpChannelTojoin) // if channel exists
+		server->createChannel(channelTojoin, joiningClient->getSocket());
+		channel = isChannelExist(channels, channelTojoin);
+		channel->joinClient(*joiningClient);
+		// *** print message in case JOIN_FAILURE, because client already exist in channel ***
+		// *** try JOIN !!!channel *** it has to create only channels with '#'
+		std::string welcomemsg = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin);
+		sendToChannel(*channel, welcomemsg);
+		if (channel->getisTopic() == 1)
 		{
-			it->joinClient(*joiningClient);
-			std::string msg = "you joined " + tmpChannelTojoin + " channel. enjoy!\n";
-			send(joiningClient->getSocket(), msg.c_str(), msg.length(), 0);
-			std::cout << "you are joined to " << tmpChannelTojoin << std::endl; 
-			return ;
+			std::string topicMsg = RPL_TOPIC(username, channelTojoin, channel->getTopic());
+			std::string topicMsg2 = RPL_TOPICWHOTIME(username, channelTojoin, channel->getwhoTopicSet(), channel->getwhenTopicSet());
+			send(joiningClient->getSocket(), topicMsg.c_str(), topicMsg.length(), 0);
+			send(joiningClient->getSocket(), topicMsg2.c_str(), topicMsg2.length(), 0);
 		}
+		std::string	memberInfo = RPL_NAMREPLY(joiningClient->getNickName(), channelTojoin, *channel);
+		std::string endOfMsg = RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin);
+		send(joiningClient->getSocket(), memberInfo.c_str(), memberInfo.length(), 0);
+		send(joiningClient->getSocket(), endOfMsg.c_str(), endOfMsg.length(), 0);
+	}
+	else
+	{
+		channel->joinClient(*joiningClient);
+
+		std::string welcomemsg = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin);
+		sendToChannel(*channel, welcomemsg);
+		if (channel->getisTopic() == 1)
+		{
+			std::string topicMsg = RPL_TOPIC(username, channelTojoin, channel->getTopic());
+			std::string topicMsg2 = RPL_TOPICWHOTIME(username, channelTojoin, channel->getwhoTopicSet(), channel->getwhenTopicSet());
+			send(joiningClient->getSocket(), topicMsg.c_str(), topicMsg.length(), 0);
+			send(joiningClient->getSocket(), topicMsg2.c_str(), topicMsg2.length(), 0);
+		}
+		std::string	memberInfo = RPL_NAMREPLY(joiningClient->getNickName(), channelTojoin, *channel);
+		std::string endOfMsg = RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin);
+		send(joiningClient->getSocket(), memberInfo.c_str(), memberInfo.length(), 0);
+		send(joiningClient->getSocket(), endOfMsg.c_str(), endOfMsg.length(), 0);
 	}
 }
