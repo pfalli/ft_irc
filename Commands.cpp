@@ -32,8 +32,11 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 	else if (cmd.command == "KICK") {
 		handleKick(&client, cmd);
 	}
+	// if (cmd.command == "TOPIC") {
+	// 	topic(client, cmd);
+	// }
     else if (cmd.command == "INVITE") {
-		handleInvite(&client, cmd);
+		//handleInvite(&client, cmd);
 	}
 	else if (cmd.command == "INFO") {
 		printInfo(&client, cmd);
@@ -67,9 +70,9 @@ void Server::printInfo(Client* handleClient, const Command &cmd) {
 
 }
 
-void Server::handleInvite(Client* handleClient, const Command &cmd) {
+// void Server::handleInvite(Client* handleClient, const Command &cmd) {
     
-}
+// }
 
 void Server::handleKick(Client* handleClient, const Command &cmd) {
 	std::istringstream iss(cmd.parameter); // cmd.parameter has two words
@@ -102,7 +105,7 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 		targetIt++;
 	}
 	if (targetIt == channelIt->getJoinedClients().end()) {
-        std::string str = ERR_USERNOTINCHANNEL(handleClient->getUserName(), targetIt->getNickName() channelIt->getName());
+        std::string str = ERR_USERNOTINCHANNEL(handleClient->getUserName(), targetIt->getNickName(), channelIt->getName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}

@@ -201,3 +201,10 @@ void	signal_handler(int signal)
 	Server &server = static_cast<Server &>(*global_server);
 	server.setServerShutdown();
 }
+
+std::string timeToString(time_t t)
+{
+	std::ostringstream oss;
+	oss << t;
+	return oss.str();
+}
