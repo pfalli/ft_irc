@@ -32,6 +32,9 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 	else if (cmd.command == "KICK") {
 		handleKick(&client, cmd);
 	}
+    else if (cmd.command == "INVITE") {
+		handleInvite(&client, cmd);
+	}
 	else if (cmd.command == "INFO") {
 		printInfo(&client, cmd);
 	}
@@ -64,6 +67,10 @@ void Server::printInfo(Client* handleClient, const Command &cmd) {
 
 }
 
+void Server::handleInvite(Client* handleClient, const Command &cmd) {
+    
+}
+
 void Server::handleKick(Client* handleClient, const Command &cmd) {
 	std::istringstream iss(cmd.parameter); // cmd.parameter has two words
 	std::string channelName, targetNick;
@@ -82,7 +89,8 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 		channelIt++;
 	}
 	if (channelIt == channels.end()) {
-		send(handleClient->getSocket(), "Channel not found.\n", 20, 0);
+        std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelIt->getName());
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
 	// Search for the target client in the channel
@@ -94,7 +102,7 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 		targetIt++;
 	}
 	if (targetIt == channelIt->getJoinedClients().end()) {
-        std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelIt->getName());
+        std::string str = ERR_USERNOTINCHANNEL(handleClient->getUserName(), targetIt->getNickName() channelIt->getName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
@@ -128,15 +136,15 @@ void Server::handleQuit(Client *handleClient, const Command &cmd) {
 		std::cerr << "Debug: Poll not found for QUIT command" << std::endl;
 		return;
 	}
-	const std::string str = RPL_QUIT(clientIt->getNickName(), clientIt->getUserName(), cmd.message);
+	std::string str = RPL_QUIT(clientIt->getNickName(), clientIt->getUserName(), cmd.message);
 	send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 	deleteClient(clientIt, pollIt);
 }
 
 
 void Server::handlePing(Client *handleClient, const Command &cmd) {
-	const std::string str = ERR_NEEDMOREPARAMS(handleClient->getUserName());
-	if (cmd.parameter.empty()) {
+    if (cmd.parameter.empty()) {
+        std::string str = ERR_NEEDMOREPARAMS(handleClient->getUserName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return ;
 	}

@@ -129,6 +129,7 @@ class Server
 	void handlePong(Client *handleClient);
 	void handleQuit(Client *handleClient, const Command &cmd);
 	void handleKick(Client* handleClient, const Command &cmd);
+	void handleInvite(Client* handleClient, const Command &cmd);
 	void printInfo(Client* handleClient, const Command &cmd);
 	bool findChannelByName(const std::string& str);
 
