@@ -17,7 +17,8 @@ SRC =		main.cpp	\
 			utils.cpp	\
 			Channel.cpp \
 			privmsg.cpp \
-			join.cpp 
+			join.cpp \
+			Commands.cpp
 
 OBJS_DIR = objs/
 OBJS = $(SRC:.cpp=.o)

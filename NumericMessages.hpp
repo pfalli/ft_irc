@@ -8,6 +8,7 @@
 
 // **REPLIES
 # define RPL_QUIT(nickname, username, reason) ":" + nickname + "!" + username + "@localhost QUIT :Quit: " + reason + "\r\n"
+#define RPL_KICK(kickernick, kickeruser, channelname, username) ":" + kickernick + "!" + kickeruser + "@localhost KICK #" + channelname + " " + username + "\r\n"
 
 /* PRIVMSG */
 # define ERR_NOSUCHNICK(client, nickname) (std::string(RED) + ":" + client + " " + nickname + ":" + "401 Error: No such nick/channel\r\n" + std::string(RESET))
