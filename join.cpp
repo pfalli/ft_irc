@@ -6,7 +6,7 @@
 /*   By: junhhong <junhhong@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/02/24 11:35:49 by junhhong          #+#    #+#             */
-/*   Updated: 2025/02/28 16:08:51 by junhhong         ###   ########.fr       */
+/*   Updated: 2025/02/28 16:20:24 by junhhong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,7 +71,9 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 			send(joiningClient->getSocket(), topicMsg2.c_str(), topicMsg2.length(), 0);
 		}
 		std::string	memberInfo = RPL_NAMREPLY(joiningClient->getNickName(), tmpChannelTojoin, *channel);
+		std::string endOfMsg = RPL_ENDOFNAMES(joiningClient->getNickName(), tmpChannelTojoin);
 		send(joiningClient->getSocket(), memberInfo.c_str(), memberInfo.length(), 0);
+		send(joiningClient->getSocket(), endOfMsg.c_str(), endOfMsg.length(), 0);
 	}
 	else
 	{
@@ -86,6 +88,8 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 			send(joiningClient->getSocket(), topicMsg2.c_str(), topicMsg2.length(), 0);
 		}
 		std::string	memberInfo = RPL_NAMREPLY(joiningClient->getNickName(), tmpChannelTojoin, *channel);
+		std::string endOfMsg = RPL_ENDOFNAMES(joiningClient->getNickName(), tmpChannelTojoin);
 		send(joiningClient->getSocket(), memberInfo.c_str(), memberInfo.length(), 0);
+		send(joiningClient->getSocket(), endOfMsg.c_str(), endOfMsg.length(), 0);
 	}
 }
