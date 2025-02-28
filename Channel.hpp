@@ -36,6 +36,8 @@ class Channel {
 	void									joinClient(const Client &client);
 	std::string								getName()const{return (this->_name);}
 	std::vector<Client>&					getJoinedClients(){return (this-> _joinedClients);}
+
+	void removeClientFromList(std::vector<Client>::iterator person);
 };
 
 #endif

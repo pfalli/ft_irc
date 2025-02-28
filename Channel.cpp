@@ -41,3 +41,12 @@
 	   }
 		_joinedClients.push_back(joiningClient);
    }
+
+
+   	// to remove the client from _joinedClients after KICK command
+	void Channel::removeClientFromList(std::vector<Client>::iterator clientIt) {
+		if (clientIt != _joinedClients.end()) {
+			_joinedClients.erase(clientIt);
+			std::cout << "debug KICK client from _joinedClients: " << clientIt->getUserName() << this->getName() << std::endl;
+		}
+	}

@@ -4,10 +4,12 @@
 // **ERRORS
 # define ERR_NEEDMOREPARAMS(username) ":serverhost 461 " + username + " :Not enough parameters\r\n"
 # define ERR_TOOMANYPARAMS(username) ":serverhost 461 " + username + " :Too many parameters\r\n"
+#define ERR_USERNOTINCHANNEL(client, nick, channel) ":" + client + " " + nick + " " + channel + ":Error (441): They aren't on that channel\r\n"
 
 
 // **REPLIES
 # define RPL_QUIT(nickname, username, reason) ":" + nickname + "!" + username + "@localhost QUIT :Quit: " + reason + "\r\n"
+#define RPL_KICK(kickernick, kickeruser, channelname, username) ":" + kickernick + "!" + kickeruser + "@localhost KICK #" + channelname + " " + username + "\r\n"
 
 /* PRIVMSG */
 # define ERR_NOSUCHNICK(client, nickname) (std::string(RED) + ":" + client + " " + nickname + ":" + "401 Error: No such nick/channel\r\n" + std::string(RESET))
