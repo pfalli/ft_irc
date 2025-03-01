@@ -36,6 +36,8 @@
 
 #include <csignal>
 
+#include <ctime>
+
 #include "NumericMessages.hpp"
 
 #define RESET "\033[0m"

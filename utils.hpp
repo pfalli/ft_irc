@@ -22,7 +22,7 @@ std::string		timeToString(time_t t);
 
 /* join */
 void	join(Server *server, Client *joiningClient, std::string channelTojoin);
-int		isChannleExist(std::vector<Channel>&	channels, Client *joiningClient, std::string tmpChannelTojoin);
+Channel*		isChannelExist(std::vector<Channel>&	channels, std::string channelTojoin);
 
 
 /* privmsg */
@@ -31,5 +31,8 @@ void	signal_handler(int signal);
 void	parseChannelName2(std::string &targetChannel);
 void	sendToChannel(Channel &channel, std::string msg);
 
+
+/* topic */
+void topic(Server *server, const Command &cmd, Client &client);
 
 template <typename T> typename std::vector<T>::iterator		findObject(int toFind, std::vector<T> &array);

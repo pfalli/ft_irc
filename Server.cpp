@@ -307,8 +307,6 @@ typename std::vector<T>::iterator		Server::findObject(int toFind, std::vector<T>
 
 void					Server::_register(Client &client, const Command &cmd, int mode)
 {
-	std::cout << "0#id ::" << client.getNickName() << std::endl;
-	std::cout << "0#socket ::" << client.getSocket() << std::endl;
 	if (cmd.parameter.empty())
 	{
 		const std::string str = ERR_NEEDMOREPARAMS(client.getUserName());
@@ -349,10 +347,12 @@ void Server::parseCommand(const std::string &str, Command &cmd) {
 	std::istringstream iss(str);
 	iss >> cmd.command;	
 	std::string word;
+	cmd.hasMessage = 0;
 	bool messageStarted = false;
 	while (iss >> word) {
 		if (word[0] == ':') {
 			messageStarted = true;
+			cmd.hasMessage = 1;
 			cmd.message = word.substr(1);
 			std::getline(iss, word);
 			cmd.message += word;
@@ -367,6 +367,8 @@ void Server::parseCommand(const std::string &str, Command &cmd) {
 	std::cout << "\n-------------------\nParsed command: " << cmd.command << std::endl;
 	std::cout << "Parameter: " << cmd.parameter << std::endl;
 	std::cout << "Message: " << cmd.message << "\n-------------------\n" << std::endl;
+
+	std::cout << "|" << cmd.message << "|" << std::endl;
 }
 
 

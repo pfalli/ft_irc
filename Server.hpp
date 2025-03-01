@@ -67,9 +67,10 @@
 // };
 
 struct Command {
-    std::string command;
-    std::string parameter;
-    std::string message;
+    std::string	command;
+    std::string	parameter;
+    std::string	message;
+	bool		hasMessage;
 };
 
 

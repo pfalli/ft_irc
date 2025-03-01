@@ -37,6 +37,7 @@ class Channel {
 											~Channel();
 	void									setName(std::string _name){this->_name = _name;}
 	void									joinClient(const Client &client);
+	void									setisTopic(bool num){this->_isTopic = num;}
 	bool									getisTopic()const{return (this->_isTopic);}
 	std::string								getName()const{return (this->_name);}
 	std::string								getTopic()const{return (this->_topic);}
@@ -45,6 +46,8 @@ class Channel {
 	std::vector<Client>&					getJoinedClients(){return (this-> _joinedClients);}
 	void									printAllMembers();
 	std::string 							makeMemberList();
+	void									setTopic(std::string topic, std::string whoSet);
+	void									clearTopic(std::string whoClear);
 
 
 	void removeClientFromList(std::vector<Client>::iterator person);

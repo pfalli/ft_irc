@@ -63,6 +63,7 @@ void Channel::printAllMembers()
 	}
 }
 
+
 std::string Channel::makeMemberList()
 {
 	std::vector<Client> memberList = this->getJoinedClients();
@@ -74,4 +75,20 @@ std::string Channel::makeMemberList()
 		result = result + " " + it->getNickName();
 	}
 	return (result);
+}
+
+void Channel::setTopic(std::string topic, std::string whoSet)
+{
+	this->_topic = topic;
+	this->_isTopic = 1;
+	this->_whoTopicSet = whoSet;
+	this->_whenTopicSet = time(NULL);
+}
+
+void Channel::clearTopic(std::string whoClear)
+{
+	this->_topic = "";
+	this->_isTopic = 0;
+	this->_whoTopicSet = whoClear;
+	this->_whenTopicSet = time(NULL);
 }

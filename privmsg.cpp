@@ -60,15 +60,15 @@ void	splitTargetUsers(std::string tmpTarget, std::vector<std::string> &targets)
 	}
 }
 
-void	parseChannelName2(std::string &targetChannel)
-{
-	size_t	location;
+// void	parseChannelName2(std::string &targetChannel)
+// {
+// 	size_t	location;
 
-	location = targetChannel.find('#');
-	targetChannel = targetChannel.substr(location + 1, targetChannel.length());
+// 	location = targetChannel.find('#');
+// 	targetChannel = targetChannel.substr(location + 1, targetChannel.length());
 
-	std::cout << "targetChannel :" << targetChannel << std::endl;
-}
+// 	std::cout << "targetChannel :" << targetChannel << std::endl;
+// }
 
 void	sendToChannel(Channel &channel, std::string msg)
 {
@@ -96,7 +96,7 @@ void	messageToAllChannel(Server *server, Client *sender, const Command &cmd)
 	std::string	targetChannel = cmd.parameter;
 	std::string	senderNickname = sender->getNickName();
 
-	parseChannelName2(targetChannel);
+	//parseChannelName2(targetChannel);
 	for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); it++)
 	{
 		if (it->getName() == targetChannel)

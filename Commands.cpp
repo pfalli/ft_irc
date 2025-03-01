@@ -32,9 +32,9 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 	else if (cmd.command == "KICK") {
 		handleKick(&client, cmd);
 	}
-	// if (cmd.command == "TOPIC") {
-	// 	topic(client, cmd);
-	// }
+	if (cmd.command == "TOPIC") {
+		topic(this, cmd, client);
+	}
     else if (cmd.command == "INVITE") {
 		//handleInvite(&client, cmd);
 	}
