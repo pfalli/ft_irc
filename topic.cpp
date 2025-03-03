@@ -18,7 +18,6 @@
 void sendTopicMsg(Client &client, Channel *channel, std::string userName)
 {
 	int	fd = client.getSocket();
-
 	if (channel->getisTopic() == 1)
 	{
 		std::string rtlTopic = RPL_TOPIC(userName, channel->getName(), channel->getTopic());
@@ -37,9 +36,8 @@ void sendTopicMsg(Client &client, Channel *channel, std::string userName)
 
 int	isUserInTheChannel(std::string userName, Channel *channel)
 {
-	std::vector<Client> clients;
+	std::vector<Client> &clients = channel->getJoinedClients();
 
-	clients = channel->getJoinedClients();
 	std::vector<Client>::iterator it = clients.begin();
 	for (; it != clients.end(); it++)
 	{
@@ -56,15 +54,16 @@ void topic(Server *server, const Command &cmd, Client &client)
 	Channel *channel;
 
 	channel = isChannelExist(server->getChannelsref(), channelName);
-	if (isUserInTheChannel(userName, channel) == -1)
+	if (channel == 0) // if channel does not exist
+	{
+		std::string noSuchChannel = ERR_NOSUCHCHANNEL(userName, channelName);
+		send (client.getSocket(), noSuchChannel.c_str(), noSuchChannel.length(), 0);
+		return ;
+	}
+	if (isUserInTheChannel(userName, channel) == -1) // check if user in the channel
 	{
 		std::string notToChannel = ERR_NOTONCHANNEL(userName, channelName);
 		send (client.getSocket(), notToChannel.c_str(), notToChannel.length(), 0);
-		return ;
-	}
-	if (channel == 0)
-	{
-		std::string noSuchChannel = ERR_NOSUCHCHANNEL(userName, channelName);
 		return ;
 	}
 	if (cmd.hasMessage == 0)
@@ -72,14 +71,14 @@ void topic(Server *server, const Command &cmd, Client &client)
 		sendTopicMsg(client, channel, userName);
 		return ;
 	}
-	else
+	else 
 	{
 		if (cmd.message.empty())
 			channel->clearTopic(userName);
 		else
-			channel->setTopic(cmd.parameter, userName);
+			channel->setTopic(cmd.message, userName);
 		sendToChannel(*channel, RPL_TOPIC(userName, channelName, channel->getTopic()));
 		sendToChannel(*channel, RPL_TOPICWHOTIME(userName, channelName, channel->getwhoTopicSet(), channel->getwhenTopicSet()));
 		return ;
 	}
-}
+} 

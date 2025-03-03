@@ -6,7 +6,7 @@
 # define ERR_NEEDMOREPARAMS(username) ":serverhost 461 " + username + " :Not enough parameters\r\n"
 # define ERR_TOOMANYPARAMS(username) ":serverhost 461 " + username + " :Too many parameters\r\n"
 # define ERR_USERNOTINCHANNEL(client, nick, channel) ":" + client + " " + nick + " " + channel + ":Error (441): They aren't on that channel\r\n"
-# define ERR_NOTONCHANNEL(client, channel) ":" + client + " #"+ channel + " Error(442):You're not on that channel\r\n"
+# define ERR_NOTONCHANNEL(client, channel) ":" + client + " " + channel + " Error(442):You're not on that channel\r\n"
 # define ERR_USERONCHANNEL(client, nick, channel) ":" + client + " " + nick + " #" + channel + "Error(443):is already on channel\r\n"
 # define ERR_NOTEXIST(target) ":serverhost 461 " + target + " doesn't exist\r\n"
 
@@ -25,7 +25,7 @@
 /* join */
 # define ERR_NEEDMOREPARAMS2(userName, command) (std::string (RED) + userName + " " + command + " :Not enough parameters + std::string(RESET)" + "\r\n")
 # define JOIN_SUCCESS(joiner, channelName) (std::string(BLUE) + joiner + " is joining the channel " + channelName + std::string(RESET) + "\r\n")
-# define RPL_TOPIC(userName, channelName, topic) (std::string(GREEN) + " " + channelName + " :" + topic + std::string(RESET) + "\r\n") 
+# define RPL_TOPIC(userName, channelName, topic) (std::string(GREEN) + channelName + " :" + topic + std::string(RESET) + "\r\n") 
 # define RPL_TOPICWHOTIME(userName, channelName, nickName, time) (std::string(GREEN) + userName + " " + channelName + " " + nickName + " " + timeToString(time) + std::string(RESET) + "\r\n")
 # define RPL_NAMREPLY(nickName, channelName, channel) (nickName + "=" + channelName + " :" + ((channel).makeMemberList()) + "\r\n")
 # define RPL_ENDOFNAMES(nickName, channelName) (nickName + " " + channelName + " :End of /NAMES list \r\n")

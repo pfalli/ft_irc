@@ -34,7 +34,10 @@ Channel*		isChannelExist(std::vector<Channel>&	channels, std::string channelTojo
 {
 	for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); it++)
 	{
-		if (it->getName() == channelTojoin) // if channel exists
+		std::string tmp = it->getName();
+		std::cout << "tmp : "  << tmp<< std::endl;
+		std::cout << "toJoin : "  << channelTojoin << std::endl;
+		if (tmp == channelTojoin) // if channel exists
 			return &(*it);
 	}
 	return (0);
