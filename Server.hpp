@@ -127,7 +127,7 @@ class Server
 	void									existingConnection(std::vector<pollfd>::iterator it);
 	void									newConnection();
 	void									clean();
-
+	bool									existingUsername(std::string username);
 
 	// Piero functions
 	void parseCommand(const std::string &str, Command &cmd);

@@ -132,6 +132,20 @@ bool					Server::existingUser(int clientSocket)
 	return (false);
 }
 
+bool							Server::existingUsername(std::string username)
+{
+	if (!this->clients.size())
+		return false;
+	std::vector<Client>::iterator it = this->clients.begin();
+	while (it != this->clients.end())
+	{
+		if (it->getUserName() == username)
+			return true;
+		it++;
+	}
+	return false;
+}
+
 int	Server::NewClient(int new_socket)
 {
 	std::cout << "New client connected: " << new_socket << std::endl;
@@ -328,11 +342,29 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 	}
 	else if (mode == USERNAME)
 	{
-		client.setUserName(cmd.parameter);
-		client.setUser();
+		if (!client.getPW())
+		{
+			send(client.getSocket(), "Please enter the password first.\n", 34, 0);
+			return ;
+		}
+		if (!existingUsername(cmd.parameter))
+		{
+			client.setUserName(cmd.parameter);
+			client.setUser();
+		}
+		else
+		{
+			send(client.getSocket(), "Username already taken. Please try again with a different user name.\n", 70, 0);
+			return ;
+		}
 	}
 	else if (mode == NICKNAME)
 	{
+		if (!client.getPW())
+		{
+			send(client.getSocket(), "Please enter the password first.\n", 34, 0);
+			return ;
+		}
 		client.setNickName(cmd.parameter);
 		client.setNick();
 	}
