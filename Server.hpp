@@ -73,6 +73,12 @@ struct Command {
 	bool		hasMessage;
 };
 
+struct modeCommand {
+	std::string	channelName;
+	std::string	mode;
+	std::string modeArgument;
+	int			setRemove;
+};
 
 class Server
 {

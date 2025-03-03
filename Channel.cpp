@@ -17,6 +17,8 @@ Channel::Channel()
 	this->_name = "Default";
 	this->_channelCreator = 9999;
 	this->_isTopic = 0;
+	this->_modes = "+";
+	this->_serverCreationTime = time(NULL);
 }
 
 Channel::Channel(std::string name, int channelCreator)
@@ -25,7 +27,10 @@ Channel::Channel(std::string name, int channelCreator)
 	this->_channelCreator = channelCreator;
 	this->_topic = "No topic set";
 	this->_isTopic = 0;
+	this->_modes = "+";
+	this->_serverCreationTime = time(NULL);
 }
+
 
 Channel::~Channel()
 {

@@ -19,7 +19,8 @@ SRC =		main.cpp	\
 			privmsg.cpp \
 			join.cpp \
 			Commands.cpp \
-			topic.cpp
+			topic.cpp \
+			mode.cpp
 
 OBJS_DIR = objs/
 OBJS = $(SRC:.cpp=.o)

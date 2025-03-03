@@ -20,6 +20,9 @@ std::string		requestName(int format, int clientSocket, std::vector<Client> &clie
 std::string		timeToString(time_t t);
 
 
+/* mode */
+void	mode(Server *server, const Command &cmd, Client &client);
+
 /* join */
 void	join(Server *server, Client *joiningClient, std::string channelTojoin);
 Channel*		isChannelExist(std::vector<Channel>&	channels, std::string channelTojoin);

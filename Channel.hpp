@@ -26,7 +26,9 @@ class Channel {
 	std::string								nameClientList;
 	std::string								_topic;
 	time_t									_whenTopicSet;
+	time_t									_serverCreationTime;
 	std::string								_whoTopicSet;
+	std::string								_modes;
 	std::vector<Client>						_joinedClients;
 	int										_channelCreator;
 	bool									_isTopic;
@@ -42,7 +44,9 @@ class Channel {
 	std::string								getName()const{return (this->_name);}
 	std::string								getTopic()const{return (this->_topic);}
 	time_t									getwhenTopicSet()const{return (this->_whenTopicSet);}
+	time_t									getserverCreationTime()const{return (this->_serverCreationTime);}
 	std::string								getwhoTopicSet()const{return (this->_whoTopicSet);}
+	std::string								getModes()const{return (this->_modes);}
 	std::vector<Client>&					getJoinedClients(){return (this-> _joinedClients);}
 	void									printAllMembers();
 	std::string 							makeMemberList();

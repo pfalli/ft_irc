@@ -33,6 +33,10 @@
 /* TOPIC */
 # define RPL_NOTOPIC(userName, channelName) (std::string(GREEN) + userName + " " + channelName + " :No Topic is set" + std::string(RESET) + "\r\n")
 
+/* MODE */
+# define RPL_CHANNELMODEIS(serverName, nickName, channelName, modeString, parameter) (std::string(BLUE) + ": " + serverName + " 324 " + nickName + " " + channelName + " " + modeString + " " + parameter + std::string(RESET) + "\r\n")
+# define RPL_CREATIONTIME(serverName, nickName, channelName, creationTime) (std::string(BLUE) + ": " + serverName + " 329 " + nickName + " " + channelName + " " + timeToString(creationTime) + std::string(RESET) + "\r\n")
+
 # define WELCOME_MESSAGE "Welcome to our server\nTo register, please use the following commands:\nPASS <password>\nUSER <username>\nNICK <nickname>\n"
 
 

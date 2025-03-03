@@ -14,8 +14,9 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 		return ;
 	if (cmd.command == "JOIN") {
 		join(this, &client, cmd.parameter);
-	} else if (cmd.command == "MODE") {
-		std::cout << "Handling MODE: "<< cmd.parameter + cmd.message<< std::endl;
+	}
+	else if (cmd.command == "MODE") {
+		mode(this, cmd, client);
 	} else if (cmd.command == "KICK") {
 		handleKick(&client, cmd);
 	} else if (cmd.command == "PRIVMSG") {
