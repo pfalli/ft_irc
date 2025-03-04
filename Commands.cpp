@@ -37,7 +37,7 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 		topic(this, cmd, client);
 	}
     else if (cmd.command == "INVITE") {
-		//handleInvite(&client, cmd);
+		handleInvite(&client, cmd);
 	}
 	else if (cmd.command == "INFO") {
 		printInfo(&client, cmd);
@@ -72,7 +72,6 @@ void Server::printInfo(Client* handleClient, const Command &cmd) {
 }
 
 // INVITE <nickname> <channel>
-// 2 Issues: 1. when try to invite someone not inside the channel
 void Server::handleInvite(Client* handleClient, const Command &cmd) {
 	std::istringstream iss(cmd.parameter);
 	std::string channelName, targetNick;
@@ -82,7 +81,14 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
-	// channel exist? -ERR_NOSUCHCHANNEL
+	// Check if the first parameter is channel
+	if (channelName[0] != '#') {
+		const std::string str = ERR_INVERTPARAM(channelName);
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+		return;
+	}
+	//---------------------------------------------------
+	// channel exist?
 	std::vector<Channel>::iterator channelIt = channels.begin();
 	while (channelIt != channels.end()) {
 		if (channelIt->getName() == channelName) {
@@ -91,7 +97,7 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 		channelIt++;
 	}
 	if (channelIt == channels.end()) {
-        std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelIt->getName());
+		std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelIt->getName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
@@ -104,10 +110,11 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 		inviterIt++;
 	}
 	if (inviterIt == channelIt->getJoinedClients().end()) {
-        std::string str = ERR_NOTONCHANNEL(handleClient->getNickName(), channelIt->getName());
+		std::string str = ERR_NOTONCHANNEL(handleClient->getNickName(), channelIt->getName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
+	//------------------------------------------------
 	// target already in channel -ERR_USERONCHANNEL
 	std::vector<Client>::iterator targetIt = channelIt->getJoinedClients().begin();
 	while (targetIt != channelIt->getJoinedClients().end()) {
@@ -118,7 +125,7 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 		}
 		targetIt++;
 	}
-	// target exist?
+	// target exist in Server?
 	std::vector<Client>::iterator targetExistIt = this->getClients().begin();
 	while (targetExistIt != this->getClients().end()) {
 		if (targetExistIt->getNickName() == targetNick) {
@@ -131,11 +138,10 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
-	channelIt->getJoinedClients().push_back(*targetIt);
-	std::string str = RPL_INVITING(handleClient->getUserName(), handleClient->getNickName(), targetIt->getNickName(), channelIt->getName());
+	std::cout << "Debug 1" << std::endl;
+	channelIt->getJoinedClients().push_back(*targetExistIt);
+	std::string str = RPL_INVITING(handleClient->getUserName(), handleClient->getNickName(), targetExistIt->getNickName(), channelIt->getName());
 	send(handleClient->getSocket(), str.c_str(), str.length(), 0);
-
-
 }
 
 // + ADD COMMENT
@@ -183,7 +189,7 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 	}
 	// Remove the client from the channel
 	channelIt->removeClientFromList(targetIt);
-	const std::string str = RPL_KICK(handleClient->getNickName(),  handleClient->getUserName(), channelIt->getName(), targetIt->getUserName());
+	const std::string str = RPL_KICK(handleClient->getNickName(),  handleClient->getUserName(), channelIt->getName(), targetIt->getUserName(), cmd.message);
 	send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 }
 
