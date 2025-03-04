@@ -138,14 +138,19 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 
 }
 
-// Issue: 1. when channel and name are inverted!!!
-// ***it doesn't kick multiple clients*** only member of channel can kick clients!!! + ADD COMMENT
+// + ADD COMMENT
 void Server::handleKick(Client* handleClient, const Command &cmd) {
 	std::istringstream iss(cmd.parameter); // cmd.parameter has two words
 	std::string channelName, targetNick;
-	iss >> channelName >> targetNick;	
+	iss >> channelName >> targetNick;
 	if (channelName.empty() || targetNick.empty()) {
 		const std::string str = ERR_NEEDMOREPARAMS(handleClient->getUserName());
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+		return;
+	}
+	// Check if the first parameter is channel
+	if (channelName[0] != '#') {
+		const std::string str = ERR_INVERTPARAM(channelName);
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
@@ -158,10 +163,11 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 		channelIt++;
 	}
 	if (channelIt == channels.end()) {
-        std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelIt->getName());
+		std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelIt->getName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
+	//--------------------------------------------------------------------
 	// Search for the target client in the channel
 	std::vector<Client>::iterator targetIt = channelIt->getJoinedClients().begin();
 	while (targetIt != channelIt->getJoinedClients().end()) {
@@ -171,7 +177,7 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 		targetIt++;
 	}
 	if (targetIt == channelIt->getJoinedClients().end()) {
-        std::string str = ERR_USERNOTINCHANNEL(handleClient->getUserName(), targetIt->getNickName(), channelIt->getName());
+		const std::string str = ERR_USERNOTINCHANNEL(handleClient->getUserName(), targetNick, channelIt->getName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
@@ -179,7 +185,6 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 	channelIt->removeClientFromList(targetIt);
 	const std::string str = RPL_KICK(handleClient->getNickName(),  handleClient->getUserName(), channelIt->getName(), targetIt->getUserName());
 	send(handleClient->getSocket(), str.c_str(), str.length(), 0);
-	// std::cout << "Client " << targetNick << " kicked from channel " << channelName << std::endl;
 }
 
 bool Server::findChannelByName(const std::string& str) {
