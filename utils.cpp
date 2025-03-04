@@ -208,3 +208,13 @@ std::string timeToString(time_t t)
 	oss << t;
 	return oss.str();
 }
+
+int stringToSizeT(std::string str)
+{
+	size_t result;
+	std::istringstream iss(str);
+	iss >> result;
+	if (iss.fail() || !iss.eof() == 0)
+		return (0);
+	return (result);
+}

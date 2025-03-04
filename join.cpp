@@ -61,7 +61,7 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	channel = isChannelExist(channels, channelTojoin);
 	if (channel == 0)
 	{
-		server->createChannel(channelTojoin, joiningClient->getSocket());
+		server->createChannel(*joiningClient, channelTojoin, joiningClient->getSocket());
 		channel = isChannelExist(channels, channelTojoin);
 		channel->joinClient(*joiningClient);
 		// *** print message in case JOIN_FAILURE, because client already exist in channel ***

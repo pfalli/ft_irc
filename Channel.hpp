@@ -29,13 +29,17 @@ class Channel {
 	time_t									_serverCreationTime;
 	std::string								_whoTopicSet;
 	std::string								_modes;
+	std::string								_modeArguments;
+	std::string								_key;
 	std::vector<Client>						_joinedClients;
+	std::vector<Client>						_operators;
+	size_t									_limit;
 	int										_channelCreator;
 	bool									_isTopic;
 
 	public:
 											Channel();
-											Channel(std::string name, int channelCreator);
+											Channel(Client &client, std::string name, int channelCreator);
 											~Channel();
 	void									setName(std::string _name){this->_name = _name;}
 	void									joinClient(const Client &client);
@@ -46,14 +50,23 @@ class Channel {
 	time_t									getwhenTopicSet()const{return (this->_whenTopicSet);}
 	time_t									getserverCreationTime()const{return (this->_serverCreationTime);}
 	std::string								getwhoTopicSet()const{return (this->_whoTopicSet);}
+	std::string								getmodeArguments()const{return (this->_modeArguments);}
 	std::string								getModes()const{return (this->_modes);}
 	std::vector<Client>&					getJoinedClients(){return (this-> _joinedClients);}
 	void									printAllMembers();
 	std::string 							makeMemberList();
 	void									setTopic(std::string topic, std::string whoSet);
 	void									clearTopic(std::string whoClear);
+	void									removeFlag(char flag);
+	void									addFlag(char flag);
+	void									setmodes(std::string modes);
+	int										signPlus(std::string serverName, Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch);
+	int										signMinus(Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch);
+	Client									*isUserInChannel(std::string nickName);
 
-
+	int										modeK(std::vector<std::string> &argumentSet);
+	int										modeO(std::string serverName, Client &client, std::vector<std::string> &argumentSet);
+	int										modeL(std::string serverName, Client &client, std::vector<std::string> &argumentSet);
 	void removeClientFromList(std::vector<Client>::iterator person);
 };
 

@@ -404,7 +404,7 @@ void Server::parseCommand(const std::string &str, Command &cmd) {
 }
 
 
-void	Server::createChannel(std::string name, int creatorFd)
+void	Server::createChannel(Client &client, std::string name, int creatorFd)
 {
 	// // Check if a channel with the given name already exists
 	// for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); ++it)
@@ -413,6 +413,6 @@ void	Server::createChannel(std::string name, int creatorFd)
 	// 		return ;
 	// }
 	// // if does not exist, create a new one and add
-	channels.push_back(Channel(name, creatorFd));
+	channels.push_back(Channel(client, name, creatorFd));
 }
 

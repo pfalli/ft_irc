@@ -6,7 +6,7 @@
 /*   By: junhhong <junhhong@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 12:47:21 by junhhong          #+#    #+#             */
-/*   Updated: 2025/03/03 17:47:18 by junhhong         ###   ########.fr       */
+/*   Updated: 2025/03/04 16:46:10 by junhhong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -40,12 +40,90 @@ int		modeParse(const Command &cmd, modeCommand& parsedModeCommand)
 	return (0);
 }
 
-void	printModes(Server *server, modeCommand &parsedModeCommand, Client &client, Channel &channel)
+void	printModes(std::string serverName, Client &client, Channel &channel, int to_all)
 {
-	std::string channelModeIs = RPL_CHANNELMODEIS(server->getName(), client.getNickName(), channel.getName(), channel.getModes(), parsedModeCommand.modeArgument);
-	std::string creationTime = RPL_CREATIONTIME(server->getName(), client.getNickName(), channel.getName(), channel.getserverCreationTime());
-	send(client.getSocket(), channelModeIs.c_str(), channelModeIs.length(), 0);
-	send(client.getSocket(), creationTime.c_str(), creationTime.length(), 0);
+	std::string channelModeIs = RPL_CHANNELMODEIS(serverName, client.getNickName(), channel.getName(), channel.getModes());
+	std::string creationTime = RPL_CREATIONTIME(serverName, client.getNickName(), channel.getName(), channel.getserverCreationTime());
+	if (to_all == 0)
+	{	
+		send(client.getSocket(), channelModeIs.c_str(), channelModeIs.length(), 0);
+		send(client.getSocket(), creationTime.c_str(), creationTime.length(), 0);
+		return ;
+	}
+	else
+	{
+		sendToChannel(channel, channelModeIs);
+		sendToChannel(channel, creationTime);
+		return ;
+	}
+}
+
+int		is_itkol(char ch)
+{
+	if (ch != 'i' && ch != 't' && ch != 'k' && ch != 'o' && ch != 'l')
+	{
+		return (-1);
+	}
+	return (1);
+}
+
+void	makeArgumentSet(std::vector<std::string> &argumentSet, std::string argument)
+{
+	std::istringstream	iss(argument);
+	std::string			token;
+
+	while (iss >> token)
+	{
+		argumentSet.push_back(token);
+	}
+}
+
+void	applyModeToChannel(Server *server, Client &client, modeCommand &modeCommand, Channel &channel)
+{
+	int	sign = 1;
+	std::string mode = modeCommand.mode;
+	std::string modeArgument = modeCommand.modeArgument;
+	std::string prvModes = channel.getModes();
+	std::string	serverName = server->getName();
+	std::string unknownError = ERR_UMODEUNKNOWNFLAG(serverName, client.getNickName());
+	std::vector <std::string> argumentSet;
+
+	if (mode[0] != '+' && mode[0] != '-')
+	{
+		send(client.getSocket(), unknownError.c_str(), unknownError.length(), 0);
+		return ;
+	}
+	makeArgumentSet(argumentSet, modeArgument);
+	for (size_t i = 0; i < mode.length(); i ++)
+	{
+		char ch = mode[i];
+		if (ch == '-' || ch == '+')
+		{
+			if (ch == '-')
+				sign = -1;
+			if (ch == '+')
+				sign = 1;
+		}
+		else
+		{
+			if (is_itkol(ch) == -1)
+			{
+				std::string msg = ERR_UNKNOWNMODE(serverName, client.getNickName(), ch);
+				send(client.getSocket(), msg.c_str(), msg.length(), 0);
+				channel.setmodes(prvModes);
+				return ;
+			}
+			if (sign == -1)
+				channel.removeFlag(ch);
+			if (sign == 1)
+			{
+				std::vector<Client> clients = server->getClients();
+				channel.signPlus(server->getName(), channel, client, argumentSet, ch);
+			}
+		}
+	}
+	if (prvModes != channel.getModes())
+		printModes(serverName, client, channel, 1);
 }
 
 void	mode(Server *server, const Command &cmd, Client &client)
@@ -65,7 +143,8 @@ void	mode(Server *server, const Command &cmd, Client &client)
 	}
 	if (parsedModeCommand.mode.empty())
 	{
-		printModes(server, parsedModeCommand, client, *channel);
+		printModes(server->getName(), client, *channel, 0);
 		return ;
 	}
+	applyModeToChannel(server, client, parsedModeCommand, *channel);
 }

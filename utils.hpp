@@ -18,6 +18,7 @@ std::string		removeNewline(char *buff);
 bool			verfifyPassword(std::string password, int clientSocket);
 std::string		requestName(int format, int clientSocket, std::vector<Client> &clients);
 std::string		timeToString(time_t t);
+int				stringToSizeT(std::string str);
 
 
 /* mode */

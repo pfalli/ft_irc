@@ -114,7 +114,7 @@ class Server
 	void									setServerShutdown();
 
 	void									_register(Client &client, const Command &cmd, int mode);
-	void									createChannel(std::string name, int creatorFd);
+	void									createChannel(Client &client, std::string name, int creatorFd);
 	void									startServer();
 	void									launch();
 	bool									existingUser(int clientSocket);
