@@ -138,6 +138,7 @@ class Server
 	void handleInvite(Client* handleClient, const Command &cmd);
 	void printInfo(Client* handleClient, const Command &cmd);
 	bool findChannelByName(const std::string& str);
+	void deleteClientInsideChannels(const Client &client);
 
 
 
