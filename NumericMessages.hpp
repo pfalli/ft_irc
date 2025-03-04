@@ -9,11 +9,12 @@
 # define ERR_NOTONCHANNEL(client, channel) ":" + client + " " + channel + " Error(442):You're not on that channel\r\n"
 # define ERR_USERONCHANNEL(client, nick, channel) ":" + client + " " + nick + " #" + channel + "Error(443):is already on channel\r\n"
 # define ERR_NOTEXIST(target) ":serverhost 461 " + target + " doesn't exist\r\n"
+# define ERR_INVERTPARAM(target) ":serverhost 461 '" + target + "' is not a channel. KICK <channel> <client>\r\n"
 
 
 // **REPLIES
 # define RPL_QUIT(nickname, username, reason) ":" + nickname + "!" + username + "@localhost QUIT :Quit: " + reason + "\r\n"
-#define RPL_KICK(kickernick, kickeruser, channelname, username) ":" + kickernick + "!" + kickeruser + "@localhost KICK #" + channelname + " " + username + "\r\n"
+#define RPL_KICK(kickernick, kickeruser, channelname, username, reason) ":" + kickernick + "!" + kickeruser + "@localhost KICK #" + channelname + " " + username + ", reason: " + reason + "\r\n"
 # define RPL_INVITING(client, username, targetnick, channel) ":" + client + "!" + username +"@localhost  INVITE " + targetnick + " to #" + channel + "\r\n"
 
 /* PRIVMSG */

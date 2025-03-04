@@ -132,16 +132,28 @@ bool					Server::existingUser(int clientSocket)
 	return (false);
 }
 
-bool							Server::existingUsername(std::string username)
+bool							Server::existingName(std::string name, int mode)
 {
 	if (!this->clients.size())
 		return false;
 	std::vector<Client>::iterator it = this->clients.begin();
-	while (it != this->clients.end())
+	if (mode == USERNAME)
 	{
-		if (it->getUserName() == username)
-			return true;
-		it++;
+		while (it != this->clients.end())
+		{
+			if (it->getUserName() == name)
+				return true;
+			it++;
+		}
+	}
+	else if (mode == NICKNAME)
+	{
+		while (it != this->clients.end())
+		{
+			if (it->getNickName() == name)
+				return true;
+			it++;
+		}
 	}
 	return false;
 }
@@ -174,6 +186,22 @@ void		Server::deleteClient(std::vector<Client>::iterator client, std::vector<pol
 	close(client->getSocket());
 	this->clients.erase(client);
 	this->poll_fds.erase(poll);
+	// loop if client inside one or multiple channels => delete
+	deleteClientInsideChannels(*client);
+
+}
+
+void	Server::deleteClientInsideChannels(const Client &client) {
+	std::vector<Channel>::iterator channelIt = channels.begin();
+	for (; channelIt != channels.end(); ++channelIt) { // found channel
+		std::vector<Client> &joinedClients = channelIt->getJoinedClients();
+		for (std::vector<Client>::iterator clientIt = joinedClients.begin(); clientIt != joinedClients.end(); ++clientIt) { // found clientIt inside the channel
+			if (clientIt->getSocket() == client.getSocket()) {
+				joinedClients.erase(clientIt);;
+				break; // break and check inside other channels
+			}
+		}
+	}
 }
 
 int									Server::acceptClient()
@@ -347,7 +375,7 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 			send(client.getSocket(), "Please enter the password first.\n", 34, 0);
 			return ;
 		}
-		if (!existingUsername(cmd.parameter))
+		if (!existingName(cmd.parameter, USERNAME))
 		{
 			client.setUserName(cmd.parameter);
 			client.setUser();
@@ -365,8 +393,16 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 			send(client.getSocket(), "Please enter the password first.\n", 34, 0);
 			return ;
 		}
-		client.setNickName(cmd.parameter);
-		client.setNick();
+		if (!existingName(cmd.parameter, NICKNAME))
+		{
+			client.setNickName(cmd.parameter);
+			client.setNick();
+		}
+		else
+		{
+			send(client.getSocket(), "Nickname already taken. Please try again with a different nick name.\n", 70, 0);
+			return ;
+		}
 	}
 	if (client.getNick() == true && client.getPW() == true && client.getUser() == true)
 	{
