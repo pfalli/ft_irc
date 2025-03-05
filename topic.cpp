@@ -36,12 +36,12 @@ void sendTopicMsg(Client &client, Channel *channel, std::string userName)
 
 int	isUserInTheChannel(std::string userName, Channel *channel)
 {
-	std::vector<Client> &clients = channel->getJoinedClients();
+	std::vector<Client *> &clients = channel->getJoinedClients();
 
-	std::vector<Client>::iterator it = clients.begin();
+	std::vector<Client *>::iterator it = clients.begin();
 	for (; it != clients.end(); it++)
 	{
-		if (it->getUserName() == userName)
+		if ((*it)->getUserName() == userName)
 			return (0);
 	}
 	return (-1);

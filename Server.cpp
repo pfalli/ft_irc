@@ -194,9 +194,9 @@ void		Server::deleteClient(std::vector<Client>::iterator client, std::vector<pol
 void	Server::deleteClientInsideChannels(const Client &client) {
 	std::vector<Channel>::iterator channelIt = channels.begin();
 	for (; channelIt != channels.end(); ++channelIt) { // found channel
-		std::vector<Client> &joinedClients = channelIt->getJoinedClients();
-		for (std::vector<Client>::iterator clientIt = joinedClients.begin(); clientIt != joinedClients.end(); ++clientIt) { // found clientIt inside the channel
-			if (clientIt->getSocket() == client.getSocket()) {
+		std::vector<Client *> &joinedClients = channelIt->getJoinedClients();
+		for (std::vector<Client *>::iterator clientIt = joinedClients.begin(); clientIt != joinedClients.end(); ++clientIt) { // found clientIt inside the channel
+			if ((*clientIt)->getSocket() == client.getSocket()) {
 				joinedClients.erase(clientIt);;
 				break; // break and check inside other channels
 			}

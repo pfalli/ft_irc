@@ -31,8 +31,8 @@ class Channel {
 	std::string								_modes;
 	std::string								_modeArguments;
 	std::string								_key;
-	std::vector<Client>						_joinedClients;
-	std::vector<Client>						_operators;
+	std::vector<Client *>					_joinedClients;
+	std::vector<Client *>					_operators;
 	size_t									_limit;
 	int										_channelCreator;
 	bool									_isTopic;
@@ -43,7 +43,7 @@ class Channel {
 											Channel(Client &client, std::string name, int channelCreator);
 											~Channel();
 	void									setName(std::string _name){this->_name = _name;}
-	void									joinClient(const Client &client);
+	void									joinClient(Client &client);
 	void									setisTopic(bool num){this->_isTopic = num;}
 	bool									getisTopic()const{return (this->_isTopic);}
 	std::string								getName()const{return (this->_name);}
@@ -53,7 +53,7 @@ class Channel {
 	std::string								getwhoTopicSet()const{return (this->_whoTopicSet);}
 	std::string								getmodeArguments()const{return (this->_modeArguments);}
 	std::string								getModes()const{return (this->_modes);}
-	std::vector<Client>&					getJoinedClients(){return (this-> _joinedClients);}
+	std::vector<Client *>					&getJoinedClients(){return (this-> _joinedClients);}
 	void									printAllMembers();
 	std::string 							makeMemberList();
 	void									setTopic(std::string topic, std::string whoSet);
@@ -70,7 +70,7 @@ class Channel {
 	int										modeO(std::string serverName, Client &client, std::vector<std::string> &argumentSet);
 	int										modeL(std::string serverName, Client &client, std::vector<std::string> &argumentSet);
 	Client*									hasOper(Client &client);
-	void									removeClientFromList(std::vector<Client>::iterator person);
+	void									removeClientFromList(std::vector<Client *>::iterator person);
 };
 
 #endif
