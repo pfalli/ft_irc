@@ -9,7 +9,7 @@
 # define ERR_NOTONCHANNEL(client, channel) ":" + client + " " + channel + " Error(442):You're not on that channel\r\n"
 # define ERR_USERONCHANNEL(client, nick, channel) ":" + client + " " + nick + " #" + channel + "Error(443):is already on channel\r\n"
 # define ERR_NOTEXIST(target) ":serverhost 461 " + target + " doesn't exist\r\n"
-# define ERR_INVERTPARAM(target) ":serverhost 461 '" + target + "' is not a channel. KICK <channel> <client>\r\n"
+# define ERR_INVERTPARAM(command, target) ":serverhost 461 '" + target + "' is not a channel. "+command+" <channel> <client>\r\n"
 # define ERR_UNKNOWNCOMMAND(username, command) ":serverhost 421 " + username + " " + command + " :Unknown command\r\n"
 
 

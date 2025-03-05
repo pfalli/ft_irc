@@ -203,9 +203,9 @@ void	Server::deleteClientInsideChannels(const Client &client) {
 				while (operatorIt != channelIt->getOperators().end()) {
 					if ((*operatorIt)->getSocket() == client.getSocket()) {
 						channelIt->getOperators().erase(operatorIt);
-						break;
+					} else {
+						++operatorIt;
 					}
-					operatorIt++;
 				}
 				break; // break and check inside other channels
 			}

@@ -75,8 +75,9 @@ class Channel {
 	int										modeO(std::string serverName, Client &client, std::vector<std::string> &argumentSet);
 	int										modeL(std::string serverName, Client &client, std::vector<std::string> &argumentSet);
 	Client*									hasOper(Client &client);
-	void									removeClientFromList(std::vector<Client *>::iterator person);
+	
 	// piero added
+	void									removeClientFromList(std::vector<Client *>::iterator person);
 	std::vector<Client *>&					getOperators(){return (this->_operators);}
 };
 
