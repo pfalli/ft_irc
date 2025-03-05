@@ -170,12 +170,20 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 	}
 	// Search for the channel
 	std::vector<Channel>::iterator channelIt = channels.begin();
-	while (channelIt != channels.end()) {
+	for (size_t i = 0; i < channels.size(); i++)
+	{
 		if (channelIt->getName() == channelName) {
 			break;
 		}
 		channelIt++;
 	}
+	
+	// while (channelIt != channels.end()) {
+	// 	if (channelIt->getName() == channelName) {
+	// 		break;
+	// 	}
+	// 	channelIt++;
+	// }
 	if (channelIt == channels.end()) {
 		std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelIt->getName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
