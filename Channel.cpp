@@ -30,7 +30,7 @@ Channel::Channel()
 
 Channel::Channel(Client &client, std::string name, int channelCreator)
 {
-	this->_operators.push_back(client);
+	this->_operators.push_back(&client);
 	this->_name = name;
 	this->_key = "";
 	this->_channelCreator = channelCreator;
@@ -50,46 +50,46 @@ Channel::~Channel()
 
 /* add joiningClient to _joinedClients in Channel object 
   before add, check if client is already exist in joinedClients list. */
-void Channel::joinClient(const Client &joiningClient) 
+void Channel::joinClient(Client &joiningClient) 
 {
 	std::string clientName = joiningClient.getUserName();
-	for (std::vector<Client>::iterator it = _joinedClients.begin(); it != _joinedClients.end(); ++it)
+	for (std::vector<Client *>::iterator it = _joinedClients.begin(); it != _joinedClients.end(); ++it)
 	{
-		if (it->getUserName() == clientName)
+		if ((* it)->getUserName() == clientName)
 			return; // need announce function for both server & client
 	}
-	_joinedClients.push_back(joiningClient);
+	_joinedClients.push_back(&(joiningClient));
 }
 
 
   	// to remove the client from _joinedClients after KICK command
-void Channel::removeClientFromList(std::vector<Client>::iterator clientIt) {
+void Channel::removeClientFromList(std::vector<Client *>::iterator clientIt) {
 	if (clientIt != _joinedClients.end()) {
 		_joinedClients.erase(clientIt);
-		std::cout << "debug KICK client from _joinedClients: " << clientIt->getUserName() << this->getName() << std::endl;
+		std::cout << "debug KICK client from _joinedClients: " << (*clientIt)->getUserName() << this->getName() << std::endl;
 	}
 }
 
 void Channel::printAllMembers()
 {
-	std::vector<Client>::iterator it;
+	std::vector<Client *>::iterator it;
 
 	for (; it != _joinedClients.end(); ++it)
 	{
-		std::cout << it->getUserName() << " " << std::endl;
+		std::cout << (* it)->getUserName() << " " << std::endl;
 	}
 }
 
 
 std::string Channel::makeMemberList()
 {
-	std::vector<Client> memberList = this->getJoinedClients();
+	std::vector<Client *> memberList = this->getJoinedClients();
 	std::string	result;
 	
-	std::vector<Client>::iterator it = memberList.begin();
+	std::vector<Client *>::iterator it = memberList.begin();
 	for (; it != memberList.end(); it++)
 	{
-		result = result + " " + it->getNickName();
+		result = result + " " + (* it)->getNickName();
 	}
 	return (result);
 }
@@ -104,12 +104,12 @@ void Channel::setTopic(std::string topic, std::string whoSet)
 
 Client	*Channel::isUserInChannel(std::string nickName)
 {
-	std::vector<Client>::iterator it = _joinedClients.begin();
+	std::vector<Client *>::iterator it = _joinedClients.begin();
 
 	for (; it != _joinedClients.end(); ++it)
 	{
-		if (it->getNickName() == nickName)
-			return &(*it);
+		if ((* it)->getNickName() == nickName)
+			return (*it);
 	}
 	return (NULL);
 }
@@ -179,7 +179,7 @@ int	Channel::modeO(std::string serverName, Client &client, std::vector<std::stri
 		send(client.getSocket(), notInChannel.c_str(), notInChannel.size(), 0);
 		return (-1);
 	}
-	this->_operators.push_back(*toBeOperator);
+	this->_operators.push_back(toBeOperator);
 	argumentSet.erase(argumentSet.begin());
 	return (0);
 }
@@ -242,12 +242,12 @@ int Channel::signPlus(std::string serverName, Channel &channel, Client &client, 
 
 Client*	Channel::hasOper(Client &client)
 {
-	std::vector<Client>::iterator it = this->_operators.begin();
+	std::vector<Client *>::iterator it = this->_operators.begin();
 
 	for (; it != this->_operators.end(); it ++)
 	{
-		if (client.getNickName() == it->getNickName())
-			return &(*it);
+		if (client.getNickName() == (* it)->getNickName())
+			return (*it);
 	}
 	return (NULL);
 }

@@ -72,10 +72,10 @@ void	splitTargetUsers(std::string tmpTarget, std::vector<std::string> &targets)
 
 void	sendToChannel(Channel &channel, std::string msg)
 {
-	std::vector<Client> clients = channel.getJoinedClients();
-	for (std::vector<Client>::iterator it = clients.begin(); it != clients.end() ;it++)
+	std::vector<Client *> clients = channel.getJoinedClients();
+	for (std::vector<Client *>::iterator it = clients.begin(); it != clients.end() ;it++)
 	{
-		send(it->getSocket(), msg.c_str(), msg.length(), 0);
+		send((*it)->getSocket(), msg.c_str(), msg.length(), 0);
 	}
 }
 

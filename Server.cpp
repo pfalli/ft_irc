@@ -186,7 +186,7 @@ void		Server::deleteClient(std::vector<Client>::iterator client, std::vector<pol
 	close(client->getSocket());
 	this->clients.erase(client);
 	this->poll_fds.erase(poll);
-	// loop if client inside one or multiple channels => delete
+	// if client inside one or multiple channels => delete
 	deleteClientInsideChannels(*client);
 
 }
@@ -194,10 +194,19 @@ void		Server::deleteClient(std::vector<Client>::iterator client, std::vector<pol
 void	Server::deleteClientInsideChannels(const Client &client) {
 	std::vector<Channel>::iterator channelIt = channels.begin();
 	for (; channelIt != channels.end(); ++channelIt) { // found channel
-		std::vector<Client> &joinedClients = channelIt->getJoinedClients();
-		for (std::vector<Client>::iterator clientIt = joinedClients.begin(); clientIt != joinedClients.end(); ++clientIt) { // found clientIt inside the channel
-			if (clientIt->getSocket() == client.getSocket()) {
-				joinedClients.erase(clientIt);;
+		std::vector<Client *> &joinedClients = channelIt->getJoinedClients(); // take reference to joinedClients
+		for (std::vector<Client *>::iterator clientIt = joinedClients.begin(); clientIt != joinedClients.end(); ++clientIt) { // found client inside the channel
+			if ((*clientIt)->getSocket() == client.getSocket()) {
+				joinedClients.erase(clientIt);
+				// if client is OPERATOR, delete from operators container
+				std::vector<Client *>::iterator operatorIt = channelIt->getOperators().begin();
+				while (operatorIt != channelIt->getOperators().end()) {
+					if ((*operatorIt)->getSocket() == client.getSocket()) {
+						channelIt->getOperators().erase(operatorIt);
+						break;
+					}
+					operatorIt++;
+				}
 				break; // break and check inside other channels
 			}
 		}
@@ -440,6 +449,7 @@ void Server::parseCommand(const std::string &str, Command &cmd) {
 }
 
 
+
 void	Server::createChannel(Client &client, std::string name, int creatorFd)
 {
 	// // Check if a channel with the given name already exists
@@ -449,6 +459,7 @@ void	Server::createChannel(Client &client, std::string name, int creatorFd)
 	// 		return ;
 	// }
 	// // if does not exist, create a new one and add
+	
 	channels.push_back(Channel(client, name, creatorFd));
 }
 

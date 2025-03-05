@@ -43,6 +43,13 @@ Channel*		isChannelExist(std::vector<Channel>&	channels, std::string channelTojo
 	return (0);
 }
 
+static bool	name_check(std::string str)
+{
+	if (str[0] != '#')
+		return false;
+	return true;
+}
+
 void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 {
 	std::vector<Channel>&	channels = server->getChannelsref();
@@ -58,6 +65,10 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	// 	send(joiningClient->getSocket(), hashMsg.c_str(), hashMsg.length(), 0);
 	// 	return ;
 	// }
+
+	if (!name_check(channelTojoin))
+			channelTojoin = "#" + channelTojoin;
+
 	channel = isChannelExist(channels, channelTojoin);
 	if (channel == 0)
 	{
