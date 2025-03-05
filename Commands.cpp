@@ -97,7 +97,7 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 		channelIt++;
 	}
 	if (channelIt == channels.end()) {
-		std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelIt->getName());
+		std::string str = ERR_NOSUCHCHANNEL(this->name, handleClient->getUserName(), channelIt->getName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
@@ -169,7 +169,7 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 		channelIt++;
 	}
 	if (channelIt == channels.end()) {
-		std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelIt->getName());
+		std::string str = ERR_NOSUCHCHANNEL(this->name, handleClient->getUserName(), channelIt->getName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}

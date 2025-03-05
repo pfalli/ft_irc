@@ -82,8 +82,13 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	}
 	else
 	{
+		if (channel->getInviteOnly() == 1)
+		{
+			std::string joinOnly = ERR_INVITEONLYCHAN(server->getName(), username, channel->getName());
+			send(joiningClient->getSocket(), joinOnly.c_str(), joinOnly.length(), 0);
+			return ;
+		}
 		channel->joinClient(*joiningClient);
-
 		std::string welcomemsg = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin);
 		sendToChannel(*channel, welcomemsg);
 		if (channel->getisTopic() == 1)

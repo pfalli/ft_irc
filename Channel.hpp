@@ -37,6 +37,7 @@ class Channel {
 	int										_channelCreator;
 	bool									_isTopic;
 	bool									_inviteOnly;
+	bool									_isTopicProtected;
 
 	public:
 											Channel();
@@ -65,7 +66,11 @@ class Channel {
 	int										signMinus(Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch);
 	Client									*isUserInChannel(std::string nickName);
 	size_t									getLimit()const{return (this->_limit);}
+	bool									getInviteOnly()const{return (this->_inviteOnly);}
+	bool									getTopicProtected()const{return (this->_isTopicProtected);}
 
+	void									modeT();
+	void									modeI();
 	int										modeK(std::vector<std::string> &argumentSet);
 	int										modeO(std::string serverName, Client &client, std::vector<std::string> &argumentSet);
 	int										modeL(std::string serverName, Client &client, std::vector<std::string> &argumentSet);

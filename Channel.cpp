@@ -25,6 +25,7 @@ Channel::Channel()
 	this->_serverCreationTime = time(NULL);
 	this->_limit = 9999;
 	this->_inviteOnly = 0;
+	this->_isTopicProtected = 0;
 }
 
 Channel::Channel(Client &client, std::string name, int channelCreator)
@@ -39,7 +40,9 @@ Channel::Channel(Client &client, std::string name, int channelCreator)
 	this->_limit = 9999;
 	this->_serverCreationTime = time(NULL);
 	this->_inviteOnly = 0;
+	this->_isTopicProtected = 0;
 }
+
 
 Channel::~Channel()
 {
@@ -201,6 +204,16 @@ int	Channel::modeL(std::string serverName, Client &client, std::vector<std::stri
 	return (0);
 }
 
+void	Channel::modeI()
+{
+	this->_inviteOnly = 1;
+}
+
+void	Channel::modeT()
+{
+	this->_isTopicProtected = 1;
+}
+
 int Channel::signPlus(std::string serverName, Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch)
 {
 	if (ch == 'k')
@@ -218,6 +231,10 @@ int Channel::signPlus(std::string serverName, Channel &channel, Client &client, 
 		if (modeL(serverName, client, argumentSet) == -1)
 			return (3);
 	}
+	if (ch == 'i')
+		modeI();
+	if (ch == 't')
+		modeT();
 	if (ch != 'o')
 		channel.addFlag(ch);
 	return (0);
@@ -234,7 +251,6 @@ Client*	Channel::hasOper(Client &client)
 	}
 	return (NULL);
 }
-
 
 // int	Channel::signMinus(Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch)
 // {
