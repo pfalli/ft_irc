@@ -50,7 +50,7 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	//std::string				tmpChannelTojoin;
 	Channel					*channel;
 
-	username = joiningClient->getUserName();
+	username = joiningClient->getNickName();
 	//tmpChannelTojoin = channelTojoin;
 	// if (removeHash(tmpChannelTojoin) != 0)
 	// {
