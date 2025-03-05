@@ -43,7 +43,7 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 		printInfo(&client, cmd);
 	}
 	else {
-		std::cout << "Command not found: " << cmd.command << std::endl;
+		
 	}
 }
 
@@ -68,6 +68,14 @@ void Server::printInfo(Client* handleClient, const Command &cmd) {
 		listIt++;
 	}
 	send(handleClient->getSocket(), clientList.c_str(), clientList.length(), 0);
+	// print _operators
+	std::vector<Client>::iterator opIt = channelIt->getOperators().begin();
+	std::string opList = "Operators in channel " + cmd.parameter + ":\n";
+	while (opIt != channelIt->getOperators().end()) {
+		opList += " => " + opIt->getNickName() + "\n";
+		opIt++;
+	}
+	send(handleClient->getSocket(), opList.c_str(), opList.length(), 0);
 
 }
 
