@@ -122,16 +122,16 @@ bool validFormat(int format, std::string str)
 
 std::string removeNewline(char *buff) // ***good one***
 {
-    std::string _new = "";
+	std::string _new = "";
 
-    for (size_t i = 0; i < strlen(buff); i++)
-    {
-        if (buff[i] != '\n' && buff[i] != '\r')
-        {
-            _new += buff[i];
-        }
-    }
-    return _new;
+	for (size_t i = 0; i < strlen(buff); i++)
+	{
+		if (buff[i] != '\n' && buff[i] != '\r')
+		{
+			_new += buff[i];
+		}
+	}
+	return _new;
 }
 
 
@@ -209,12 +209,19 @@ std::string timeToString(time_t t)
 	return oss.str();
 }
 
-int stringToSizeT(std::string str)
+size_t stringToSizeT(std::string &str)
 {
 	size_t result;
 	std::istringstream iss(str);
 	iss >> result;
-	if (iss.fail() || !iss.eof() == 0)
+	if (iss.fail() || !iss.eof())
 		return (0);
 	return (result);
+}
+
+std::string convertSizeTtoString(size_t number)
+{
+	std::stringstream ss;
+	ss << number;
+	return ss.str();
 }

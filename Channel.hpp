@@ -36,6 +36,7 @@ class Channel {
 	size_t									_limit;
 	int										_channelCreator;
 	bool									_isTopic;
+	bool									_inviteOnly;
 
 	public:
 											Channel();
@@ -63,11 +64,13 @@ class Channel {
 	int										signPlus(std::string serverName, Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch);
 	int										signMinus(Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch);
 	Client									*isUserInChannel(std::string nickName);
+	size_t									getLimit()const{return (this->_limit);}
 
 	int										modeK(std::vector<std::string> &argumentSet);
 	int										modeO(std::string serverName, Client &client, std::vector<std::string> &argumentSet);
 	int										modeL(std::string serverName, Client &client, std::vector<std::string> &argumentSet);
-	void removeClientFromList(std::vector<Client>::iterator person);
+	Client*									hasOper(Client &client);
+	void									removeClientFromList(std::vector<Client>::iterator person);
 };
 
 #endif

@@ -6,7 +6,7 @@
 /*   By: junhhong <junhhong@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 12:47:21 by junhhong          #+#    #+#             */
-/*   Updated: 2025/03/04 16:46:10 by junhhong         ###   ########.fr       */
+/*   Updated: 2025/03/05 11:01:21 by junhhong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,14 @@ int		modeParse(const Command &cmd, modeCommand& parsedModeCommand)
 
 void	printModes(std::string serverName, Client &client, Channel &channel, int to_all)
 {
-	std::string channelModeIs = RPL_CHANNELMODEIS(serverName, client.getNickName(), channel.getName(), channel.getModes());
+	std::string channelModeIs;
+	if (channel.getModes().find('l') != std::string::npos)
+	{
+		std::string modeString = channel.getModes() + " " + convertSizeTtoString(channel.getLimit());
+		channelModeIs = RPL_CHANNELMODEIS(serverName, client.getNickName(), channel.getName(), modeString);
+	}
+	else
+		channelModeIs = RPL_CHANNELMODEIS(serverName, client.getNickName(), channel.getName(), channel.getModes());
 	std::string creationTime = RPL_CREATIONTIME(serverName, client.getNickName(), channel.getName(), channel.getserverCreationTime());
 	if (to_all == 0)
 	{	
@@ -73,9 +80,7 @@ void	makeArgumentSet(std::vector<std::string> &argumentSet, std::string argument
 	std::string			token;
 
 	while (iss >> token)
-	{
 		argumentSet.push_back(token);
-	}
 }
 
 void	applyModeToChannel(Server *server, Client &client, modeCommand &modeCommand, Channel &channel)
@@ -145,6 +150,15 @@ void	mode(Server *server, const Command &cmd, Client &client)
 	{
 		printModes(server->getName(), client, *channel, 0);
 		return ;
+	}
+	else
+	{
+		if (channel->hasOper(client) == NULL)
+		{
+			std::string noPrivs = ERR_CHANOPRIVSNEEDED(server->getName(), client.getNickName(), channel->getName());
+			send (client.getSocket(), noPrivs.c_str(), noPrivs.length(), 0);
+			return ;
+		}
 	}
 	applyModeToChannel(server, client, parsedModeCommand, *channel);
 }

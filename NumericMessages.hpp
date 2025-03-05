@@ -39,6 +39,7 @@
 # define RPL_CREATIONTIME(serverName, nickName, channelName, creationTime) (std::string(BLUE) + ":" + serverName + " 329 " + nickName + " " + channelName + " " + timeToString(creationTime) + std::string(RESET) + "\r\n")
 # define ERR_UMODEUNKNOWNFLAG(serverName, nickName) (std::string(RED) + ":" + serverName + " Error(501) " + nickName + " :unknown MODE flag" + std::string(RESET) + "\r\n")
 # define ERR_UNKNOWNMODE(serverName, nickName, char) (std::string(RED) + ":" + serverName + " Error(472) " + nickName + " " + char + " :is unknown mode char to me" + std::string(RESET) + "\r\n") 
+# define ERR_CHANOPRIVSNEEDED(serverName, nickName, channelName) (std::string(RED) + ":" + serverName + " Error(485) " + nickName + " " + channelName + " :You're not channel operator"+ std::string(RESET) + "\r\n")
 
 # define WELCOME_MESSAGE "Welcome to our server\nTo register, please use the following commands:\nPASS <password>\nUSER <username>\nNICK <nickname>\n"
 

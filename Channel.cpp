@@ -24,6 +24,7 @@ Channel::Channel()
 	this->_modes = "+";
 	this->_serverCreationTime = time(NULL);
 	this->_limit = 9999;
+	this->_inviteOnly = 0;
 }
 
 Channel::Channel(Client &client, std::string name, int channelCreator)
@@ -37,6 +38,7 @@ Channel::Channel(Client &client, std::string name, int channelCreator)
 	this->_modes = "+";
 	this->_limit = 9999;
 	this->_serverCreationTime = time(NULL);
+	this->_inviteOnly = 0;
 }
 
 Channel::~Channel()
@@ -195,6 +197,7 @@ int	Channel::modeL(std::string serverName, Client &client, std::vector<std::stri
 		return (2);
 	}
 	_limit = result;
+	argumentSet.erase(argumentSet.begin());
 	return (0);
 }
 
@@ -208,18 +211,30 @@ int Channel::signPlus(std::string serverName, Channel &channel, Client &client, 
 	if (ch == 'o')
 	{
 		if (modeO(serverName, client, argumentSet) == -1)
-		{
 			return (2);
-		}
 	}
 	if (ch == 'l')
 	{
 		if (modeL(serverName, client, argumentSet) == -1)
 			return (3);
 	}
-	channel.addFlag(ch);
+	if (ch != 'o')
+		channel.addFlag(ch);
 	return (0);
 }
+
+Client*	Channel::hasOper(Client &client)
+{
+	std::vector<Client>::iterator it = this->_operators.begin();
+
+	for (; it != this->_operators.end(); it ++)
+	{
+		if (client.getNickName() == it->getNickName())
+			return &(*it);
+	}
+	return (NULL);
+}
+
 
 // int	Channel::signMinus(Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch)
 // {
