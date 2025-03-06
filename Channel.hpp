@@ -36,15 +36,15 @@ class Channel {
 	size_t									_limit;
 	int										_channelCreator;
 	bool									_isTopic;
-	bool									_inviteOnly;
-	bool									_isTopicProtected;
+	//bool									_inviteOnly;
+	//bool									_isTopicProtected;
 
 	public:
 											Channel();
 											Channel(Client &client, std::string name, int channelCreator);
 											~Channel();
 	void									setName(std::string _name){this->_name = _name;}
-	void									joinClient(Client &client);
+	int										joinClient(Client &client);
 	void									setisTopic(bool num){this->_isTopic = num;}
 	bool									getisTopic()const{return (this->_isTopic);}
 	std::string								getName()const{return (this->_name);}
@@ -64,13 +64,16 @@ class Channel {
 	void									setmodes(std::string modes);
 	int										signPlus(std::string serverName, Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch);
 	int										signMinus(Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch);
-	Client									*isUserInChannel(std::string nickName);
+	Client*									isUserInChannel(std::string nickName);
 	size_t									getLimit()const{return (this->_limit);}
-	bool									getInviteOnly()const{return (this->_inviteOnly);}
-	bool									getTopicProtected()const{return (this->_isTopicProtected);}
+	//bool									getInviteOnly()const{return (this->_inviteOnly);}
+	//bool									getTopicProtected()const{return (this->_isTopicProtected);}
+	int										isUserInTheChannel2(std::string userName);
+	std::string								getKey()const{return (this->_key);}
+	int										flagCheck(char flag);
 
-	void									modeT();
-	void									modeI();
+	//void									modeT();
+	//void									modeI();
 	int										modeK(std::vector<std::string> &argumentSet);
 	int										modeO(std::string serverName, Client &client, std::vector<std::string> &argumentSet);
 	int										modeL(std::string serverName, Client &client, std::vector<std::string> &argumentSet);

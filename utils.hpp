@@ -26,7 +26,7 @@ void	mode(Server *server, const Command &cmd, Client &client);
 
 /* join */
 void	join(Server *server, Client *joiningClient, std::string channelTojoin);
-Channel*		isChannelExist(std::vector<Channel>&	channels, std::string channelTojoin);
+//Channel*		isChannelExist(std::vector<Channel>&	channels, std::string channelTojoin);
 
 
 /* privmsg */

@@ -165,13 +165,10 @@ int	Server::NewClient(int new_socket)
 	Client _new(new_socket);
 	// _new.setUserName(requestName(USERNAME, clientSocket));
 	// _new.setNickName(requestName(NICKNAME, clientSocket));
-	std::cout << "new_socket#0 : " << new_socket << std::endl;
 	this->clients.push_back(_new);
 	// Add new client to poll lists
 	pollfd client_fd;
 	client_fd.fd = new_socket;
-	std::cout << "new_socket#1 : " << new_socket << std::endl;
-	std::cout << "clients_socket#1 : " << _new.getSocket() << std::endl;
 	client_fd.events = POLLIN;  // Monitor for incoming data
 	poll_fds.push_back(client_fd);
 	std::string str = WELCOME_MESSAGE;
