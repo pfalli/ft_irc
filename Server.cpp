@@ -200,9 +200,9 @@ void	Server::deleteClientInsideChannels(const Client &client) {
 				while (operatorIt != channelIt->getOperators().end()) {
 					if ((*operatorIt)->getSocket() == client.getSocket()) {
 						channelIt->getOperators().erase(operatorIt);
-						break;
+					} else {
+						++operatorIt;
 					}
-					operatorIt++;
 				}
 				break; // break and check inside other channels
 			}
@@ -383,6 +383,11 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		}
 		if (!existingName(cmd.parameter, USERNAME))
 		{
+			if (!validFormat(USERNAME, cmd.parameter))
+			{
+				send(client.getSocket(), "Wrong Format. please try again.\n", 33, 0);
+				return ;
+			}
 			client.setUserName(cmd.parameter);
 			client.setUser();
 		}
@@ -396,11 +401,21 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 	{
 		if (!client.getPW())
 		{
-			send(client.getSocket(), "Please enter the password first.\n", 34, 0);
+			send(client.getSocket(), "Please enter the password and username first.\n", 47, 0);
+			return ;
+		}
+		else if (client.getUserName() == "default")
+		{
+			send(client.getSocket(), "Please set your username first.\n", 33, 0);
 			return ;
 		}
 		if (!existingName(cmd.parameter, NICKNAME))
 		{
+			if (!validFormat(NICKNAME, cmd.parameter))
+			{
+				send(client.getSocket(), "Wrong Format. please try again.\n", 33, 0);
+				return ;
+			}
 			client.setNickName(cmd.parameter);
 			client.setNick();
 		}

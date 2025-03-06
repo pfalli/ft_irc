@@ -225,3 +225,17 @@ std::string convertSizeTtoString(size_t number)
 	ss << number;
 	return ss.str();
 }
+
+bool isOperator(Channel &channel, Client *client)
+{
+	std::vector<Client *>::iterator it = channel.getOperators().begin();
+	for (size_t i = 0; i < channel.getOperators().size(); i++)
+	{
+		if ((*it)->getNickName() == client->getNickName())
+			break ;
+		it++;
+	}
+	if (it == channel.getOperators().end())
+		return false;
+	return true ;
+}
