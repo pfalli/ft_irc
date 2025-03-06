@@ -386,6 +386,11 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		}
 		if (!existingName(cmd.parameter, USERNAME))
 		{
+			if (!validFormat(USERNAME, cmd.parameter))
+			{
+				send(client.getSocket(), "Wrong Format. please try again.\n", 33, 0);
+				return ;
+			}
 			client.setUserName(cmd.parameter);
 			client.setUser();
 		}
@@ -409,6 +414,11 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		}
 		if (!existingName(cmd.parameter, NICKNAME))
 		{
+			if (!validFormat(NICKNAME, cmd.parameter))
+			{
+				send(client.getSocket(), "Wrong Format. please try again.\n", 33, 0);
+				return ;
+			}
 			client.setNickName(cmd.parameter);
 			client.setNick();
 		}

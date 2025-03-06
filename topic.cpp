@@ -74,6 +74,12 @@ void topic(Server *server, const Command &cmd, Client &client)
 		send (client.getSocket(), noSuchChannel.c_str(), noSuchChannel.length(), 0);
 		return ;
 	}
+	if (!isOperator(*channel, &client))
+	{
+		std::string error = "Error: you need to be operator to do this.\n";
+		send(client.getSocket(), error.c_str(), error.length(), 0);
+		return ;
+	}
 	if (isUserInTheChannel(nickName, channel) == -1) // check if user in the channel
 	{
 		std::string notToChannel = ERR_NOTONCHANNEL(nickName, channelName);

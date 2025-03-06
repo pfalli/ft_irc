@@ -43,12 +43,12 @@ Channel*		isChannelExist(std::vector<Channel>&	channels, std::string channelTojo
 	return (0);
 }
 
-static bool	name_check(std::string str)
-{
-	if (str[0] != '#')
-		return false;
-	return true;
-}
+// static bool	name_check(std::string str)
+// {
+// 	if (str[0] != '#')
+// 		return false;
+// 	return true;
+// }
 
 void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 {
@@ -66,9 +66,19 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	// 	return ;
 	// }
 
-	if (!name_check(channelTojoin))
-			channelTojoin = "#" + channelTojoin;	//automatic # added to avoid crash of KICK
-
+	// if (!name_check(channelTojoin))
+	// 		channelTojoin = "#" + channelTojoin;	//automatic # added to avoid crash of KICK
+	if (channelTojoin.empty())
+	{
+		std::string str = ERR_NEEDMOREPARAMS(joiningClient->getUserName());
+		send(joiningClient->getSocket(), str.c_str(), str.length(), 0);
+		return ;
+	}
+	if (channelTojoin[0] != '#')
+	{
+		send(joiningClient->getSocket(), "Error: channel name needs to include # at beginning\n", 53, 0);
+		return ;
+	}
 	channel = isChannelExist(channels, channelTojoin);
 	if (channel == 0)
 	{

@@ -64,7 +64,7 @@ void Server::giveHelp(const Client &client)
 	KICK #<channel name> <nickname of member> to kick someone from a channel\n\
 	PRIVMSG <nickname> or #<channel name> : <message> to send a private message to a user or channel\n\
 	TOPIC #<channel name> : <topic> to set the topic of a channel\n\
-	QUIT to leave our server\n";
+	QUIT <reason> to leave our server\n";
 	send(client.getSocket(), message.c_str(), strlen(message.c_str()), 0);
 }
 
@@ -173,6 +173,12 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
+	if (!isOperator(*channelIt, handleClient))
+	{
+		std::string error = "Error: you need to be operator to do this.\n";
+		send(handleClient->getSocket(), error.c_str(), error.length(), 0);
+		return ;
+	}
 	// is inviter on channel? -ERR_NOTONCHANNEL
 	std::vector<Client *>::iterator inviterIt = channelIt->getJoinedClients().begin();
 	while (inviterIt != channelIt->getJoinedClients().end()) {
@@ -210,17 +216,22 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
-	std::cout << "Debug 1" << std::endl;
 	channelIt->getJoinedClients().push_back(&(*targetExistIt));
 	std::string str = RPL_INVITING(handleClient->getUserName(), handleClient->getNickName(), targetExistIt->getNickName(), channelIt->getName());
 	send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+	std::string msg = "You were added to " + channelIt->getName() + " by " + handleClient->getNickName() + "\r\n";
+	send(targetExistIt->getSocket(), msg.c_str(), msg.length(), 0);
+	std::string temp = JOIN_SUCCESS(targetExistIt->getNickName(), channelIt->getName());
+	sendToChannel(*channelIt, temp);
+
 }
 
-// + ADD COMMENT
 void Server::handleKick(Client* handleClient, const Command &cmd) {
 	std::istringstream iss(cmd.parameter); // cmd.parameter has two words
 	std::string channelName, targetNick;
 	iss >> channelName >> targetNick;
+
+
 	if (channelName.empty() || targetNick.empty()) {
 		const std::string str = ERR_NEEDMOREPARAMS(handleClient->getUserName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
@@ -245,6 +256,12 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 		std::string str = ERR_NOSUCHCHANNEL(this->name, handleClient->getUserName(), channelIt->getName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
+	}
+	if (!isOperator(*channelIt, handleClient))
+	{
+		std::string error = "Error: you need to be operator to do this.\n";
+		send(handleClient->getSocket(), error.c_str(), error.length(), 0);
+		return ;
 	}
 	//--------------------------------------------------------------------
 	// Search for the target client in the channel

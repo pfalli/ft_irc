@@ -7,16 +7,16 @@
 # define ERR_TOOMANYPARAMS(username) ":serverhost 461 " + username + " :Too many parameters\r\n"
 # define ERR_USERNOTINCHANNEL(client, nick, channel) ":" + client + " " + nick + " " + channel + ":Error (441): They aren't on that channel\r\n"
 # define ERR_NOTONCHANNEL(client, channel) ":" + client + " " + channel + " Error(442):You're not on that channel\r\n"
-# define ERR_USERONCHANNEL(client, nick, channel) ":" + client + " " + nick + " #" + channel + "Error(443):is already on channel\r\n"
+# define ERR_USERONCHANNEL(client, nick, channel) ":" + client + " " + nick + " " + channel + "Error(443):is already on channel\r\n"
 # define ERR_NOTEXIST(target) ":serverhost 461 " + target + " doesn't exist\r\n"
-# define ERR_INVERTPARAM(command, target) ":serverhost 461 '" + target + "' is not a channel. "+command+" <channel> <client>\r\n"
+# define ERR_INVERTPARAM(command, target) ":serverhost 461 '" + target + "' is not a channel. "+command+" <client> <channel> \r\n"
 # define ERR_UNKNOWNCOMMAND(username, command) ":serverhost 421 " + username + " " + command + " :Unknown command\r\n"
 
 
 // **REPLIES
 # define RPL_QUIT(nickname, username, reason) ":" + nickname + "!" + username + "@localhost QUIT :Quit: " + reason + "\r\n"
-#define RPL_KICK(kickernick, kickeruser, channelname, username, reason) ":" + kickernick + "!" + kickeruser + "@localhost KICK #" + channelname + " " + username + ", reason: " + reason + "\r\n"
-# define RPL_INVITING(client, username, targetnick, channel) ":" + client + "!" + username +"@localhost  INVITE " + targetnick + " to #" + channel + "\r\n"
+#define RPL_KICK(kickernick, kickeruser, channelname, username, reason) ":" + kickernick + "!" + kickeruser + "@localhost KICK " + channelname + " " + username + ", reason: " + reason + "\r\n"
+# define RPL_INVITING(client, username, targetnick, channel) ":" + client + "!" + username +"@localhost  INVITE " + targetnick + " to " + channel + "\r\n"
 # define RPL_NOTICE(client, username, targetnick, message) ":" + client + "!" + username + "@localhost NOTICE " + targetnick + " :" + message + "\r\n"
 
 /* PRIVMSG */
