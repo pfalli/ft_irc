@@ -67,7 +67,7 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	// }
 
 	if (!name_check(channelTojoin))
-			channelTojoin = "#" + channelTojoin;
+			channelTojoin = "#" + channelTojoin;	//automatic # added to avoid crash of KICK
 
 	channel = isChannelExist(channels, channelTojoin);
 	if (channel == 0)
