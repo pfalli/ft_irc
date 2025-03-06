@@ -14,7 +14,7 @@
 
 
 // **REPLIES
-# define RPL_QUIT(nickname, username, reason) ":" + nickname + "!" + username + "@localhost QUIT :Quit: " + reason + "\r\n"
+# define RPL_QUIT(username, reason) "" + username + " /Quit reason: " + reason + "\r\n"
 #define RPL_KICK(kickernick, kickeruser, channelname, username, reason) ":" + kickernick + "!" + kickeruser + "@localhost KICK " + channelname + " " + username + ", reason: " + reason + "\r\n"
 # define RPL_INVITING(client, username, targetnick, channel) ":" + client + "!" + username +"@localhost  INVITE " + targetnick + " to " + channel + "\r\n"
 # define RPL_NOTICE(client, username, targetnick, message) ":" + client + "!" + username + "@localhost NOTICE " + targetnick + " :" + message + "\r\n"

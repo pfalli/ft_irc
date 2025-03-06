@@ -315,8 +315,12 @@ void Server::handleQuit(Client *handleClient, const Command &cmd) {
 		std::cerr << "Debug: Poll not found for QUIT command" << std::endl;
 		return;
 	}
-	std::string str = RPL_QUIT(clientIt->getNickName(), clientIt->getUserName(), cmd.message);
-	send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+	// send to all people inside all channels
+	std::string str = RPL_QUIT(clientIt->getNickName(), cmd.message);
+	std::vector<Channel>::iterator channelIt = channels.begin();
+	for (size_t i = 0; i < channels.size(); i++) {
+		sendToChannel(*channelIt, str);
+	}
 	deleteClient(clientIt, pollIt);
 }
 
