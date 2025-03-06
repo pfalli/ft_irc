@@ -50,13 +50,11 @@ void sendTopicMsg(Client &client, Channel *channel, std::string userName)
 int	topicProtected(Server *server, Channel *channel, Client &client)
 {
 	std::string errmsg = ERR_CHANOPRIVSNEEDED(server->getName(), client.getNickName(), channel->getName());
-	if (channel->flagCheck('t') == 1)
+	if (channel->flagCheck('t') == 0)
 	{
 		if (channel->hasOper(client) != NULL)
 			return (1);
 	}
-	else
-		return (1);
 	send(client.getSocket(), errmsg.c_str(), errmsg.length(), 0);
 	return (-1);
 }
@@ -69,6 +67,13 @@ void topic(Server *server, const Command &cmd, Client &client)
 
 	channel = server->isChannelExist2(channelName);
 	std::cout << "#0" << std::endl;
+	// IF CHANNEL IS FLAGED "T" AND USER IS NOT OPERATOR => RETURN
+	// if (channel->flagCheck('t') == 1 && channel->hasOper(client) == NULL)
+	// {
+	// 	std::string noPrivs = ERR_CHANOPRIVSNEEDED(server->getName(), nickName, channelName);
+	// 	send(client.getSocket(), noPrivs.c_str(), noPrivs.length(), 0);
+	// 	return ;
+	// }
 	if (channel == 0) // if channel does not exist
 	{
 		std::string noSuchChannel = ERR_NOSUCHCHANNEL(server->getName(), nickName, channelName);

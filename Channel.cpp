@@ -99,18 +99,23 @@ void Channel::setTopic(std::string topic, std::string whoSet)
 	this->_whenTopicSet = time(NULL);
 }
 
-Client	*Channel::isUserInChannel(std::string nickName)
+Client *Channel::isUserInChannel(std::string nickName)
 {
-	std::vector<Client *>::iterator it = _joinedClients.begin();
-	std::cout << "#52" << std::endl;
-	for (; it != _joinedClients.end(); it++)
-	{
-		std::cout << "current NickName" << (*it)->getNickName() << std::endl;
-		if ((*it)->getNickName() == nickName)
-			return (*it);
-	}
-	std::cout << "#53" << std::endl;
-	return (NULL);
+    std::vector<Client *>::iterator it = _joinedClients.begin();
+    std::cout << "#52" << std::endl;
+    for (; it != _joinedClients.end(); it++)
+    {
+        if (*it == NULL)
+        {
+            std::cerr << "Error: Null client pointer in _joinedClients" << std::endl;
+            continue;
+        }
+        std::cout << "current NickName: " << (*it)->getNickName() << std::endl;
+        if ((*it)->getNickName() == nickName)
+            return (*it);
+    }
+    std::cout << "#53" << std::endl;
+    return NULL;
 }
 
 void Channel::clearTopic(std::string whoClear)
@@ -261,7 +266,10 @@ Client*	Channel::hasOper(Client &client)
 	for (; it != this->_operators.end(); it ++)
 	{
 		if (client.getNickName() == (* it)->getNickName())
+		{
+			std::cout << "nickName#11 :" << (* it)->getNickName() << std::endl;
 			return (*it);
+		}
 	}
 	return (NULL);
 }

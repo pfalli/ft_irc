@@ -28,7 +28,7 @@ class Channel {
 	time_t									_whenTopicSet;
 	time_t									_serverCreationTime;
 	std::string								_whoTopicSet;
-	std::string								_modes;
+	std::string								_modes; // +i
 	std::string								_modeArguments;
 	std::string								_key;
 	std::vector<Client *>					_joinedClients;

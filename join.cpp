@@ -72,6 +72,7 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	channel = server->isChannelExist2(channelTojoin);
 	if (channel == 0)
 	{
+		std::cout << "#0" << std::endl;
 		server->createChannel(*joiningClient, channelTojoin, joiningClient->getSocket());
 		channel = server->isChannelExist2(channelTojoin);
 		channel->joinClient(*joiningClient);
@@ -90,6 +91,7 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		std::string endOfMsg = RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin);
 		send(joiningClient->getSocket(), memberInfo.c_str(), memberInfo.length(), 0);
 		send(joiningClient->getSocket(), endOfMsg.c_str(), endOfMsg.length(), 0);
+		std::cout << "#1" << std::endl;
 	}
 	else
 	{
