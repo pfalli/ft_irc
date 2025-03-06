@@ -203,9 +203,9 @@ void	Server::deleteClientInsideChannels(const Client &client) {
 				while (operatorIt != channelIt->getOperators().end()) {
 					if ((*operatorIt)->getSocket() == client.getSocket()) {
 						channelIt->getOperators().erase(operatorIt);
-						break;
+					} else {
+						++operatorIt;
 					}
-					operatorIt++;
 				}
 				break; // break and check inside other channels
 			}
@@ -463,3 +463,13 @@ void	Server::createChannel(Client &client, std::string name, int creatorFd)
 	channels.push_back(Channel(client, name, creatorFd));
 }
 
+Channel*	Server::isChannelExist2(std::string channelTojoin)
+{
+	for (std::vector<Channel>::iterator it = this->channels.begin(); it != this->channels.end(); it++)
+	{
+		std::string tmp = it->getName();
+		if (tmp == channelTojoin)
+			return &(*it);
+	}
+	return (0);
+}

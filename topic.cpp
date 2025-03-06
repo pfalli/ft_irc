@@ -47,38 +47,54 @@ int	isUserInTheChannel(std::string userName, Channel *channel)
 	return (-1);
 }
 
+int	topicProtected(Server *server, Channel *channel, Client &client)
+{
+	std::string errmsg = ERR_CHANOPRIVSNEEDED(server->getName(), client.getNickName(), channel->getName());
+	if (channel->getTopicProtected() == 1)
+	{
+		if (channel->hasOper(client) != NULL)
+			return (1);
+	}
+	else
+		return (1);
+	send(client.getSocket(), errmsg.c_str(), errmsg.length(), 0);
+	return (-1);
+}
+
 void topic(Server *server, const Command &cmd, Client &client)
 {
 	std::string	channelName = cmd.parameter;
-	std::string	userName = client.getUserName();
+	std::string	nickName = client.getNickName();
 	Channel *channel;
 
-	channel = isChannelExist(server->getChannelsref(), channelName);
+	channel = server->isChannelExist2(channelName);
 	if (channel == 0) // if channel does not exist
 	{
-		std::string noSuchChannel = ERR_NOSUCHCHANNEL(userName, channelName);
+		std::string noSuchChannel = ERR_NOSUCHCHANNEL(server->getName(), nickName, channelName);
 		send (client.getSocket(), noSuchChannel.c_str(), noSuchChannel.length(), 0);
 		return ;
 	}
-	if (isUserInTheChannel(userName, channel) == -1) // check if user in the channel
+	if (isUserInTheChannel(nickName, channel) == -1) // check if user in the channel
 	{
-		std::string notToChannel = ERR_NOTONCHANNEL(userName, channelName);
+		std::string notToChannel = ERR_NOTONCHANNEL(nickName, channelName);
 		send (client.getSocket(), notToChannel.c_str(), notToChannel.length(), 0);
 		return ;
 	}
 	if (cmd.hasMessage == 0)
 	{
-		sendTopicMsg(client, channel, userName);
+		sendTopicMsg(client, channel, nickName);
 		return ;
 	}
-	else 
+	else
 	{
+		if (topicProtected(server, channel, client) == -1)
+			return ;
 		if (cmd.message.empty())
-			channel->clearTopic(userName);
+			channel->clearTopic(nickName);
 		else
-			channel->setTopic(cmd.message, userName);
-		sendToChannel(*channel, RPL_TOPIC(userName, channelName, channel->getTopic()));
-		sendToChannel(*channel, RPL_TOPICWHOTIME(userName, channelName, channel->getwhoTopicSet(), channel->getwhenTopicSet()));
+			channel->setTopic(cmd.message, nickName);
+		sendToChannel(*channel, RPL_TOPIC(nickName, channelName, channel->getTopic()));
+		sendToChannel(*channel, RPL_TOPICWHOTIME(nickName, channelName, channel->getwhoTopicSet(), channel->getwhenTopicSet()));
 		return ;
 	}
 } 

@@ -42,8 +42,54 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 	else if (cmd.command == "INFO") {
 		printInfo(&client, cmd);
 	}
+	else if (cmd.command == "NOTICE") {
+		handleNotice(&client, cmd);
+	}
 	else {
 		
+	}
+}
+
+void Server::handleNotice(Client *handleClient, const Command &cmd) {
+	std::istringstream iss(cmd.parameter);
+	std::string target;
+	iss >> target;
+	if (target.empty() || cmd.message.empty()) {
+		std::string str = ERR_NEEDMOREPARAMS(handleClient->getUserName());
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+		return;
+	}	
+	if (target[0] == '#') {
+		// Target is a channel
+		Channel *channel = isChannelExist2(target);
+		if (channel == NULL) {
+			std::string str = ERR_NOSUCHCHANNEL(this->name, handleClient->getUserName(), target);
+			send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+			return;
+		}
+		if (channel->isUserInChannel(handleClient->getNickName()) == NULL) {
+			std::string str = ERR_NOTONCHANNEL(handleClient->getNickName(), target);
+			send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+			return;
+		}
+		std::string str = RPL_NOTICE(handleClient->getNickName(), handleClient->getUserName(), target, cmd.message);
+		sendToChannel(*channel, str);
+	} else {
+		// Target exist?
+		std::vector<Client>::iterator targetIt = clients.begin();
+		while (targetIt != clients.end()) {
+			if (targetIt->getNickName() == target) {
+				break;
+			}
+			targetIt++;
+		}
+		if (targetIt == clients.end()) {
+			std::string str = ERR_NOSUCHNICK(handleClient->getNickName(), target);
+			send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+			return;
+		}
+		std::string str = RPL_NOTICE(handleClient->getNickName(), handleClient->getUserName(), target, cmd.message);
+		send(targetIt->getSocket(), str.c_str(), str.length(), 0);
 	}
 }
 
@@ -91,7 +137,7 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 	}
 	// Check if the first parameter is channel
 	if (channelName[0] != '#') {
-		const std::string str = ERR_INVERTPARAM(channelName);
+		const std::string str = ERR_INVERTPARAM(cmd.command, channelName);
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
@@ -105,7 +151,7 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 		channelIt++;
 	}
 	if (channelIt == channels.end()) {
-		std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelIt->getName());
+		std::string str = ERR_NOSUCHCHANNEL(this->name, handleClient->getUserName(), channelIt->getName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
@@ -164,7 +210,7 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 	}
 	// Check if the first parameter is channel
 	if (channelName[0] != '#') {
-		const std::string str = ERR_INVERTPARAM(channelName);
+		const std::string str = ERR_INVERTPARAM(cmd.command, channelName);
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
@@ -177,15 +223,8 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 		}
 		channelIt++;
 	}
-	
-	// while (channelIt != channels.end()) {
-	// 	if (channelIt->getName() == channelName) {
-	// 		break;
-	// 	}
-	// 	channelIt++;
-	// }
 	if (channelIt == channels.end()) {
-		std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelIt->getName());
+		std::string str = ERR_NOSUCHCHANNEL(this->name, handleClient->getUserName(), channelIt->getName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
@@ -205,6 +244,15 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 	}
 	// Remove the client from the channel
 	channelIt->removeClientFromList(targetIt);
+	// Remove Client from operator list
+	std::vector<Client *>::iterator operatorIt = channelIt->getOperators().begin();
+	while (operatorIt != channelIt->getOperators().end()) {
+		if ((*operatorIt)->getNickName() == targetNick) {
+			operatorIt = channelIt->getOperators().erase(operatorIt);
+		} else {
+			++operatorIt;
+		}
+	}
 	const std::string str = RPL_KICK(handleClient->getNickName(),  handleClient->getUserName(), channelIt->getName(), (*targetIt)->getUserName(), cmd.message);
 	send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 }
@@ -239,8 +287,8 @@ void Server::handleQuit(Client *handleClient, const Command &cmd) {
 
 
 void Server::handlePing(Client *handleClient, const Command &cmd) {
-    if (cmd.parameter.empty()) {
-        std::string str = ERR_NEEDMOREPARAMS(handleClient->getUserName());
+	if (cmd.parameter.empty()) {
+		std::string str = ERR_NEEDMOREPARAMS(handleClient->getUserName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return ;
 	}

@@ -128,6 +128,7 @@ class Server
 	void									newConnection();
 	void									clean();
 	bool									existingName(std::string name, int mode);
+	Channel*								isChannelExist2(std::string channelTojoin);
 	// Piero functions
 	void parseCommand(const std::string &str, Command &cmd);
 	void handleCommand(const Command &cmd, Client &client);
@@ -139,6 +140,7 @@ class Server
 	void printInfo(Client* handleClient, const Command &cmd);
 	bool findChannelByName(const std::string& str);
 	void deleteClientInsideChannels(const Client &client);
+	void handleNotice(Client *handleClient, const Command &cmd);
 
 
 

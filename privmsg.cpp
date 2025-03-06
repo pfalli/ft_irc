@@ -106,7 +106,7 @@ void	messageToAllChannel(Server *server, Client *sender, const Command &cmd)
 			return ;
 		}
 	}
-	std::string errmsg = ERR_NOSUCHCHANNEL(sender->getUserName(), targetChannel);
+	std::string errmsg = ERR_NOSUCHCHANNEL(server->getName(), sender->getUserName(), targetChannel);
 	send(sender->getSocket(), errmsg.c_str(), errmsg.length(), 0);
 }
 
@@ -118,11 +118,25 @@ void	privmsg(Server *server, Client *sender, const Command &cmd)
 	splitTargetUsers(cmd.parameter, targets);
 	if (cmd.parameter[0] == '#')
 	{
+		Channel *channel;
+		channel = server->isChannelExist2(cmd.parameter);
+		if (channel == NULL)
+		{
+			std::string errmsg = ERR_NOSUCHCHANNEL(server->getName(), sender->getUserName(), cmd.parameter);
+			send(sender->getSocket(), errmsg.c_str(), errmsg.length(), 0);
+			return ;
+		}
+		else
+		{
+			if (channel->isUserInChannel(sender->getNickName()) == NULL)
+			{
+				std::string notOnChannel = ERR_NOTONCHANNEL(server->getName(), channel->getName());
+				send(sender->getSocket(), notOnChannel.c_str(), notOnChannel.length(), 0);
+				return ;
+			}
+		}
 		messageToAllChannel(server, sender, cmd);
 		return ;
 	}
 	messageToTargets(sender, server, targets, cmd.message);
-	for (size_t i = 0; i < targets.size(); ++i) {
-		std::cout << "User " << i << ": " << targets[i] << std::endl;
-	}
 }
