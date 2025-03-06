@@ -45,7 +45,7 @@
 # define ERR_CHANOPRIVSNEEDED(serverName, nickName, channelName) (std::string(RED) + ":" + serverName + " Error(485) " + nickName + " " + channelName + " :You're not channel operator"+ std::string(RESET) + "\r\n")
 
 # define WELCOME_MESSAGE "\n\
-	Hello, welcome to out server!\n\
+	Hello, welcome to our server!\n\
 	To properly use our server you have to register.\n\
 	Please use the following commands in order :)\n\n\
 	PASS <password> to register with the server password\n\
