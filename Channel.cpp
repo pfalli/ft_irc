@@ -103,7 +103,7 @@ Client	*Channel::isUserInChannel(std::string nickName)
 {
 	std::vector<Client *>::iterator it = _joinedClients.begin();
 	std::cout << "#52" << std::endl;
-	for (; it != _joinedClients.end(); ++it)
+	for (; it != _joinedClients.end(); it++)
 	{
 		std::cout << "current NickName" << (*it)->getNickName() << std::endl;
 		if ((*it)->getNickName() == nickName)
