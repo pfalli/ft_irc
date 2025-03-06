@@ -14,7 +14,7 @@
 
 
 // **REPLIES
-# define RPL_QUIT(nickname, username, reason) ":" + nickname + "!" + username + "@localhost QUIT :Quit: " + reason + "\r\n"
+# define RPL_QUIT(username, reason) "" + username + " /Quit reason: " + reason + "\r\n"
 #define RPL_KICK(kickernick, kickeruser, channelname, username, reason) ":" + kickernick + "!" + kickeruser + "@localhost KICK " + channelname + " " + username + ", reason: " + reason + "\r\n"
 # define RPL_INVITING(client, username, targetnick, channel) ":" + client + "!" + username +"@localhost  INVITE " + targetnick + " to " + channel + "\r\n"
 # define RPL_NOTICE(client, username, targetnick, message) ":" + client + "!" + username + "@localhost NOTICE " + targetnick + " :" + message + "\r\n"
@@ -45,7 +45,7 @@
 # define ERR_CHANOPRIVSNEEDED(serverName, nickName, channelName) (std::string(RED) + ":" + serverName + " Error(485) " + nickName + " " + channelName + " :You're not channel operator"+ std::string(RESET) + "\r\n")
 
 # define WELCOME_MESSAGE "\n\
-	Hello, welcome to out server!\n\
+	Hello, welcome to our server!\n\
 	To properly use our server you have to register.\n\
 	Please use the following commands in order :)\n\n\
 	PASS <password> to register with the server password\n\
