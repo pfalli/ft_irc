@@ -33,6 +33,7 @@
 # define RPL_NAMREPLY(nickName, channelName, channel) (nickName + "=" + channelName + " :" + ((channel).makeMemberList()) + "\r\n")
 # define RPL_ENDOFNAMES(nickName, channelName) (nickName + " " + channelName + " :End of /NAMES list \r\n")
 # define ERR_INVITEONLYCHAN(serverName, nickName, channelName)(std::string(RED) + serverName + ": Error(473) " + nickName + " " + channelName + " :Cannot join channel (+i)" + std::string(RESET) + "\r\n")
+# define ERR_BADCHANNELKEY(serverName, nickName, channelName)(std::string(RED) + serverName + ": Error(475) " + nickName + " " + channelName + " :Cannot join channel (+k)" + std::string(RESET) + "\r\n")
 /* TOPIC */
 # define RPL_NOTOPIC(userName, channelName) (std::string(GREEN) + userName + " " + channelName + " :No Topic is set" + std::string(RESET) + "\r\n")
 

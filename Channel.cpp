@@ -24,8 +24,8 @@ Channel::Channel()
 	this->_modes = "+";
 	this->_serverCreationTime = time(NULL);
 	this->_limit = 9999;
-	this->_inviteOnly = 0;
-	this->_isTopicProtected = 0;
+	// /this->_inviteOnly = 0;
+	//this->_isTopicProtected = 0;
 }
 
 Channel::Channel(Client &client, std::string name, int channelCreator)
@@ -39,8 +39,8 @@ Channel::Channel(Client &client, std::string name, int channelCreator)
 	this->_modes = "+";
 	this->_limit = 9999;
 	this->_serverCreationTime = time(NULL);
-	this->_inviteOnly = 0;
-	this->_isTopicProtected = 0;
+	//this->_inviteOnly = 0;
+	//this->_isTopicProtected = 0;
 }
 
 
@@ -50,15 +50,12 @@ Channel::~Channel()
 
 /* add joiningClient to _joinedClients in Channel object 
   before add, check if client is already exist in joinedClients list. */
-void Channel::joinClient(Client &joiningClient) 
+int Channel::joinClient(Client &joiningClient) 
 {
-	std::string clientName = joiningClient.getUserName();
-	for (std::vector<Client *>::iterator it = _joinedClients.begin(); it != _joinedClients.end(); ++it)
-	{
-		if ((* it)->getUserName() == clientName)
-			return; // need announce function for both server & client
-	}
+	if (isUserInChannel(joiningClient.getNickName()) != 0)
+		return (-1);
 	_joinedClients.push_back(&(joiningClient));
+	return (0);
 }
 
 
@@ -105,12 +102,14 @@ void Channel::setTopic(std::string topic, std::string whoSet)
 Client	*Channel::isUserInChannel(std::string nickName)
 {
 	std::vector<Client *>::iterator it = _joinedClients.begin();
-
+	std::cout << "#52" << std::endl;
 	for (; it != _joinedClients.end(); ++it)
 	{
-		if ((* it)->getNickName() == nickName)
+		std::cout << "current NickName" << (*it)->getNickName() << std::endl;
+		if ((*it)->getNickName() == nickName)
 			return (*it);
 	}
+	std::cout << "#53" << std::endl;
 	return (NULL);
 }
 
@@ -158,11 +157,13 @@ int	Channel::modeK(std::vector<std::string> &argumentSet)
 {
 	std::string	argument;
 
+	std::cout << "#13" << std::endl;
 	if (argumentSet.empty() || argumentSet[0].empty())
 		return (-1);
 	argument = argumentSet[0];
 	_key = argument;
 	argumentSet.erase(argumentSet.begin());
+	std::cout << "#14key:" << _key << std::endl;
 	return (0);
 }
 
@@ -204,20 +205,22 @@ int	Channel::modeL(std::string serverName, Client &client, std::vector<std::stri
 	return (0);
 }
 
-void	Channel::modeI()
-{
-	this->_inviteOnly = 1;
-}
+// void	Channel::modeI()
+// {
+// 	this->_inviteOnly = 1;
+// }
 
-void	Channel::modeT()
-{
-	this->_isTopicProtected = 1;
-}
+// void	Channel::modeT()
+// {
+// 	this->_isTopicProtected = 1;
+// }
+
 
 int Channel::signPlus(std::string serverName, Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch)
 {
 	if (ch == 'k')
 	{
+		std::cout << "#12" << std::endl;
 		if (modeK(argumentSet) == -1)
 			return (1);
 	}
@@ -231,12 +234,23 @@ int Channel::signPlus(std::string serverName, Channel &channel, Client &client, 
 		if (modeL(serverName, client, argumentSet) == -1)
 			return (3);
 	}
-	if (ch == 'i')
-		modeI();
-	if (ch == 't')
-		modeT();
+	// if (ch == 'i')
+	// 	modeI();
+	// if (ch == 't')
+	// 	modeT();
 	if (ch != 'o')
 		channel.addFlag(ch);
+	return (0);
+}
+
+int		Channel::flagCheck(char ch)
+{
+	size_t	pos;
+	std::cout << "#24" << std::endl;
+	pos = this->_modes.find(ch);
+	if (pos == std::string::npos)
+		return (-1);
+	std::cout << "#25" << std::endl;
 	return (0);
 }
 

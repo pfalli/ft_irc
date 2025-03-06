@@ -6,7 +6,7 @@
 /*   By: junhhong <junhhong@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/03 12:47:21 by junhhong          #+#    #+#             */
-/*   Updated: 2025/03/05 14:55:56 by junhhong         ###   ########.fr       */
+/*   Updated: 2025/03/05 18:24:58 by junhhong         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -139,17 +139,11 @@ void	mode(Server *server, const Command &cmd, Client &client)
 	std::string	userName = client.getUserName();
 	
 	modeParse(cmd, parsedModeCommand);
-	channel = isChannelExist(server->getChannelsref(), parsedModeCommand.channelName);
+	channel = server->isChannelExist2(parsedModeCommand.channelName);
 	if (channel == 0) // if channel does not exist
 	{
 		std::string noSuchChannel = ERR_NOSUCHCHANNEL(server->getName(), userName, channelName);
 		send (client.getSocket(), noSuchChannel.c_str(), noSuchChannel.length(), 0);
-		return ;
-	}
-	if (!isOperator(*channel, &client))
-	{
-		std::string error = "Error: you need to be operator to do this.\n";
-		send(client.getSocket(), error.c_str(), error.length(), 0);
 		return ;
 	}
 	if (parsedModeCommand.mode.empty())

@@ -35,6 +35,7 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 	else if (cmd.command == "KICK") {
 		handleKick(&client, cmd);
 	}
+	std::cout << "#33" << std::endl;
 	if (cmd.command == "TOPIC") {
 		topic(this, cmd, client);
 	}
