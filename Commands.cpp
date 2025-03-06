@@ -42,8 +42,54 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 	else if (cmd.command == "INFO") {
 		printInfo(&client, cmd);
 	}
+	else if (cmd.command == "NOTICE") {
+		handleNotice(&client, cmd);
+	}
 	else {
 		
+	}
+}
+
+void Server::handleNotice(Client *handleClient, const Command &cmd) {
+	std::istringstream iss(cmd.parameter);
+	std::string target;
+	iss >> target;
+	if (target.empty() || cmd.message.empty()) {
+		std::string str = ERR_NEEDMOREPARAMS(handleClient->getUserName());
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+		return;
+	}	
+	if (target[0] == '#') {
+		// Target is a channel
+		Channel *channel = isChannelExist2(target);
+		if (channel == NULL) {
+			std::string str = ERR_NOSUCHCHANNEL(this->name, handleClient->getUserName(), target);
+			send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+			return;
+		}
+		if (channel->isUserInChannel(handleClient->getNickName()) == NULL) {
+			std::string str = ERR_NOTONCHANNEL(handleClient->getNickName(), target);
+			send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+			return;
+		}
+		std::string str = RPL_NOTICE(handleClient->getNickName(), handleClient->getUserName(), target, cmd.message);
+		sendToChannel(*channel, str);
+	} else {
+		// Target exist?
+		std::vector<Client>::iterator targetIt = clients.begin();
+		while (targetIt != clients.end()) {
+			if (targetIt->getNickName() == target) {
+				break;
+			}
+			targetIt++;
+		}
+		if (targetIt == clients.end()) {
+			std::string str = ERR_NOSUCHNICK(handleClient->getNickName(), target);
+			send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+			return;
+		}
+		std::string str = RPL_NOTICE(handleClient->getNickName(), handleClient->getUserName(), target, cmd.message);
+		send(targetIt->getSocket(), str.c_str(), str.length(), 0);
 	}
 }
 
@@ -177,13 +223,6 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 		}
 		channelIt++;
 	}
-	
-	// while (channelIt != channels.end()) {
-	// 	if (channelIt->getName() == channelName) {
-	// 		break;
-	// 	}
-	// 	channelIt++;
-	// }
 	if (channelIt == channels.end()) {
 		std::string str = ERR_NOSUCHCHANNEL(this->name, handleClient->getUserName(), channelIt->getName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);

@@ -17,6 +17,7 @@
 # define RPL_QUIT(nickname, username, reason) ":" + nickname + "!" + username + "@localhost QUIT :Quit: " + reason + "\r\n"
 #define RPL_KICK(kickernick, kickeruser, channelname, username, reason) ":" + kickernick + "!" + kickeruser + "@localhost KICK #" + channelname + " " + username + ", reason: " + reason + "\r\n"
 # define RPL_INVITING(client, username, targetnick, channel) ":" + client + "!" + username +"@localhost  INVITE " + targetnick + " to #" + channel + "\r\n"
+# define RPL_NOTICE(client, username, targetnick, message) ":" + client + "!" + username + "@localhost NOTICE " + targetnick + " :" + message + "\r\n"
 
 /* PRIVMSG */
 # define ERR_NOSUCHNICK(client, nickname) ( std::string(RED) + ":" + client + " " + nickname + ":" + "401 Error: No such nick/channel" + std::string(RESET) + "\r\n" )
