@@ -43,7 +43,14 @@
 # define ERR_UNKNOWNMODE(serverName, nickName, char) (std::string(RED) + ":" + serverName + " Error(472) " + nickName + " " + char + " :is unknown mode char to me" + std::string(RESET) + "\r\n") 
 # define ERR_CHANOPRIVSNEEDED(serverName, nickName, channelName) (std::string(RED) + ":" + serverName + " Error(485) " + nickName + " " + channelName + " :You're not channel operator"+ std::string(RESET) + "\r\n")
 
-# define WELCOME_MESSAGE "Welcome to our server\nTo register, please use the following commands:\nPASS <password>\nUSER <username>\nNICK <nickname>\n"
+# define WELCOME_MESSAGE "\n\
+	Hello, welcome to out server!\n\
+	To properly use our server you have to register.\n\
+	Please use the following commands in order :)\n\n\
+	PASS <password> to register with the server password\n\
+	USER <username> to set Username\n\
+	NICK <nickname> to set Nickname\n\n\
+	If you want to know what commands you can use just type HELP\n\n";
 
 
 #endif

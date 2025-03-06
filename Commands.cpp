@@ -62,7 +62,7 @@ void Server::giveHelp(const Client &client)
 	Give the password, your username and nickname first.\n\n\
 	MODE <channel name> <flag>\n\
 	KICK #<channel name> <nickname of member> to kick someone from a channel\n\
-	PRIVMSG <nickname> to start a private chat\n\
+	PRIVMSG <nickname> or #<channel name> : <message> to send a private message to a user or channel\n\
 	TOPIC <channel to set the topic of a channel\n\
 	QUIT to leave our server\n";
 	send(client.getSocket(), message.c_str(), strlen(message.c_str()), 0);
