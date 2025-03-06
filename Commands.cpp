@@ -4,7 +4,9 @@
 #include "NumericMessages.hpp"
 
 void Server::handleCommand(const Command &cmd, Client &client) {
-	if (cmd.command == "PASS")
+	if (cmd.command == "HELP")
+		giveHelp(client);
+	else if (cmd.command == "PASS")
 		_register(client, cmd, PASSWORD);
 	else if (cmd.command == "USER")
 		_register(client, cmd, USERNAME);
@@ -45,9 +47,25 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 	else if (cmd.command == "NOTICE") {
 		handleNotice(&client, cmd);
 	}
-	else {
-		
-	}
+	else
+	{}
+}
+
+void Server::giveHelp(const Client &client)
+{
+	std::string message;
+	message =	"Commands: (the first three you have to do in that oder)\n\
+	PASS <password> to register with the server password\n\
+	USER <username> to set Username\n\
+	NICK <nickname> to set Nickname\n\n\
+	To use the following you have to register first!\n\
+	Give the password, your username and nickname first.\n\n\
+	MODE <channel name> <flag>\n\
+	KICK #<channel name> <nickname of member> to kick someone from a channel\n\
+	PRIVMSG <nickname> to start a private chat\n\
+	TOPIC <channel to set the topic of a channel\n\
+	QUIT to leave our server\n";
+	send(client.getSocket(), message.c_str(), strlen(message.c_str()), 0);
 }
 
 void Server::handleNotice(Client *handleClient, const Command &cmd) {

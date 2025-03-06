@@ -399,7 +399,12 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 	{
 		if (!client.getPW())
 		{
-			send(client.getSocket(), "Please enter the password first.\n", 34, 0);
+			send(client.getSocket(), "Please enter the password and username first.\n", 47, 0);
+			return ;
+		}
+		else if (client.getUserName() == "default")
+		{
+			send(client.getSocket(), "Please set your username first.\n", 33, 0);
 			return ;
 		}
 		if (!existingName(cmd.parameter, NICKNAME))
