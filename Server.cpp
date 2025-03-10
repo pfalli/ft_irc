@@ -42,7 +42,11 @@ Server::Server(): \
 	this->serverSocket = socket(AF_INET, SOCK_STREAM, 0);
 	if (serverSocket == -1) {
 		throw SeverExceptionSocket();
+	
 	}
+	clients.reserve(500); // Here reserve 500
+	channels.reserve(500);
+
 	this->serverAddress.sin_family = AF_INET;
 	this->serverAddress.sin_port = htons(port);
 	this->serverAddress.sin_addr.s_addr = INADDR_ANY;
@@ -63,6 +67,9 @@ Server::Server(std::string _password, int _port, std::string _name): \
 	this->serverAddress.sin_port = htons(port);
 	this->serverAddress.sin_addr.s_addr = INADDR_ANY;
 	inet_pton(AF_INET, "0.0.0.0", &serverAddress.sin_addr); 	 // convert a number to an array of integers: 127.0.0.1
+
+	clients.reserve(500); // Here reserve 500
+	channels.reserve(500);
 
 	signal(SIGINT, signal_handler);
 	global_server = static_cast<Server *>(this);
@@ -101,7 +108,9 @@ Server					&Server::operator=(const Server &src)
 	if (this->channels.size() > 0)
 		this->channels.erase(channels.begin(), channels.end());
 	if (this->clients.size() > 0)
+	{
 		this->clients.erase(clients.begin(), clients.end());
+	}
 	std::vector<Client>::iterator _clients = src.getClients().begin();
 	while (_clients != src.getClients().end())
 	{
@@ -160,7 +169,6 @@ bool							Server::existingName(std::string name, int mode)
 
 int	Server::NewClient(int new_socket)
 {
-	std::cout << "New client connected: " << new_socket << std::endl;
 
 	Client _new(new_socket);
 	// _new.setUserName(requestName(USERNAME, clientSocket));
@@ -263,11 +271,12 @@ void	Server::launch()
 			{
 				if (it->fd == serverSocket)
 				{
-					// Check for new client connections
 					newConnection();
 				}
 				else
+				{
 					existingConnection(it);
+				}
 			}
 			it++;
 		}
@@ -298,6 +307,7 @@ void	Server::existingConnection(std::vector<pollfd>::iterator it)
 	int bytes_read;
 	memset(buffer, 0, sizeof(buffer));
 
+	debugging_whoinserver();
 	if (server_shutdown)
 		return ;
 	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0); // ***receiving message
@@ -481,7 +491,18 @@ Channel*	Server::isChannelExist2(std::string channelTojoin)
 	{
 		std::string tmp = it->getName();
 		if (tmp == channelTojoin)
+		{
 			return &(*it);
+		}
 	}
 	return (0);
+}
+
+void	Server::debugging_whoinserver()
+{
+	std::vector<Client>::iterator it = this->clients.begin();
+	while (it != this->clients.end())
+	{
+		it++;
+	}
 }

@@ -46,7 +46,9 @@ int		caseK(Server *server, Client *joiningClient, Channel *channel)
 	char buffer[BUFFER_SIZE];
 	int	bytesReceived = recv(joiningClient->getSocket(), buffer, BUFFER_SIZE, 0);
 	if (bytesReceived < 0)
+	{
 		return (-1);
+	}
 	std::string input(buffer, bytesReceived);
 	removeNewline(input);
 	if (input != channel->getKey())
@@ -63,6 +65,7 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	std::string				username;
 	Channel					*channel;
 
+	server->debugging_whoinserver();
 	username = joiningClient->getNickName();
 	if (!name_check(channelTojoin))
 	{
@@ -70,12 +73,13 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		send(joiningClient->getSocket(), noChannel.c_str(), noChannel.length(), 0);
 	}
 	channel = server->isChannelExist2(channelTojoin);
+	if (channel != 0)
+		channel->printAllMembers();
 	if (channel == 0)
 	{
-		std::cout << "#0" << std::endl;
 		server->createChannel(*joiningClient, channelTojoin, joiningClient->getSocket());
 		channel = server->isChannelExist2(channelTojoin);
-		channel->joinClient(*joiningClient);
+		channel->joinClient(joiningClient);
 		// *** print message in case JOIN_FAILURE, because client already exist in channel ***
 		// *** try JOIN !!!channel *** it has to create only channels with '#'
 		std::string welcomemsg = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin);
@@ -91,10 +95,11 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		std::string endOfMsg = RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin);
 		send(joiningClient->getSocket(), memberInfo.c_str(), memberInfo.length(), 0);
 		send(joiningClient->getSocket(), endOfMsg.c_str(), endOfMsg.length(), 0);
-		std::cout << "#1" << std::endl;
+		channel->printAllMembers();
 	}
 	else
 	{
+		channel->printAllMembers();
 		if (channel->flagCheck('i') == 0)
 		{
 			std::string joinOnly = ERR_INVITEONLYCHAN(server->getName(), username, channel->getName());
@@ -105,31 +110,23 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		{
 			if (caseK(server, joiningClient, channel) == -1)
 			{
-				std::cout << "#45" << std::endl;
 				return ;
 			}
-			std::cout << "#44" << std::endl;
 		}
-		std::cout << "#46" << std::endl;
 		if (channel->isUserInChannel(joiningClient->getNickName()))
 		{
-			std::cout << "#54" << std::endl;
 			std::string usrOnChannel = ERR_USERONCHANNEL(server->getName(), joiningClient->getNickName(), channel->getName());
 			send(joiningClient->getSocket(), usrOnChannel.c_str(), usrOnChannel.length(), 0);
-			std::cout << "#55" << std::endl;
 			return ;
 		}
-		std::cout << "#47" << std::endl;
-		if (channel->joinClient(*joiningClient) == -1)
+		if (channel->joinClient(joiningClient) == -1)
 		{
 			std::string usrOnChannel2 = ERR_USERONCHANNEL(server->getName(), joiningClient->getNickName(), channel->getName());
 			send(joiningClient->getSocket(), usrOnChannel2.c_str(), usrOnChannel2.length(), 0);
 			return ;
 		}
-		std::cout << "#48" << std::endl;
 		std::string welcomemsg = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin);
 		sendToChannel(*channel, welcomemsg);
-		std::cout << "#49" << std::endl;
 		if (channel->getisTopic() == 1)
 		{
 			std::string topicMsg = RPL_TOPIC(username, channelTojoin, channel->getTopic());
@@ -137,11 +134,9 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 			send(joiningClient->getSocket(), topicMsg.c_str(), topicMsg.length(), 0);
 			send(joiningClient->getSocket(), topicMsg2.c_str(), topicMsg2.length(), 0);
 		}
-		std::cout << "#50" << std::endl;
 		std::string	memberInfo = RPL_NAMREPLY(joiningClient->getNickName(), channelTojoin, *channel);
 		std::string endOfMsg = RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin);
 		send(joiningClient->getSocket(), memberInfo.c_str(), memberInfo.length(), 0);
 		send(joiningClient->getSocket(), endOfMsg.c_str(), endOfMsg.length(), 0);
-		std::cout << "#51" << std::endl;
 	}
 }

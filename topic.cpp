@@ -15,9 +15,9 @@
 #include "Server.hpp"
 #include "utils.hpp"
 
-void sendTopicMsg(Client &client, Channel *channel, std::string userName)
+void sendTopicMsg(Client *client, Channel *channel, std::string userName)
 {
-	int	fd = client.getSocket();
+	int	fd = client->getSocket();
 	if (channel->getisTopic() == 1)
 	{
 		std::string rtlTopic = RPL_TOPIC(userName, channel->getName(), channel->getTopic());
@@ -47,26 +47,25 @@ void sendTopicMsg(Client &client, Channel *channel, std::string userName)
 // 	return (-1);
 // }
 
-int	topicProtected(Server *server, Channel *channel, Client &client)
+int	topicProtected(Server *server, Channel *channel, Client *client)
 {
-	std::string errmsg = ERR_CHANOPRIVSNEEDED(server->getName(), client.getNickName(), channel->getName());
+	std::string errmsg = ERR_CHANOPRIVSNEEDED(server->getName(), client->getNickName(), channel->getName());
 	if (channel->flagCheck('t') == 0)
 	{
 		if (channel->hasOper(client) != NULL)
 			return (1);
 	}
-	send(client.getSocket(), errmsg.c_str(), errmsg.length(), 0);
+	send(client->getSocket(), errmsg.c_str(), errmsg.length(), 0);
 	return (-1);
 }
 
-void topic(Server *server, const Command &cmd, Client &client)
+void topic(Server *server, const Command &cmd, Client *client)
 {
 	std::string	channelName = cmd.parameter;
-	std::string	nickName = client.getNickName();
+	std::string	nickName = client->getNickName();
 	Channel *channel;
 
 	channel = server->isChannelExist2(channelName);
-	std::cout << "#0" << std::endl;
 	// IF CHANNEL IS FLAGED "T" AND USER IS NOT OPERATOR => RETURN
 	// if (channel->flagCheck('t') == 1 && channel->hasOper(client) == NULL)
 	// {
@@ -77,17 +76,15 @@ void topic(Server *server, const Command &cmd, Client &client)
 	if (channel == 0) // if channel does not exist
 	{
 		std::string noSuchChannel = ERR_NOSUCHCHANNEL(server->getName(), nickName, channelName);
-		send (client.getSocket(), noSuchChannel.c_str(), noSuchChannel.length(), 0);
+		send (client->getSocket(), noSuchChannel.c_str(), noSuchChannel.length(), 0);
 		return ;
 	}
-	std::cout << "#1" << std::endl;
 	if (channel->isUserInChannel(nickName) == NULL) // check if user in the channel
 	{
 		std::string notToChannel = ERR_NOTONCHANNEL(nickName, channelName);
-		send (client.getSocket(), notToChannel.c_str(), notToChannel.length(), 0);
+		send (client->getSocket(), notToChannel.c_str(), notToChannel.length(), 0);
 		return ;
 	}
-	std::cout << "#2" << std::endl;
 	if (cmd.hasMessage == 0)
 	{
 		sendTopicMsg(client, channel, nickName);
@@ -95,10 +92,8 @@ void topic(Server *server, const Command &cmd, Client &client)
 	}
 	else
 	{
-		std::cout << "#3" << std::endl;
 		if (topicProtected(server, channel, client) == -1)
 			return ;
-		std::cout << "#4" << std::endl;
 		if (cmd.message.empty())
 			channel->clearTopic(nickName);
 		else
@@ -107,4 +102,4 @@ void topic(Server *server, const Command &cmd, Client &client)
 		sendToChannel(*channel, RPL_TOPICWHOTIME(nickName, channelName, channel->getwhoTopicSet(), channel->getwhenTopicSet()));
 		return ;
 	}
-} 
+}

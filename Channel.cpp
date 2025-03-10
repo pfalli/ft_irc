@@ -50,11 +50,11 @@ Channel::~Channel()
 
 /* add joiningClient to _joinedClients in Channel object 
   before add, check if client is already exist in joinedClients list. */
-int Channel::joinClient(Client &joiningClient) 
+int Channel::joinClient(Client *joiningClient) 
 {
-	if (isUserInChannel(joiningClient.getNickName()) != 0)
+	if (isUserInChannel(joiningClient->getNickName()) != NULL)
 		return (-1);
-	_joinedClients.push_back(&(joiningClient));
+	_joinedClients.push_back(joiningClient);
 	return (0);
 }
 
@@ -63,18 +63,21 @@ int Channel::joinClient(Client &joiningClient)
 void Channel::removeClientFromList(std::vector<Client *>::iterator clientIt) {
 	if (clientIt != _joinedClients.end()) {
 		_joinedClients.erase(clientIt);
-		std::cout << "debug KICK client from _joinedClients: " << (*clientIt)->getUserName() << this->getName() << std::endl;
 	}
 }
-
+ 
 void Channel::printAllMembers()
 {
-	std::vector<Client *>::iterator it;
+    std::vector<Client *> clients = _joinedClients;
 
-	for (; it != _joinedClients.end(); ++it)
-	{
-		std::cout << (* it)->getUserName() << " " << std::endl;
-	}
+    std::vector<Client *>::iterator it = clients.begin();
+    for (; it != clients.end(); ++it)
+    {
+        if (*it == NULL)
+        {
+            return;
+        }
+    }
 }
 
 
@@ -102,19 +105,11 @@ void Channel::setTopic(std::string topic, std::string whoSet)
 Client *Channel::isUserInChannel(std::string nickName)
 {
     std::vector<Client *>::iterator it = _joinedClients.begin();
-    std::cout << "#52" << std::endl;
     for (; it != _joinedClients.end(); it++)
     {
-        if (*it == NULL)
-        {
-            std::cerr << "Error: Null client pointer in _joinedClients" << std::endl;
-            continue;
-        }
-        std::cout << "current NickName: " << (*it)->getNickName() << std::endl;
         if ((*it)->getNickName() == nickName)
             return (*it);
     }
-    std::cout << "#53" << std::endl;
     return NULL;
 }
 
@@ -162,17 +157,15 @@ int	Channel::modeK(std::vector<std::string> &argumentSet)
 {
 	std::string	argument;
 
-	std::cout << "#13" << std::endl;
 	if (argumentSet.empty() || argumentSet[0].empty())
 		return (-1);
 	argument = argumentSet[0];
 	_key = argument;
 	argumentSet.erase(argumentSet.begin());
-	std::cout << "#14key:" << _key << std::endl;
 	return (0);
 }
 
-int	Channel::modeO(std::string serverName, Client &client, std::vector<std::string> &argumentSet)
+int	Channel::modeO(std::string serverName, Client *client, std::vector<std::string> &argumentSet)
 {
 	std::string nickName;
 	if (argumentSet.empty() || argumentSet[0].empty()) 
@@ -182,7 +175,7 @@ int	Channel::modeO(std::string serverName, Client &client, std::vector<std::stri
 	if (toBeOperator == NULL)
 	{
 		std::string notInChannel = ERR_USERNOTINCHANNEL(serverName, nickName, _name);
-		send(client.getSocket(), notInChannel.c_str(), notInChannel.size(), 0);
+		send(client->getSocket(), notInChannel.c_str(), notInChannel.size(), 0);
 		return (-1);
 	}
 	this->_operators.push_back(toBeOperator);
@@ -190,7 +183,7 @@ int	Channel::modeO(std::string serverName, Client &client, std::vector<std::stri
 	return (0);
 }
 
-int	Channel::modeL(std::string serverName, Client &client, std::vector<std::string> &argumentSet)
+int	Channel::modeL(std::string serverName, Client *client, std::vector<std::string> &argumentSet)
 {
 	size_t		result;
 	std::string	argument;
@@ -201,8 +194,8 @@ int	Channel::modeL(std::string serverName, Client &client, std::vector<std::stri
 	result = stringToSizeT(argument);
 	if (result == 0)
 	{
-		std::string errMsg = ERR_UNKNOWNMODE(serverName, client.getNickName(), "l");
-		send(client.getSocket(), errMsg.c_str(), errMsg.size(), 0);
+		std::string errMsg = ERR_UNKNOWNMODE(serverName, client->getNickName(), "l");
+		send(client->getSocket(), errMsg.c_str(), errMsg.size(), 0);
 		return (2);
 	}
 	_limit = result;
@@ -221,11 +214,10 @@ int	Channel::modeL(std::string serverName, Client &client, std::vector<std::stri
 // }
 
 
-int Channel::signPlus(std::string serverName, Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch)
+int Channel::signPlus(std::string serverName, Channel &channel, Client *client, std::vector<std::string> &argumentSet, char ch)
 {
 	if (ch == 'k')
 	{
-		std::cout << "#12" << std::endl;
 		if (modeK(argumentSet) == -1)
 			return (1);
 	}
@@ -251,23 +243,20 @@ int Channel::signPlus(std::string serverName, Channel &channel, Client &client, 
 int		Channel::flagCheck(char ch)
 {
 	size_t	pos;
-	std::cout << "#24" << std::endl;
 	pos = this->_modes.find(ch);
 	if (pos == std::string::npos)
 		return (-1);
-	std::cout << "#25" << std::endl;
 	return (0);
 }
 
-Client*	Channel::hasOper(Client &client)
+Client*	Channel::hasOper(Client *client)
 {
 	std::vector<Client *>::iterator it = this->_operators.begin();
 
 	for (; it != this->_operators.end(); it ++)
 	{
-		if (client.getNickName() == (* it)->getNickName())
+		if (client->getNickName() == (* it)->getNickName())
 		{
-			std::cout << "nickName#11 :" << (* it)->getNickName() << std::endl;
 			return (*it);
 		}
 	}

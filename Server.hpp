@@ -128,6 +128,9 @@ class Server
 	void									newConnection();
 	void									clean();
 	bool									existingName(std::string name, int mode);
+
+	void									debugging_whoinserver();
+
 	Channel*								isChannelExist2(std::string channelTojoin);
 	// Piero functions
 	void parseCommand(const std::string &str, Command &cmd);

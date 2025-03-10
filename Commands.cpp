@@ -18,7 +18,7 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 		join(this, &client, cmd.parameter);
 	}
 	else if (cmd.command == "MODE") {
-		mode(this, cmd, client);
+		mode(this, cmd, &client);
 	} else if (cmd.command == "KICK") {
 		handleKick(&client, cmd);
 	} else if (cmd.command == "PRIVMSG") {
@@ -35,9 +35,8 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 	else if (cmd.command == "KICK") {
 		handleKick(&client, cmd);
 	}
-	std::cout << "#33" << std::endl;
 	if (cmd.command == "TOPIC") {
-		topic(this, cmd, client);
+		topic(this, cmd, &client);
 	}
     else if (cmd.command == "INVITE") {
 		handleInvite(&client, cmd);
@@ -224,7 +223,6 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 	send(targetExistIt->getSocket(), msg.c_str(), msg.length(), 0);
 	std::string temp = JOIN_SUCCESS(targetExistIt->getNickName(), channelIt->getName());
 	sendToChannel(*channelIt, temp);
-
 }
 
 void Server::handleKick(Client* handleClient, const Command &cmd) {
@@ -232,8 +230,8 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 	std::string channelName, targetNick;
 	iss >> channelName >> targetNick;
 
-
 	if (channelName.empty() || targetNick.empty()) {
+
 		const std::string str = ERR_NEEDMOREPARAMS(handleClient->getUserName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;

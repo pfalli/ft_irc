@@ -22,7 +22,7 @@ size_t			stringToSizeT(std::string &str);
 std::string		convertSizeTtoString(size_t number);
 
 /* mode */
-void	mode(Server *server, const Command &cmd, Client &client);
+void	mode(Server *server, const Command &cmd, Client *client);
 
 /* join */
 void	join(Server *server, Client *joiningClient, std::string channelTojoin);
@@ -37,7 +37,7 @@ void	sendToChannel(Channel &channel, std::string msg);
 
 
 /* topic */
-void topic(Server *server, const Command &cmd, Client &client);
+void topic(Server *server, const Command &cmd, Client *client);
 
 template <typename T> typename std::vector<T>::iterator		findObject(int toFind, std::vector<T> &array);
 

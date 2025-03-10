@@ -44,7 +44,7 @@ class Channel {
 											Channel(Client &client, std::string name, int channelCreator);
 											~Channel();
 	void									setName(std::string _name){this->_name = _name;}
-	int										joinClient(Client &client);
+	int										joinClient(Client *client);
 	void									setisTopic(bool num){this->_isTopic = num;}
 	bool									getisTopic()const{return (this->_isTopic);}
 	std::string								getName()const{return (this->_name);}
@@ -62,7 +62,7 @@ class Channel {
 	void									removeFlag(char flag);
 	void									addFlag(char flag);
 	void									setmodes(std::string modes);
-	int										signPlus(std::string serverName, Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch);
+	int										signPlus(std::string serverName, Channel &channel, Client *client, std::vector<std::string> &argumentSet, char ch);
 	int										signMinus(Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch);
 	Client*									isUserInChannel(std::string nickName);
 	size_t									getLimit()const{return (this->_limit);}
@@ -75,9 +75,9 @@ class Channel {
 	//void									modeT();
 	//void									modeI();
 	int										modeK(std::vector<std::string> &argumentSet);
-	int										modeO(std::string serverName, Client &client, std::vector<std::string> &argumentSet);
-	int										modeL(std::string serverName, Client &client, std::vector<std::string> &argumentSet);
-	Client*									hasOper(Client &client);
+	int										modeO(std::string serverName, Client *client, std::vector<std::string> &argumentSet);
+	int										modeL(std::string serverName, Client *client, std::vector<std::string> &argumentSet);
+	Client*									hasOper(Client *client);
 	
 	// piero added
 	void									removeClientFromList(std::vector<Client *>::iterator person);

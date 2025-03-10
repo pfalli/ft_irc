@@ -41,7 +41,7 @@ CXX = c++
 
 RM = rm -rf
 MKDIR = mkdir -p
-CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g
+CXXFLAGS = -Wall -Wextra -Werror -std=c++98 -g -O0 #-fsanitize=address
 
 all: $(NAME) #client
 
