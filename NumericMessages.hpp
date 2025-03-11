@@ -20,29 +20,29 @@
 # define RPL_NOTICE(client, username, targetnick, message) ":" + client + "!" + username + "@localhost NOTICE " + targetnick + " :" + message + "\r\n"
 
 /* PRIVMSG */
-# define ERR_NOSUCHNICK(client, nickname) ( std::string(RED) + ":" + client + " " + nickname + ":" + "401 Error: No such nick/channel" + std::string(RESET) + "\r\n" )
-# define SUCCESS_PRIVMSG(sender, recipient, msg) (std::string(YELLOW) + ":" + sender + " PRIVMSG " + recipient + " :" + msg +  std::string(RESET) + "\r\n")
+# define ERR_NOSUCHNICK(client, nickname) ( ":" + client + " " + nickname + ":" + "401 Error: No such nick/channel"  + "\r\n" )
+# define SUCCESS_PRIVMSG(sender, recipient, msg)  ":" + sender + " PRIVMSG " + recipient + " :" + msg  + "\r\n"
 # define TO_ALL_CHANNEL(senderNickname, channelName, msg) (":" + senderNickname + " PRIVMSG " + channelName + " :" + msg + "\r\n")
-# define ERR_NOSUCHCHANNEL(serverName, nickName, channelName) (std::string(RED) + serverName + ": Error(403)" + nickName + " " + channelName + " :No such channel" + std::string(RESET) + "\r\n")
+# define ERR_NOSUCHCHANNEL(serverName, nickName, channelName) (  serverName + ": Error(403)" + nickName + " " + channelName + " :No such channel" + "\r\n")
 
 /* join */
-# define ERR_NEEDMOREPARAMS2(userName, command) (std::string (RED) + userName + " " + command + " :Not enough parameters + std::string(RESET)" + "\r\n")
-# define JOIN_SUCCESS(joiner, channelName) (std::string(BLUE) + joiner + " is joining the channel " + channelName + std::string(RESET) + "\r\n")
-# define RPL_TOPIC(userName, channelName, topic) (std::string(GREEN) + channelName + " :" + topic + std::string(RESET) + "\r\n") 
-# define RPL_TOPICWHOTIME(userName, channelName, nickName, time) (std::string(GREEN) + userName + " " + channelName + " " + nickName + " " + timeToString(time) + std::string(RESET) + "\r\n")
+# define ERR_NEEDMOREPARAMS2(userName, command) (  userName + " " + command + " :Not enough parameters" + "\r\n")
+# define JOIN_SUCCESS(joiner, channelName, serverName, userName) ":" + joiner + "!" + userName + "@" + serverName + " JOIN " + channelName +"\r\n"
+# define RPL_TOPIC(userName, channelName, topic) (  channelName + " :" + topic + "\r\n") 
+# define RPL_TOPICWHOTIME(userName, channelName, nickName, time) (  userName + " " + channelName + " " + nickName + " " + timeToString(time) + "\r\n")
 # define RPL_NAMREPLY(nickName, channelName, channel) (nickName + "=" + channelName + " :" + ((channel).makeMemberList()) + "\r\n")
 # define RPL_ENDOFNAMES(nickName, channelName) (nickName + " " + channelName + " :End of /NAMES list \r\n")
-# define ERR_INVITEONLYCHAN(serverName, nickName, channelName)(std::string(RED) + serverName + ": Error(473) " + nickName + " " + channelName + " :Cannot join channel (+i)" + std::string(RESET) + "\r\n")
-# define ERR_BADCHANNELKEY(serverName, nickName, channelName)(std::string(RED) + serverName + ": Error(475) " + nickName + " " + channelName + " :Cannot join channel (+k)" + std::string(RESET) + "\r\n")
+# define ERR_INVITEONLYCHAN(serverName, nickName, channelName)(  serverName + ": Error(473) " + nickName + " " + channelName + " :Cannot join channel (+i)" + "\r\n")
+# define ERR_BADCHANNELKEY(serverName, nickName, channelName)(  serverName + ": Error(475) " + nickName + " " + channelName + " :Cannot join channel (+k)" + "\r\n")
 /* TOPIC */
-# define RPL_NOTOPIC(userName, channelName) (std::string(GREEN) + userName + " " + channelName + " :No Topic is set" + std::string(RESET) + "\r\n")
+# define RPL_NOTOPIC(userName, channelName) (  userName + " " + channelName + " :No Topic is set" + "\r\n")
 
 /* MODE */
-# define RPL_CHANNELMODEIS(serverName, nickName, channelName, modeString) (std::string(BLUE) + ":" + serverName + " 324 " + nickName + " " + channelName + " " + modeString + std::string(RESET) + "\r\n")
-# define RPL_CREATIONTIME(serverName, nickName, channelName, creationTime) (std::string(BLUE) + ":" + serverName + " 329 " + nickName + " " + channelName + " " + timeToString(creationTime) + std::string(RESET) + "\r\n")
-# define ERR_UMODEUNKNOWNFLAG(serverName, nickName) (std::string(RED) + ":" + serverName + " Error(501) " + nickName + " :unknown MODE flag" + std::string(RESET) + "\r\n")
-# define ERR_UNKNOWNMODE(serverName, nickName, char) (std::string(RED) + ":" + serverName + " Error(472) " + nickName + " " + char + " :is unknown mode char to me" + std::string(RESET) + "\r\n") 
-# define ERR_CHANOPRIVSNEEDED(serverName, nickName, channelName) (std::string(RED) + ":" + serverName + " Error(485) " + nickName + " " + channelName + " :You're not channel operator"+ std::string(RESET) + "\r\n")
+# define RPL_CHANNELMODEIS(serverName, nickName, channelName, modeString) (  ":" + serverName + " 324 " + nickName + " " + channelName + " " + modeString + "\r\n")
+# define RPL_CREATIONTIME(serverName, nickName, channelName, creationTime) (  ":" + serverName + " 329 " + nickName + " " + channelName + " " + timeToString(creationTime) + "\r\n")
+# define ERR_UMODEUNKNOWNFLAG(serverName, nickName) (  ":" + serverName + " Error(501) " + nickName + " :unknown MODE flag" + "\r\n")
+# define ERR_UNKNOWNMODE(serverName, nickName, char) (  ":" + serverName + " Error(472) " + nickName + " " + char + " :is unknown mode char to me" + "\r\n") 
+# define ERR_CHANOPRIVSNEEDED(serverName, nickName, channelName) (  ":" + serverName + " Error(485) " + nickName + " " + channelName + " :You're not channel operator "+ "\r\n")
 
 # define WELCOME_MESSAGE "\n\
 	Hello, welcome to our server!\n\

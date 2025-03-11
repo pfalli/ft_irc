@@ -221,7 +221,7 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 	send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 	std::string msg = "You were added to " + channelIt->getName() + " by " + handleClient->getNickName() + "\r\n";
 	send(targetExistIt->getSocket(), msg.c_str(), msg.length(), 0);
-	std::string temp = JOIN_SUCCESS(targetExistIt->getNickName(), channelIt->getName());
+	const std::string temp = JOIN_SUCCESS(handleClient->getNickName(), channelIt->getName(), this->getName() , handleClient->getUserName());
 	sendToChannel(*channelIt, temp);
 }
 
