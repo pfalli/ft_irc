@@ -44,6 +44,8 @@ void	removeNewline(std::string &str)
 int		caseK(Server *server, Client *joiningClient, Channel *channel)
 {
 	char buffer[BUFFER_SIZE];
+	std::string key = "Enter key for this channel\r\n";
+	send(joiningClient->getSocket(), key.c_str(), key.length(), 0);
 	int	bytesReceived = recv(joiningClient->getSocket(), buffer, BUFFER_SIZE, 0);
 	if (bytesReceived < 0)
 	{

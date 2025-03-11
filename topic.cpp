@@ -34,19 +34,6 @@ void sendTopicMsg(Client *client, Channel *channel, std::string userName)
 	}
 }
 
-// int	isUserInTheChannel(std::string userName, Channel *channel)
-// {
-// 	std::vector<Client *> &clients = channel->getJoinedClients();
-
-// 	std::vector<Client *>::iterator it = clients.begin();
-// 	for (; it != clients.end(); it++)
-// 	{
-// 		if ((*it)->getUserName() == userName)
-// 			return (0);
-// 	}
-// 	return (-1);
-// }
-
 int	topicProtected(Server *server, Channel *channel, Client *client)
 {
 	std::string errmsg = ERR_CHANOPRIVSNEEDED(server->getName(), client->getNickName(), channel->getName());
@@ -57,7 +44,7 @@ int	topicProtected(Server *server, Channel *channel, Client *client)
 	}
 	send(client->getSocket(), errmsg.c_str(), errmsg.length(), 0);
 	return (-1);
-}
+} 
 
 void topic(Server *server, const Command &cmd, Client *client)
 {
@@ -66,13 +53,6 @@ void topic(Server *server, const Command &cmd, Client *client)
 	Channel *channel;
 
 	channel = server->isChannelExist2(channelName);
-	// IF CHANNEL IS FLAGED "T" AND USER IS NOT OPERATOR => RETURN
-	// if (channel->flagCheck('t') == 1 && channel->hasOper(client) == NULL)
-	// {
-	// 	std::string noPrivs = ERR_CHANOPRIVSNEEDED(server->getName(), nickName, channelName);
-	// 	send(client.getSocket(), noPrivs.c_str(), noPrivs.length(), 0);
-	// 	return ;
-	// }
 	if (channel == 0) // if channel does not exist
 	{
 		std::string noSuchChannel = ERR_NOSUCHCHANNEL(server->getName(), nickName, channelName);

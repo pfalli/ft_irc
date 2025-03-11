@@ -252,10 +252,11 @@ int		Channel::flagCheck(char ch)
 Client*	Channel::hasOper(Client *client)
 {
 	std::vector<Client *>::iterator it = this->_operators.begin();
+	std::string nickName = client->getNickName();
 
 	for (; it != this->_operators.end(); it ++)
 	{
-		if (client->getNickName() == (* it)->getNickName())
+		if (nickName == (* it)->getNickName())
 		{
 			return (*it);
 		}
