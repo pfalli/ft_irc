@@ -25,12 +25,12 @@ int		removeHash(std::string &tmpChannelTojoin)
 	return (0);
 }
 
-static bool	name_check(std::string str)
-{
-	if (str[0] != '#')
-		return false;
-	return true;
-}
+// static bool	name_check(std::string str)
+// {
+// 	if (str[0] != '#')
+// 		return false;
+// 	return true;
+// }
 
 void	removeNewline(std::string &str)
 {
@@ -69,10 +69,16 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 
 	server->debugging_whoinserver();
 	username = joiningClient->getNickName();
-	if (!name_check(channelTojoin))
+	if (channelTojoin.empty())
 	{
-		std::string noChannel = ERR_NOSUCHCHANNEL(server->getName(), username, channelTojoin);
-		send(joiningClient->getSocket(), noChannel.c_str(), noChannel.length(), 0);
+		std::string str = ERR_NEEDMOREPARAMS(joiningClient->getUserName());
+		send(joiningClient->getSocket(), str.c_str(), str.length(), 0);
+		return ;
+	}
+	if (channelTojoin[0] != '#')
+	{
+		send(joiningClient->getSocket(), "Error: channel name needs to include # at beginning\n", 53, 0);
+		return ;
 	}
 	channel = server->isChannelExist2(channelTojoin);
 	if (channel != 0)
