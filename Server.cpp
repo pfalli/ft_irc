@@ -448,6 +448,22 @@ void Server::parseCommand(const std::string &str, Command &cmd) {
 	std::string word;
 	cmd.hasMessage = 0;
 	bool messageStarted = false;
+	// if (cmd.command == "USER") {
+	// 	std::getline(iss, cmd.parameter);
+	// 	std::size_t pos = cmd.parameter.find(':');
+	// 	if (pos != std::string::npos) {
+	// 		cmd.message = cmd.parameter.substr(pos + 1);
+	// 		cmd.parameter = cmd.parameter.substr(0, pos);
+	// 		cmd.hasMessage = 1;
+	// 	}
+	// 	cmd.parameter = cmd.parameter.substr(1); // Remove leading space
+	// 	std::cout << "\n-------------TEST USER command for HEXCHAT---------------\nParsed command: " << cmd.command << std::endl;
+	// 	std::cout << "Parameter: " << cmd.parameter << std::endl;
+	// 	std::cout << "Message: " << cmd.message << "\n-------------------\n" << std::endl;
+
+	// 	std::cout << "|" << cmd.message << "|" << std::endl;
+	// 	return;
+	// }
 	while (iss >> word) {
 		if (word[0] == ':') {
 			messageStarted = true;
@@ -462,7 +478,7 @@ void Server::parseCommand(const std::string &str, Command &cmd) {
 			}
 			cmd.parameter += word;
 		}
-	}	
+	}
 	std::cout << "\n-------------------\nParsed command: " << cmd.command << std::endl;
 	std::cout << "Parameter: " << cmd.parameter << std::endl;
 	std::cout << "Message: " << cmd.message << "\n-------------------\n" << std::endl;
