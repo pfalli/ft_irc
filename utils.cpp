@@ -42,7 +42,7 @@ static bool validUsername(std::string str)
 		return (false);
 	for (size_t i = 0; i < strlen(str.c_str()); i++)
 	{
-		if (!isalnum(str[i]))
+		if (!isalnum(str[i]) && !(str[i] <= 40 && str[i] >= 21))
 			return (false);
 	}
 	return (true);
@@ -54,7 +54,7 @@ static bool validNickname(std::string str)
 		return (false);
 	for (size_t i = 0; i < strlen(str.c_str()); i++)
 	{
-		if (!isalnum(str[i]))
+		if (!isalnum(str[i])  && !(str[i] <= 40 && str[i] >= 21))
 			return (false);
 	}
 	return (true);
@@ -65,7 +65,7 @@ static bool validPassword(std::string str)
 		return (false);
 	for (size_t i = 0; i < strlen(str.c_str()); i++)
 	{
-		if (!isalnum(str[i]) || (str[i] <= 40 && str[i] >= 21) )
+		if (!isalnum(str[i]) && !(str[i] <= 40 && str[i] >= 21) )
 			return (false);
 	}
 	return (true);
