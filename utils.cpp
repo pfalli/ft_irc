@@ -321,18 +321,18 @@ bool	checkCaseHex(const Command &cmd, Client & client)
 		size_t i;
 		for (i = 0; i < param.length(); i++)
 		{
-			nickname += param[i];
 			if (isspace(param[i]))
 			{
 				i++;
 				if (ptr == &param[i])
 					break ;
 			}
+			nickname += param[i];
 		}
 		client.setNickName(nickname);
 		if (&param[i] == ptr)
 		{
-			i += 4;
+			i += 5;	//skip whitespace after USER
 			std::string username = "";
 			while (i < param.length())
 			{
@@ -344,7 +344,7 @@ bool	checkCaseHex(const Command &cmd, Client & client)
 			client.setUserName(username);
 			client.setRealName(cmd.message);
 			client.setRegistered();
-			send(client.getSocket(), "Registration complete. Now you just need the password.\n", 56, 0);
+			send(client.getSocket(), "Registration complete. Now you just need the password.\r\n", 57, 0);
 			return true;
 		}
 	}
@@ -362,25 +362,25 @@ bool	checkCaseHex(const Command &cmd, Client & client)
 		{
 			if (&param[i] == nick_ptr)
 			{
-				i += 4;
+				i += 5;	//5 to skip whitespace after too
 				break ;
 			}
 		}
 		std::string nickname = "";
 		for (; i < param.length(); i++)
 		{
-			nickname += param[i];
 			if (isspace(param[i]))
 			{
 				i++;
 				if (user_ptr == &param[i])
 					break ;
 			}
+			nickname += param[i];
 		}
 		client.setNickName(nickname);
 		if (&param[i] == user_ptr)
 		{
-			i += 4;
+			i += 5;	//skip whitespace after USER
 			std::string username = "";
 			while (i < param.length())
 			{
@@ -392,7 +392,7 @@ bool	checkCaseHex(const Command &cmd, Client & client)
 			client.setUserName(username);
 			client.setRealName(cmd.message);
 			client.setRegistered();
-			send(client.getSocket(), "Registration complete. Now you just need the password.\n", 56, 0);
+			send(client.getSocket(), "Registration complete. Now you just need the password.\r\n", 57, 0);
 			return true;
 		}
 	}

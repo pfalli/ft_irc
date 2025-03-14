@@ -59,8 +59,10 @@ void	printModes(std::string serverName, Client *client, Channel &channel, int to
 	}
 	else
 	{
-		sendToChannel(channel, channelModeIs);
-		sendToChannel(channel, creationTime);
+		const char *msg1 = channelModeIs.c_str();
+		const char *msg2 = creationTime.c_str();
+		sendToChannel(channel, msg1);
+		sendToChannel(channel, msg2);
 		return ;
 	}
 }

@@ -70,12 +70,12 @@ void	splitTargetUsers(std::string tmpTarget, std::vector<std::string> &targets)
 // 	std::cout << "targetChannel :" << targetChannel << std::endl;
 // }
 
-void	sendToChannel(Channel &channel, std::string msg)
+void	sendToChannel(Channel &channel, const char *msg)
 {
 	std::vector<Client *> clients = channel.getJoinedClients();
 	for (std::vector<Client *>::iterator it = clients.begin(); it != clients.end() ;it++)
 	{
-		send((*it)->getSocket(), msg.c_str(), msg.length(), 0);
+		send((*it)->getSocket(), msg, strlen(msg), 0);
 	}
 }
 
@@ -102,7 +102,8 @@ void	messageToAllChannel(Server *server, Client *sender, const Command &cmd)
 		if (it->getName() == targetChannel)
 		{
 			std::string msg = TO_ALL_CHANNEL(senderNickname, targetChannel, cmd.message);
-			sendToChannel(*it, msg);
+			const char *message = msg.c_str();
+			sendToChannel(*it, message);
 			return ;
 		}
 	}

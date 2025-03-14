@@ -34,7 +34,7 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin);
 void	privmsg(Server *server, Client *sender, const Command &cmd);
 void	signal_handler(int signal);
 void	parseChannelName2(std::string &targetChannel);
-void	sendToChannel(Channel &channel, std::string msg);
+void	sendToChannel(Channel &channel, const char *msg);
 
 
 /* topic */

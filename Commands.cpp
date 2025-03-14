@@ -6,6 +6,8 @@
 void Server::handleCommand(const Command &cmd, Client &client) {
 	if (cmd.command == "HELP")
 		giveHelp(client);
+	else if (cmd.command == "CAP")
+		checkCaseHex(cmd, client);
 	else if (cmd.command == "PASS")
 		_register(client, cmd, PASSWORD);
 	else if (cmd.command == "USER")
@@ -91,7 +93,8 @@ void Server::handleNotice(Client *handleClient, const Command &cmd) {
 			return;
 		}
 		std::string str = RPL_NOTICE(handleClient->getNickName(), handleClient->getUserName(), target, cmd.message);
-		sendToChannel(*channel, str);
+		const char *msg = str.c_str();
+		sendToChannel(*channel, msg);
 	} else {
 		// Target exist?
 		std::vector<Client>::iterator targetIt = clients.begin();
@@ -221,7 +224,8 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 	send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 	std::string msg = "You were added to " + channelIt->getName() + " by " + handleClient->getNickName() + "\r\n";
 	send(targetExistIt->getSocket(), msg.c_str(), msg.length(), 0);
-	const std::string temp = JOIN_SUCCESS(handleClient->getNickName(), channelIt->getName(), this->getName() , handleClient->getUserName());
+	const std::string temp_str = JOIN_SUCCESS(handleClient->getNickName(), channelIt->getName(), this->getName() , handleClient->getUserName());
+	const char *temp = temp_str.c_str();
 	sendToChannel(*channelIt, temp);
 }
 
@@ -316,9 +320,10 @@ void Server::handleQuit(Client *handleClient, const Command &cmd) {
 	}
 	// send to all people inside all channels
 	std::string str = RPL_QUIT(clientIt->getNickName(), cmd.message);
+	const char *msg = str.c_str();
 	std::vector<Channel>::iterator channelIt = channels.begin();
 	for (size_t i = 0; i < channels.size(); i++) {
-		sendToChannel(*channelIt, str);
+		sendToChannel(*channelIt, msg);
 	}
 	deleteClient(clientIt, pollIt);
 }

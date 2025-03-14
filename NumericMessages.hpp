@@ -27,7 +27,7 @@
 
 /* join */
 # define ERR_NEEDMOREPARAMS2(userName, command) (  userName + " " + command + " :Not enough parameters" + "\r\n")
-# define JOIN_SUCCESS(joiner, channelName, serverName, userName) ":" + joiner + "!" + userName + "@" + serverName + " JOIN " + channelName +"\r\n"
+# define JOIN_SUCCESS(nickName, channelName, serverName, userName) (  nickName + "!" + userName + "@" + serverName + " JOIN " + channelName + "\r\n")
 # define RPL_TOPIC(userName, channelName, topic) (  channelName + " :" + topic + "\r\n") 
 # define RPL_TOPICWHOTIME(userName, channelName, nickName, time) (  userName + " " + channelName + " " + nickName + " " + timeToString(time) + "\r\n")
 # define RPL_NAMREPLY(nickName, channelName, channel) (nickName + "=" + channelName + " :" + ((channel).makeMemberList()) + "\r\n")

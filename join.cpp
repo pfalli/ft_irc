@@ -91,7 +91,8 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		channel->joinClient(joiningClient);
 		// *** print message in case JOIN_FAILURE, because client already exist in channel ***
 		// *** try JOIN !!!channel *** it has to create only channels with '#'
-		std::string welcomemsg = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
+		std::string welcomemsg_str = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
+		const char *welcomemsg = welcomemsg_str.c_str();
 		sendToChannel(*channel, welcomemsg);
 		
 		if (channel->getisTopic() == 1)

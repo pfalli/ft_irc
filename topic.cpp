@@ -78,8 +78,12 @@ void topic(Server *server, const Command &cmd, Client *client)
 			channel->clearTopic(nickName);
 		else
 			channel->setTopic(cmd.message, nickName);
-		sendToChannel(*channel, RPL_TOPIC(nickName, channelName, channel->getTopic()));
-		sendToChannel(*channel, RPL_TOPICWHOTIME(nickName, channelName, channel->getwhoTopicSet(), channel->getwhenTopicSet()));
+		std::string str = RPL_TOPIC(nickName, channelName, channel->getTopic());
+		const char *msg1 = str.c_str();
+		sendToChannel(*channel, msg1);
+		str = RPL_TOPICWHOTIME(nickName, channelName, channel->getwhoTopicSet(), channel->getwhenTopicSet());
+		const char *msg2 = str.c_str();
+		sendToChannel(*channel, msg2);
 		return ;
 	}
 }
