@@ -8,6 +8,7 @@ typedef enum	s_format
 	NICKNAME,
 	USERNAME,
 	PASSWORD,
+	REALNAME,
 	PORT
 
 }				t_format;
@@ -42,3 +43,5 @@ void topic(Server *server, const Command &cmd, Client *client);
 template <typename T> typename std::vector<T>::iterator		findObject(int toFind, std::vector<T> &array);
 
 bool isOperator(Channel &channel, Client *client);
+
+std::string splitParamsName(std::string params, int mode);

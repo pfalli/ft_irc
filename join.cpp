@@ -92,6 +92,7 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		// *** try JOIN !!!channel *** it has to create only channels with '#'
 		std::string welcomemsg = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
 		sendToChannel(*channel, welcomemsg);
+		
 		if (channel->getisTopic() == 1)
 		{
 			std::string topicMsg = RPL_TOPIC(username, channelTojoin, channel->getTopic());

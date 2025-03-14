@@ -239,3 +239,75 @@ bool isOperator(Channel &channel, Client *client)
 		return false;
 	return true ;
 }
+
+std::string splitParamsName(std::string params, int mode)
+{
+	std::string name = "";
+	if (mode == USERNAME)
+	{
+		size_t i = 0;
+		while (i < params.length() && params[i] != ' ')
+		{
+			name += params[i];
+			i++;
+		}
+		if (!params[i])
+		{
+			std::cout << "test" << std::endl << std::endl;
+			return ("ERROR");
+		}
+		else
+		{
+			if (isspace(params[i]))
+			{
+				i++;
+				if (params[i] && params[i] == '0')
+				{
+					std::cout << params[i] << std::endl << std::endl;
+					i++;
+					if (params[i] && isspace(params[i]))
+					{
+						std::cout << params[i] << std::endl << std::endl;
+						i++;
+						if (params[i] && params[i] == '*')
+						{
+							std::cout << params[i] << std::endl << std::endl;
+							i++;
+							if ((params[i] && isspace(params[i])))
+								return (name);
+							else
+								return ("ERROR");
+						}
+						else
+							return ("ERROR");
+					}
+					else
+						return ("ERROR"); 
+				}
+				else
+					return ("ERROR");
+			}
+			else
+				return ("ERROR");
+		}
+	}
+	else if (mode == REALNAME)
+	{
+		size_t i = 0;
+		while (i < params.length() && params[i] != '*')
+		{
+			std::cout << params[i];
+			i++;
+		}
+		if (params[i])	//skip whitespace after *
+			i++;
+		else
+			return ("ERROR");
+		while (i < params.length())
+		{
+			name += params[i];
+			i++;
+		}
+	}
+	return (name);
+}

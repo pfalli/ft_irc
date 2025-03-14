@@ -393,13 +393,28 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		}
 		if (!existingName(cmd.parameter, USERNAME))
 		{
-			if (!validFormat(USERNAME, cmd.parameter))
+			std::string uName = splitParamsName(cmd.parameter, USERNAME);
+			std::string rName = splitParamsName(cmd.parameter, REALNAME);
+			if (uName == "ERROR")
 			{
 				send(client.getSocket(), "Wrong Format. please try again.\n", 33, 0);
 				return ;
 			}
-			client.setUserName(cmd.parameter);
+			if (!validFormat(USERNAME, uName))
+			{
+				send(client.getSocket(), "Wrong Format. please try again.\n", 33, 0);
+				return ;
+			}
+			client.setUserName(uName);
 			client.setUser();
+			if (rName == "ERROR")
+			{
+				std::string reply = ERR_NEEDMOREPARAMS2(uName, "USER");
+				const char *msg = reply.c_str();
+				send(client.getSocket(), msg, strlen(msg), 0);
+				return ;
+			}
+			client.setRealName(rName);
 		}
 		else
 		{

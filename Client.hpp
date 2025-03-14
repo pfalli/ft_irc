@@ -19,6 +19,7 @@ class Client
 	private:
 	int										clientSocket; //same as client_fd
 	std::string								user_name;
+	std::string								real_name;
 	std::string								nick_name;
 	bool									password;
 	bool									user;
@@ -38,6 +39,7 @@ class Client
 											~Client(){};
 	void									setUserName(std::string _name){this->user_name = _name;}
 	void									setNickName(std::string _name){this->nick_name = _name;}
+	void									setRealName(std::string _name){this->real_name = _name;}
 	void									setRegistered(){this->registered = true;}
 	void									setSocket(int socket){this->clientSocket = socket;}
 	void									setPW(){this->password = true;}
@@ -46,6 +48,7 @@ class Client
 
 	std::string								getUserName() const{return (this->user_name);}
 	std::string								getNickName() const{return (this->nick_name);}
+	std::string								getRealName() const{return (this->real_name);}
 	int										getSocket()const{return (this->clientSocket);}
 	bool									getRegistered()const{return (this->registered);}
 	bool									getPW()const{return (this->password);}
