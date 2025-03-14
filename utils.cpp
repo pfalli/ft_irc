@@ -251,45 +251,42 @@ std::string splitParamsName(std::string params, int mode)
 			name += params[i];
 			i++;
 		}
-		if (!params[i])
-		{
-			std::cout << "test" << std::endl << std::endl;
-			return ("ERROR");
-		}
-		else
-		{
-			if (isspace(params[i]))
-			{
-				i++;
-				if (params[i] && params[i] == '0')
-				{
-					std::cout << params[i] << std::endl << std::endl;
-					i++;
-					if (params[i] && isspace(params[i]))
-					{
-						std::cout << params[i] << std::endl << std::endl;
-						i++;
-						if (params[i] && params[i] == '*')
-						{
-							std::cout << params[i] << std::endl << std::endl;
-							i++;
-							if ((params[i] && isspace(params[i])))
-								return (name);
-							else
-								return ("ERROR");
-						}
-						else
-							return ("ERROR");
-					}
-					else
-						return ("ERROR"); 
-				}
-				else
-					return ("ERROR");
-			}
-			else
-				return ("ERROR");
-		}
+		// if (!params[i])
+		// 	return (name);
+		// else
+		// {
+		// 	if (isspace(params[i]))
+		// 	{
+		// 		i++;
+		// 		if (params[i] && params[i] == '0')
+		// 		{
+		// 			std::cout << params[i] << std::endl << std::endl;
+		// 			i++;
+		// 			if (params[i] && isspace(params[i]))
+		// 			{
+		// 				std::cout << params[i] << std::endl << std::endl;
+		// 				i++;
+		// 				if (params[i] && params[i] == '*')
+		// 				{
+		// 					std::cout << params[i] << std::endl << std::endl;
+		// 					i++;
+		// 					if ((params[i] && isspace(params[i])))
+		// 						return (name);
+		// 					else
+		// 						return ("ERROR");
+		// 				}
+		// 				else
+		// 					return ("ERROR");
+		// 			}
+		// 			else
+		// 				return ("ERROR"); 
+		// 		}
+		// 		else
+		// 			return ("ERROR");
+		// 	}
+		// 	else
+		// 		return ("ERROR");
+		// }
 	}
 	else if (mode == REALNAME)
 	{
@@ -302,7 +299,7 @@ std::string splitParamsName(std::string params, int mode)
 		if (params[i])	//skip whitespace after *
 			i++;
 		else
-			return ("ERROR");
+			return ("not_given");
 		while (i < params.length())
 		{
 			name += params[i];
@@ -310,4 +307,94 @@ std::string splitParamsName(std::string params, int mode)
 		}
 	}
 	return (name);
+}
+
+bool	checkCaseHex(const Command &cmd, Client & client)
+{
+	if (cmd.command == "NICK" && !cmd.message.empty())
+	{
+		std::string param = cmd.parameter;
+		const char *ptr = strstr(param.c_str(), "USER");
+		if (!ptr)
+			return false;
+		std::string nickname = "";
+		size_t i;
+		for (i = 0; i < param.length(); i++)
+		{
+			nickname += param[i];
+			if (isspace(param[i]))
+			{
+				i++;
+				if (ptr == &param[i])
+					break ;
+			}
+		}
+		client.setNickName(nickname);
+		if (&param[i] == ptr)
+		{
+			i += 4;
+			std::string username = "";
+			while (i < param.length())
+			{
+				if (isspace(param[i]))
+					break;
+				username += param[i];
+				i++;
+			}
+			client.setUserName(username);
+			client.setRealName(cmd.message);
+			client.setRegistered();
+			send(client.getSocket(), "Registration complete. Now you just need the password.\n", 56, 0);
+			return true;
+		}
+	}
+	else if (cmd.command == "CAP")
+	{
+		std::string param = cmd.parameter;
+		const char *nick_ptr = strstr(param.c_str(), "NICK");
+		if (!nick_ptr)
+			return false;
+		const char *user_ptr = strstr(param.c_str(), "USER");
+		if (!user_ptr)
+			return false;
+		size_t i;
+		for (i = 0; i < param.length(); i++)
+		{
+			if (&param[i] == nick_ptr)
+			{
+				i += 4;
+				break ;
+			}
+		}
+		std::string nickname = "";
+		for (; i < param.length(); i++)
+		{
+			nickname += param[i];
+			if (isspace(param[i]))
+			{
+				i++;
+				if (user_ptr == &param[i])
+					break ;
+			}
+		}
+		client.setNickName(nickname);
+		if (&param[i] == user_ptr)
+		{
+			i += 4;
+			std::string username = "";
+			while (i < param.length())
+			{
+				if (isspace(param[i]))
+					break;
+				username += param[i];
+				i++;
+			}
+			client.setUserName(username);
+			client.setRealName(cmd.message);
+			client.setRegistered();
+			send(client.getSocket(), "Registration complete. Now you just need the password.\n", 56, 0);
+			return true;
+		}
+	}
+	return false;
 }

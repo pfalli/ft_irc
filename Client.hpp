@@ -34,6 +34,11 @@ class Client
 											{
 												user_name = "default";
 												nick_name = "default_nick";
+												real_name = "default_real";
+												password = false;
+												user = false;
+												nick = false;
+												registered =false;
 												clientSocket = socket;
 											};
 											~Client(){};

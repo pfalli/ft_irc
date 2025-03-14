@@ -12,7 +12,7 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 		_register(client, cmd, USERNAME);
 	else if (cmd.command == "NICK")
 		_register(client, cmd, NICKNAME);
-	if (!client.getRegistered())
+	if (!client.getRegistered() || !client.getPW())
 		return ;
 	if (cmd.command == "JOIN") {
 		join(this, &client, cmd.parameter);

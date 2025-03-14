@@ -72,7 +72,8 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	if (channelTojoin.empty())
 	{
 		std::string str = ERR_NEEDMOREPARAMS(joiningClient->getUserName());
-		send(joiningClient->getSocket(), str.c_str(), str.length(), 0);
+		const char *msg = str.c_str();
+		send(joiningClient->getSocket(), msg, strlen(msg), 0);
 		return ;
 	}
 	if (channelTojoin[0] != '#')
@@ -95,15 +96,19 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		
 		if (channel->getisTopic() == 1)
 		{
-			std::string topicMsg = RPL_TOPIC(username, channelTojoin, channel->getTopic());
-			std::string topicMsg2 = RPL_TOPICWHOTIME(username, channelTojoin, channel->getwhoTopicSet(), channel->getwhenTopicSet());
-			send(joiningClient->getSocket(), topicMsg.c_str(), topicMsg.length(), 0);
-			send(joiningClient->getSocket(), topicMsg2.c_str(), topicMsg2.length(), 0);
+			std::string topicMsg_str = RPL_TOPIC(username, channelTojoin, channel->getTopic());
+			const char *topicMsg = topicMsg_str.c_str();
+			std::string topicMsg2_str = RPL_TOPICWHOTIME(username, channelTojoin, channel->getwhoTopicSet(), channel->getwhenTopicSet());
+			const char *topicMsg2 = topicMsg2_str.c_str();
+			send(joiningClient->getSocket(), topicMsg, strlen(topicMsg), 0);
+			send(joiningClient->getSocket(), topicMsg2, strlen(topicMsg2), 0);
 		}
-		std::string	memberInfo = RPL_NAMREPLY(joiningClient->getNickName(), channelTojoin, *channel);
-		std::string endOfMsg = RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin);
-		send(joiningClient->getSocket(), memberInfo.c_str(), memberInfo.length(), 0);
-		send(joiningClient->getSocket(), endOfMsg.c_str(), endOfMsg.length(), 0);
+		std::string	memberInfo_str = RPL_NAMREPLY(joiningClient->getNickName(), channelTojoin, *channel);
+		const char *memberInfo = memberInfo_str.c_str();
+		std::string endOfMsg_str = RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin);
+		const char *endOfMsg = endOfMsg_str.c_str();
+		send(joiningClient->getSocket(), memberInfo, strlen(memberInfo), 0);
+		send(joiningClient->getSocket(), endOfMsg, strlen(endOfMsg), 0);
 		channel->printAllMembers();
 	}
 	else
@@ -111,8 +116,9 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		channel->printAllMembers();
 		if (channel->flagCheck('i') == 0)
 		{
-			std::string joinOnly = ERR_INVITEONLYCHAN(server->getName(), username, channel->getName());
-			send(joiningClient->getSocket(), joinOnly.c_str(), joinOnly.length(), 0);
+			std::string joinOnly_str = ERR_INVITEONLYCHAN(server->getName(), username, channel->getName());
+			const char *joinOnly = joinOnly_str.c_str();
+			send(joiningClient->getSocket(), joinOnly, strlen(joinOnly), 0);
 			return ;
 		}
 		if (channel->flagCheck('k') == 0)
@@ -134,18 +140,23 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 			send(joiningClient->getSocket(), usrOnChannel2.c_str(), usrOnChannel2.length(), 0);
 			return ;
 		}
-		std::string welcomemsg = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
+		std::string welcomemsg_str = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
+		const char *welcomemsg = welcomemsg_str.c_str();
 		sendToChannel(*channel, welcomemsg);
 		if (channel->getisTopic() == 1)
 		{
-			std::string topicMsg = RPL_TOPIC(username, channelTojoin, channel->getTopic());
-			std::string topicMsg2 = RPL_TOPICWHOTIME(username, channelTojoin, channel->getwhoTopicSet(), channel->getwhenTopicSet());
-			send(joiningClient->getSocket(), topicMsg.c_str(), topicMsg.length(), 0);
-			send(joiningClient->getSocket(), topicMsg2.c_str(), topicMsg2.length(), 0);
+			std::string topicMsg_str = RPL_TOPIC(username, channelTojoin, channel->getTopic());
+			const char *topicMsg = topicMsg_str.c_str();
+			std::string topicMsg2_str = RPL_TOPICWHOTIME(username, channelTojoin, channel->getwhoTopicSet(), channel->getwhenTopicSet());
+			const char *topicMsg2 = topicMsg2_str.c_str();
+			send(joiningClient->getSocket(), topicMsg, strlen(topicMsg), 0);
+			send(joiningClient->getSocket(), topicMsg2, strlen(topicMsg2), 0);
 		}
-		std::string	memberInfo = RPL_NAMREPLY(joiningClient->getNickName(), channelTojoin, *channel);
-		std::string endOfMsg = RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin);
-		send(joiningClient->getSocket(), memberInfo.c_str(), memberInfo.length(), 0);
-		send(joiningClient->getSocket(), endOfMsg.c_str(), endOfMsg.length(), 0);
+		std::string	memberInfo_str = RPL_NAMREPLY(joiningClient->getNickName(), channelTojoin, *channel);
+		const char *memberInfo = memberInfo_str.c_str();
+		std::string endOfMsg_str = RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin);
+		const char *endOfMsg = endOfMsg_str.c_str();
+		send(joiningClient->getSocket(), memberInfo, strlen(memberInfo), 0);
+		send(joiningClient->getSocket(), endOfMsg, strlen(endOfMsg), 0);
 	}
 }

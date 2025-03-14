@@ -49,7 +49,7 @@
 	To properly use our server you have to register.\n\
 	Please use the following commands in order :)\n\n\
 	PASS <password> to register with the server password\n\
-	USER <username> to set Username\n\
+	USER <username> 0 * <real name> to set Username and your real name\n\
 	NICK <nickname> to set Nickname\n\n\
 	If you want to know what commands you can use just type HELP\n\n";
 

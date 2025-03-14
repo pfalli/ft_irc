@@ -344,7 +344,8 @@ void									Server::clean()
 	while (client != this->clients.end())
 	{
 		std::cout << std::endl << client->getNickName() << " " << client->getSocket() << std::endl;
-		send(client->getSocket(), "Server closed unexpectedly.\n", 29, 0);
+		const char *msg = "Server closed unexpectedly.\n";
+		send(client->getSocket(), msg, strlen(msg), 0);
 		client++;
 	}
 	std::cout << std::endl;
@@ -365,6 +366,14 @@ typename std::vector<T>::iterator		Server::findObject(int toFind, std::vector<T>
 
 void					Server::_register(Client &client, const Command &cmd, int mode)
 {
+	if (client.getRegistered() && client.getPW() && mode != NICKNAME)
+	{
+		std::string str = client.getUserName() + " :You may not reregister\n";
+		send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
+		return ;
+	}
+	if (checkCaseHex(cmd, client))
+			return ;
 	if (cmd.parameter.empty())
 	{
 		const std::string str = ERR_NEEDMOREPARAMS(client.getUserName());
@@ -380,7 +389,10 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 	if (mode == PASSWORD)
 	{
 		if (this->password == cmd.parameter)
+		{
 			client.setPW();
+			send(client.getSocket(), "Password set successfully\n", 27, 0);
+		}
 		else
 			send(client.getSocket(), "Incorrect Password. Please try again.\n", 39, 0);
 	}
