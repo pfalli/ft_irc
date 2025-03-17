@@ -14,7 +14,7 @@ int main(int ac, char **av)
 	{
 		validFormat(PASSWORD, av[2]);
 		validFormat(PORT, av[1]);
-		Server program(av[2], std::atoi(av[1]), "ft_irc");
+		Server program(av[2], std::atoi(av[1]), "localhost");
 		program.launch();
 		return 0;
 	}

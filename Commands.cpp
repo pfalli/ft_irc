@@ -124,7 +124,8 @@ void Server::printInfo(Client* handleClient, const Command &cmd) {
 		channelIt++;
 	}
 	if (channelIt == channels.end()) {
-		send(handleClient->getSocket(), "Channel not found\n", 19, 0);
+		std::string msg = ERR_NOSUCHCHANNEL(this->getName(), handleClient->getNickName(), channelIt->getName());
+		send(handleClient->getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
 		return ;
 	}
 	// print _joinedClients
