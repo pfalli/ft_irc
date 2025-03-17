@@ -380,12 +380,6 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		send(client.getSocket(), str.c_str(), str.length(), 0);
 		return ;
 	}
-	else if (!cmd.message.empty())
-	{
-		const std::string str = ERR_TOOMANYPARAMS(client.getUserName());
-		send(client.getSocket(), str.c_str(), str.length(), 0);
-		return ;
-	}
 	if (mode == PASSWORD)
 	{
 		if (this->password == cmd.parameter)
@@ -406,8 +400,8 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		}
 		if (!existingName(cmd.parameter, USERNAME))
 		{
-			std::string uName = splitParamsName(cmd.parameter, USERNAME);
-			std::string rName = splitParamsName(cmd.parameter, REALNAME);
+			std::string uName = userNameCommandFormat(cmd.parameter, USERNAME);
+			std::cout << uName << std::endl;
 			if (uName == "ERROR")
 			{
 				send(client.getSocket(), "Wrong Format. please try again.\r\n", 34, 0);
@@ -420,14 +414,11 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 			}
 			client.setUserName(uName);
 			client.setUser();
-			if (rName == "ERROR")
+			if (!cmd.message.empty())
 			{
-				std::string reply = ERR_NEEDMOREPARAMS2(uName, "USER");
-				const char *msg = reply.c_str();
-				send(client.getSocket(), msg, strlen(msg), 0);
-				return ;
+				std::string rName = removeSpace(cmd.message);
+				client.setRealName(rName);
 			}
-			client.setRealName(rName);
 		}
 		else
 		{

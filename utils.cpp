@@ -240,7 +240,7 @@ bool isOperator(Channel &channel, Client *client)
 	return true ;
 }
 
-std::string splitParamsName(std::string params, int mode)
+std::string userNameCommandFormat(std::string params, int mode)
 {
 	std::string name = "";
 	if (mode == USERNAME)
@@ -251,62 +251,52 @@ std::string splitParamsName(std::string params, int mode)
 			name += params[i];
 			i++;
 		}
-		// if (!params[i])
-		// 	return (name);
-		// else
-		// {
-		// 	if (isspace(params[i]))
-		// 	{
-		// 		i++;
-		// 		if (params[i] && params[i] == '0')
-		// 		{
-		// 			std::cout << params[i] << std::endl << std::endl;
-		// 			i++;
-		// 			if (params[i] && isspace(params[i]))
-		// 			{
-		// 				std::cout << params[i] << std::endl << std::endl;
-		// 				i++;
-		// 				if (params[i] && params[i] == '*')
-		// 				{
-		// 					std::cout << params[i] << std::endl << std::endl;
-		// 					i++;
-		// 					if ((params[i] && isspace(params[i])))
-		// 						return (name);
-		// 					else
-		// 						return ("ERROR");
-		// 				}
-		// 				else
-		// 					return ("ERROR");
-		// 			}
-		// 			else
-		// 				return ("ERROR"); 
-		// 		}
-		// 		else
-		// 			return ("ERROR");
-		// 	}
-		// 	else
-		// 		return ("ERROR");
-		// }
-	}
-	else if (mode == REALNAME)
-	{
-		size_t i = 0;
-		while (i < params.length() && params[i] != '*')
-		{
-			std::cout << params[i];
-			i++;
-		}
-		if (params[i])	//skip whitespace after *
-			i++;
+		if (!params[i])
+			return (name);
 		else
-			return ("not_given");
-		while (i < params.length())
 		{
-			name += params[i];
-			i++;
+			if (isspace(params[i]))
+			{
+				i++;
+				if (params[i] && params[i] == '0')
+				{
+					i++;
+					if (params[i] && isspace(params[i]))
+					{
+						i++;
+						if (params[i] && params[i] == '*')
+						{
+							if (!params[i + 1])
+								return (name);
+							else
+								return ("ERROR");
+						}
+						else
+							return ("ERROR");
+					}
+					else
+						return ("ERROR"); 
+				}
+				else
+					return ("ERROR");
+			}
+			else
+				return ("ERROR");
 		}
 	}
 	return (name);
+}
+
+std::string removeSpace(std::string input)
+{
+	std::string str = "";\
+	size_t i = 0;
+
+	while (i < input.length() && isspace(input[i]))
+		i++;
+	for (; i < input.length(); i++)
+		str += input[i];
+	return str;
 }
 
 bool	checkCaseHex(const Command &cmd, Client & client)
