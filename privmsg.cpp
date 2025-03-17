@@ -95,13 +95,15 @@ void	messageToAllChannel(Server *server, Client *sender, const Command &cmd)
 	std::vector<Channel> channels = server->getChannels();
 	std::string	targetChannel = cmd.parameter;
 	std::string	senderNickname = sender->getNickName();
+	std::string senderUser = sender->getUserName();
 
 	//parseChannelName2(targetChannel);
 	for (std::vector<Channel>::iterator it = channels.begin(); it != channels.end(); it++)
 	{
 		if (it->getName() == targetChannel)
 		{
-			std::string msg = TO_ALL_CHANNEL(senderNickname, targetChannel, cmd.message);
+			//std::string msg = TO_ALL_CHANNEL(senderNickname, targetChannel, cmd.message);
+			std::string msg = TO_ALL_CHANNEL_TEST(senderNickname, targetChannel, cmd.message, senderUser, server->getName());
 			const char *message = msg.c_str();
 			sendToChannel(*it, message);
 			return ;

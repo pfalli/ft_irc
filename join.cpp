@@ -93,6 +93,7 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		// *** try JOIN !!!channel *** it has to create only channels with '#'
 		std::string welcomemsg_str = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
 		const char *welcomemsg = welcomemsg_str.c_str();
+		// send(joiningClient->getSocket(), welcomemsg, strlen(welcomemsg), 0);
 		sendToChannel(*channel, welcomemsg);
 		
 		if (channel->getisTopic() == 1)

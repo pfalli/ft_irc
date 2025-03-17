@@ -385,17 +385,22 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		if (this->password == cmd.parameter)
 		{
 			client.setPW();
-			send(client.getSocket(), "Password set successfully\r\n", 28, 0);
+			const char *msg = "Password set successfully\r\n";
+			send(client.getSocket(), msg, strlen(msg), 0);
 		}
 		else
-			send(client.getSocket(), "Incorrect Password. Please try again.\r\n", 40, 0);
+		{
+			const char *msg = "Incorrect Password. Please try again.\r\n";
+			send(client.getSocket(), msg, strlen(msg), 0);
+		}
 		return ;
 	}
 	else if (mode == USERNAME)
 	{
 		if (!client.getPW())
 		{
-			send(client.getSocket(), "Please enter the password first.\r\n", 35, 0);
+			const char *msg = "Please enter the password first.\r\n";
+			send(client.getSocket(), msg, strlen(msg), 0);
 			return ;
 		}
 		if (!existingName(cmd.parameter, USERNAME))
@@ -404,12 +409,14 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 			std::cout << uName << std::endl;
 			if (uName == "ERROR")
 			{
-				send(client.getSocket(), "Wrong Format. please try again.\r\n", 34, 0);
+				const char *msg = "Wrong Format. please try again.\r\n";
+				send(client.getSocket(), msg, strlen(msg), 0);
 				return ;
 			}
 			if (!validFormat(USERNAME, uName))
 			{
-				send(client.getSocket(), "Wrong Format. please try again.\r\n", 34, 0);
+				const char *msg = "Wrong Format. please try again.\r\n";
+				send(client.getSocket(), msg, strlen(msg), 0);
 				return ;
 			}
 			client.setUserName(uName);
@@ -422,7 +429,8 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		}
 		else
 		{
-			send(client.getSocket(), "Username already taken. Please try again with a different user name.\r\n", 71, 0);
+			const char *msg = "Username already taken. Please try again with a different user name.\r\n";
+			send(client.getSocket(), msg, strlen(msg), 0);
 			return ;
 		}
 	}
@@ -430,19 +438,22 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 	{
 		if (!client.getPW())
 		{
-			send(client.getSocket(), "Please enter the password and username first.\r\n", 48, 0);
+			const char *msg = "Please enter the password and username first.\r\n";
+			send(client.getSocket(), msg, strlen(msg), 0);
 			return ;
 		}
 		else if (client.getUserName() == "default")
 		{
-			send(client.getSocket(), "Please set your username first.\r\n", 34, 0);
+			const char *msg = "Please set your username first.\r\n";
+			send(client.getSocket(), msg, strlen(msg), 0);
 			return ;
 		}
 		if (!existingName(cmd.parameter, NICKNAME))
 		{
 			if (!validFormat(NICKNAME, cmd.parameter))
 			{
-				send(client.getSocket(), "Wrong Format. please try again.\r\n", 34, 0);
+				const char *msg = "Wrong Format. please try again.\r\n";
+				send(client.getSocket(), msg, strlen(msg), 0);
 				return ;
 			}
 			client.setNickName(cmd.parameter);
@@ -450,14 +461,16 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		}
 		else
 		{
-			send(client.getSocket(), "Nickname already taken. Please try again with a different nick name.\r\n", 71, 0);
+			const char *msg = "Nickname already taken. Please try again with a different nick name.\r\n";
+			send(client.getSocket(), msg, strlen(msg), 0);
 			return ;
 		}
 	}
 	if (client.getNick() == true && client.getPW() == true && client.getUser() == true)
 	{
 		client.setRegistered();
-		send(client.getSocket(), "Registration complete!\r\n", 25, 0);
+		const char *msg = "Registration complete!\r\n";
+		send(client.getSocket(), msg, strlen(msg), 0);
 	}
 }
 
