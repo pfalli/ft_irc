@@ -71,7 +71,7 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	username = joiningClient->getNickName();
 	if (channelTojoin.empty())
 	{
-		sendMsg(joiningClient, ERR_NEEDMOREPARAMS2(server->getName(), joiningClient->getNickName(), "JOIN"));
+		sendMsg(joiningClient, ERR_NEEDMOREPARAMS(username));
 		return ;
 	}
 	if (channelTojoin[0] != '#')

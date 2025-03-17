@@ -104,10 +104,10 @@ void	messageToAllChannel(Server *server, Client *sender, const Command &cmd)
 		if (it->getName() == targetChannel)
 		{
 			//std::string msg = TO_ALL_CHANNEL(senderNickname, targetChannel, cmd.message);
-			std::string msg = TO_ALL_CHANNEL_TEST(senderNickname, targetChannel, cmd.message, senderUser, server->getName());
-			const char *message = msg.c_str();
-			sendToChannel(*it, message);
-			return ;
+			// std::string msg = TO_ALL_CHANNEL_TEST(senderNickname, targetChannel, cmd.message, senderUser, server->getName());
+			// const char *message = msg.c_str();
+			// sendToChannel(*it, message);
+			// return ;
 		}
 	}
 	std::string errmsg = ERR_NOSUCHCHANNEL(server->getName(), sender->getUserName(), targetChannel);

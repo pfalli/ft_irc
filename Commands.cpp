@@ -221,13 +221,13 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 		return;
 	}
 	channelIt->getJoinedClients().push_back(&(*targetExistIt));
-	std::string str = RPL_INVITING(handleClient->getUserName(), handleClient->getNickName(), targetExistIt->getNickName(), channelIt->getName());
+	std::string str = RPL_INVITING(handleClient->getNickName(), targetExistIt->getNickName(), channelIt->getName());
 	send(handleClient->getSocket(), str.c_str(), str.length(), 0);
-	std::string msg = "You were added to " + channelIt->getName() + " by " + handleClient->getNickName() + "\r\n";
-	send(targetExistIt->getSocket(), msg.c_str(), msg.length(), 0);
-	const std::string temp_str = JOIN_SUCCESS(handleClient->getNickName(), channelIt->getName(), this->getName() , handleClient->getUserName());
-	const char *temp = temp_str.c_str();
-	sendToChannel(*channelIt, temp);
+	// std::string msg = "You were added to " + channelIt->getName() + " by " + handleClient->getNickName() + "\r\n";
+	// send(targetExistIt->getSocket(), msg.c_str(), msg.length(), 0);
+	// const std::string temp_str = JOIN_SUCCESS(handleClient->getNickName(), channelIt->getName(), this->getName() , handleClient->getUserName());
+	// const char *temp = temp_str.c_str();
+	// sendToChannel(*channelIt, temp); // **** all this part is GARBAGE for HEXCHAT****
 }
 
 void Server::handleKick(Client* handleClient, const Command &cmd) {
