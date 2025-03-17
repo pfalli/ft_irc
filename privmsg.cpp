@@ -70,8 +70,9 @@ void	splitTargetUsers(std::string tmpTarget, std::vector<std::string> &targets)
 // 	std::cout << "targetChannel :" << targetChannel << std::endl;
 // }
 
-void	sendToChannel(Channel &channel, const char *msg)
+void	sendToChannel(Channel &channel, const std::string &message)
 {
+	const char *msg = message.c_str();
 	std::vector<Client *> clients = channel.getJoinedClients();
 	for (std::vector<Client *>::iterator it = clients.begin(); it != clients.end() ;it++)
 	{

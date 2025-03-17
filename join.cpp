@@ -71,14 +71,12 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	username = joiningClient->getNickName();
 	if (channelTojoin.empty())
 	{
-		std::string str = ERR_NEEDMOREPARAMS(joiningClient->getUserName());
-		const char *msg = str.c_str();
-		send(joiningClient->getSocket(), msg, strlen(msg), 0);
+		sendMsg(joiningClient, ERR_NEEDMOREPARAMS2(server->getName(), joiningClient->getNickName(), "JOIN"));
 		return ;
 	}
 	if (channelTojoin[0] != '#')
 	{
-		send(joiningClient->getSocket(), "Error: channel name needs to include # at beginning\n", 53, 0);
+		sendMsg(joiningClient, ERR_NOSUCHCHANNEL(server->getName(), joiningClient->getNickName(), channelTojoin));
 		return ;
 	}
 	channel = server->isChannelExist2(channelTojoin);
@@ -88,28 +86,19 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	{
 		server->createChannel(*joiningClient, channelTojoin, joiningClient->getSocket());
 		channel = server->isChannelExist2(channelTojoin);
+		if (channel == 0)
+			return ;
 		channel->joinClient(joiningClient);
 		// *** print message in case JOIN_FAILURE, because client already exist in channel ***
 		// *** try JOIN !!!channel *** it has to create only channels with '#'
-		std::string welcomemsg_str = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
-		const char *welcomemsg = welcomemsg_str.c_str();
-		sendToChannel(*channel, welcomemsg);
-		
+		sendToChannel(*channel, JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName()));
 		if (channel->getisTopic() == 1)
 		{
-			std::string topicMsg_str = RPL_TOPIC(username, channelTojoin, channel->getTopic());
-			const char *topicMsg = topicMsg_str.c_str();
-			std::string topicMsg2_str = RPL_TOPICWHOTIME(username, channelTojoin, channel->getwhoTopicSet(), channel->getwhenTopicSet());
-			const char *topicMsg2 = topicMsg2_str.c_str();
-			send(joiningClient->getSocket(), topicMsg, strlen(topicMsg), 0);
-			send(joiningClient->getSocket(), topicMsg2, strlen(topicMsg2), 0);
+			sendMsg(joiningClient, RPL_TOPIC(username, channelTojoin, channel->getTopic()));
+			sendMsg(joiningClient, RPL_TOPICWHOTIME(username, channelTojoin, channel->getwhoTopicSet(), channel->getwhenTopicSet()));
 		}
-		std::string	memberInfo_str = RPL_NAMREPLY(joiningClient->getNickName(), channelTojoin, *channel);
-		const char *memberInfo = memberInfo_str.c_str();
-		std::string endOfMsg_str = RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin);
-		const char *endOfMsg = endOfMsg_str.c_str();
-		send(joiningClient->getSocket(), memberInfo, strlen(memberInfo), 0);
-		send(joiningClient->getSocket(), endOfMsg, strlen(endOfMsg), 0);
+		sendMsg(joiningClient, RPL_NAMREPLY(joiningClient->getNickName(), channelTojoin, *channel));
+		sendMsg(joiningClient, RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin));
 		channel->printAllMembers();
 	}
 	else
@@ -117,28 +106,22 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		channel->printAllMembers();
 		if (channel->flagCheck('i') == 0)
 		{
-			std::string joinOnly_str = ERR_INVITEONLYCHAN(server->getName(), username, channel->getName());
-			const char *joinOnly = joinOnly_str.c_str();
-			send(joiningClient->getSocket(), joinOnly, strlen(joinOnly), 0);
+			sendMsg(joiningClient,ERR_INVITEONLYCHAN(server->getName(), username, channel->getName()));
 			return ;
 		}
 		if (channel->flagCheck('k') == 0)
 		{
 			if (caseK(server, joiningClient, channel) == -1)
-			{
 				return ;
-			}
 		}
 		if (channel->isUserInChannel(joiningClient->getNickName()))
 		{
-			std::string usrOnChannel = ERR_USERONCHANNEL(server->getName(), joiningClient->getNickName(), channel->getName());
-			send(joiningClient->getSocket(), usrOnChannel.c_str(), usrOnChannel.length(), 0);
+			sendMsg(joiningClient,ERR_USERONCHANNEL(server->getName(), joiningClient->getNickName(), channel->getName()));
 			return ;
 		}
 		if (channel->joinClient(joiningClient) == -1)
 		{
-			std::string usrOnChannel2 = ERR_USERONCHANNEL(server->getName(), joiningClient->getNickName(), channel->getName());
-			send(joiningClient->getSocket(), usrOnChannel2.c_str(), usrOnChannel2.length(), 0);
+			sendMsg(joiningClient,ERR_USERONCHANNEL(server->getName(), joiningClient->getNickName(), channel->getName()));
 			return ;
 		}
 		std::string welcomemsg_str = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
@@ -146,18 +129,11 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		sendToChannel(*channel, welcomemsg);
 		if (channel->getisTopic() == 1)
 		{
-			std::string topicMsg_str = RPL_TOPIC(username, channelTojoin, channel->getTopic());
-			const char *topicMsg = topicMsg_str.c_str();
-			std::string topicMsg2_str = RPL_TOPICWHOTIME(username, channelTojoin, channel->getwhoTopicSet(), channel->getwhenTopicSet());
-			const char *topicMsg2 = topicMsg2_str.c_str();
-			send(joiningClient->getSocket(), topicMsg, strlen(topicMsg), 0);
-			send(joiningClient->getSocket(), topicMsg2, strlen(topicMsg2), 0);
+
+			sendMsg(joiningClient,RPL_TOPIC(username, channelTojoin, channel->getTopic()));
+			sendMsg(joiningClient,RPL_TOPICWHOTIME(username, channelTojoin, channel->getwhoTopicSet(), channel->getwhenTopicSet()));
 		}
-		std::string	memberInfo_str = RPL_NAMREPLY(joiningClient->getNickName(), channelTojoin, *channel);
-		const char *memberInfo = memberInfo_str.c_str();
-		std::string endOfMsg_str = RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin);
-		const char *endOfMsg = endOfMsg_str.c_str();
-		send(joiningClient->getSocket(), memberInfo, strlen(memberInfo), 0);
-		send(joiningClient->getSocket(), endOfMsg, strlen(endOfMsg), 0);
+		sendMsg(joiningClient,RPL_NAMREPLY(joiningClient->getNickName(), channelTojoin, *channel));
+		sendMsg(joiningClient,RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin));
 	}
 }

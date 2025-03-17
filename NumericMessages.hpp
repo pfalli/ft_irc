@@ -23,11 +23,11 @@
 # define ERR_NOSUCHNICK(client, nickname) ( ":" + client + " " + nickname + ":" + "401 Error: No such nick/channel"  + "\r\n" )
 # define SUCCESS_PRIVMSG(sender, recipient, msg)  ":" + sender + " PRIVMSG " + recipient + " :" + msg  + "\r\n"
 # define TO_ALL_CHANNEL(senderNickname, channelName, msg) (":" + senderNickname + " PRIVMSG " + channelName + " :" + msg + "\r\n")
-# define ERR_NOSUCHCHANNEL(serverName, nickName, channelName) (  serverName + ": Error(403)" + nickName + " " + channelName + " :No such channel" + "\r\n")
+# define ERR_NOSUCHCHANNEL(serverName, nickName, channelName) ( ":" + serverName + "403" + nickName + " " + channelName + " :No such channel" + "\r\n")
 
 /* join */
-# define ERR_NEEDMOREPARAMS2(userName, command) (  userName + " " + command + " :Not enough parameters" + "\r\n")
-# define JOIN_SUCCESS(nickName, channelName, serverName, userName) (  nickName + "!" + userName + "@" + serverName + " JOIN " + channelName + "\r\n")
+# define ERR_NEEDMOREPARAMS2(serverName, userName, command) (":" + serverName + " 461 " + userName + " " + command + " :Not enough parameters" + "\r\n")
+# define JOIN_SUCCESS(nickName, channelName, serverName, userName) ( ":" + nickName + "!" + userName + "@" + serverName + " JOIN " + channelName + "\r\n")
 # define RPL_TOPIC(userName, channelName, topic) (  channelName + " :" + topic + "\r\n") 
 # define RPL_TOPICWHOTIME(userName, channelName, nickName, time) (  userName + " " + channelName + " " + nickName + " " + timeToString(time) + "\r\n")
 # define RPL_NAMREPLY(nickName, channelName, channel) (nickName + "=" + channelName + " :" + ((channel).makeMemberList()) + "\r\n")

@@ -121,7 +121,11 @@ void	applyModeToChannel(Server *server, Client *client, modeCommand &modeCommand
 				return ;
 			}
 			if (sign == -1)
+			{
 				channel.removeFlag(ch);
+				if (ch == 'o')
+					channel.takeOper(client->getNickName());
+			}
 			if (sign == 1)
 			{
 				std::vector<Client> clients = server->getClients();

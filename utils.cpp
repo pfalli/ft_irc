@@ -388,3 +388,9 @@ bool	checkCaseHex(const Command &cmd, Client & client)
 	}
 	return false;
 }
+
+void sendMsg(Client *client, const std::string &message)
+{
+	const char *msg = message.c_str();
+	send(client->getSocket(), msg, strlen(msg), 0);
+}

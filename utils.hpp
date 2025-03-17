@@ -34,7 +34,7 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin);
 void	privmsg(Server *server, Client *sender, const Command &cmd);
 void	signal_handler(int signal);
 void	parseChannelName2(std::string &targetChannel);
-void	sendToChannel(Channel &channel, const char *msg);
+void	sendToChannel(Channel &channel, const std::string &message);
 
 
 /* topic */
@@ -47,3 +47,5 @@ bool isOperator(Channel &channel, Client *client);
 std::string userNameCommandFormat(std::string params, int mode);
 bool	checkCaseHex(const Command &cmd, Client & client);
 std::string removeSpace(std::string input);
+
+void sendMsg(Client *client, const std::string &message);

@@ -165,6 +165,19 @@ int	Channel::modeK(std::vector<std::string> &argumentSet)
 	return (0);
 }
 
+void	Channel::takeOper(std::string nickName)
+{
+	std::vector<Client *>::iterator it = this->_operators.begin();
+	for (; it != this->_operators.end(); it++)
+	{
+		if ((*it)->getNickName() == nickName)
+		{
+			this->_operators.erase(it);
+			return ;
+		}
+	}
+}
+
 int	Channel::modeO(std::string serverName, Client *client, std::vector<std::string> &argumentSet)
 {
 	std::string nickName;
