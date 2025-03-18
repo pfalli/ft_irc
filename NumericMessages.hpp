@@ -7,10 +7,12 @@
 # define ERR_TOOMANYPARAMS(username) ":serverhost 461 " + username + " :Too many parameters\r\n"
 # define ERR_USERNOTINCHANNEL(client, nick, channel) ":" + client + " " + nick + " " + channel + ":Error (441): They aren't on that channel\r\n"
 # define ERR_NOTONCHANNEL(client, channel) ":" + client + " " + channel + " Error(442):You're not on that channel\r\n"
-# define ERR_USERONCHANNEL(client, nick, channel) ":serverhost 443" + client + " " + channel + " " + nick + ":is already on channel\r\n"
+# define ERR_USERONCHANNEL(client, nick, channel) ":serverhost 443 " + client + " " + channel + " " + nick + ":is already on channel\r\n"
 # define ERR_NOTEXIST(target) ":serverhost 461 " + target + " doesn't exist\r\n"
 # define ERR_INVERTPARAM(command, target) ":serverhost 461 '" + target + "' is not a channel. "+command+" <client> <channel> \r\n"
 # define ERR_UNKNOWNCOMMAND(username, command) ":serverhost 421 " + username + " " + command + " :Unknown command\r\n"
+
+# define ERR_USERONCHANNEL2(clientName, target, channelName) ":serverhost 443 " + clientName + " " + target + " " + channelName + " :is already on channel\r\n"
 
 
 // **REPLIES
@@ -23,7 +25,7 @@
 # define ERR_NOSUCHNICK(client, nickname) ( ":serverhost 401" + client + " " + nickname + ":" + " : No such nick/channel"  + "\r\n" )
 # define SUCCESS_PRIVMSG(sender, recipient, msg)  ":" + sender + " PRIVMSG " + recipient + " :" + msg  + "\r\n"
 # define TO_ALL_CHANNEL(senderNickname, channelName, msg) (":" + senderNickname + " PRIVMSG " + channelName + " :" + msg + "\r\n")
-# define ERR_NOSUCHCHANNEL(serverName, nickName, channelName) ( ":" + serverName + "403" + nickName + " " + channelName + " :No such channel" + "\r\n")
+# define ERR_NOSUCHCHANNEL(serverName, nickName, channelName) ( ":" + serverName + " 403 " + nickName + " " + channelName + " :No such channel" + "\r\n")
 # define TO_ALL_CHANNEL_TEST(senderNick, recipient, msg, senderUser, serverName)  (senderNick + "!" + senderUser + "@" + serverName + " PRIVMSG " + recipient + " :" + msg  + "\r\n")
 
 /* join */

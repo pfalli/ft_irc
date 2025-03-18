@@ -66,7 +66,7 @@ void Channel::removeClientFromList(std::vector<Client *>::iterator clientIt) {
 	}
 }
  
-void Channel::printAllMembers()
+void Channel:: printAllMembers()
 {
     std::vector<Client *> clients = _joinedClients;
 

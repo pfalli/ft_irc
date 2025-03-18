@@ -329,7 +329,7 @@ void	Server::existingConnection(std::vector<pollfd>::iterator it)
 		}
 		else
 		{
-			std::cout << "Received(existingConnection): " << str << std::endl;
+			std::cout << "Received(existingConnection):|" << str << "|" << std::endl;
 			Command cmd;
 			parseCommand(str, cmd);
 			handleCommand(cmd, *client);
@@ -511,11 +511,9 @@ void Server::parseCommand(const std::string &str, Command &cmd) {
 			cmd.parameter += word;
 		}
 	}
-	std::cout << "\n-------------------\nParsed command: " << cmd.command << std::endl;
-	std::cout << "Parameter: " << cmd.parameter << std::endl;
-	std::cout << "Message: " << cmd.message << "\n-------------------\n" << std::endl;
-
-	std::cout << "|" << cmd.message << "|" << std::endl;
+	std::cout << "\n-------------------\nParsed command:|" << cmd.command << "|" << std::endl;
+	std::cout << "Parameter:|" << cmd.parameter << "|" << std::endl;
+	std::cout << "Message:|" << cmd.message << "|" << "\n-------------------\n" << std::endl;
 }
 
 

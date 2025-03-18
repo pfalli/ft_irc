@@ -80,8 +80,6 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		return ;
 	}
 	channel = server->isChannelExist2(channelTojoin);
-	if (channel != 0)
-		channel->printAllMembers();
 	if (channel == 0)
 	{
 		server->createChannel(*joiningClient, channelTojoin, joiningClient->getSocket());
@@ -91,7 +89,10 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		channel->joinClient(joiningClient);
 		// *** print message in case JOIN_FAILURE, because client already exist in channel ***
 		// *** try JOIN !!!channel *** it has to create only channels with '#'
+
 		sendToChannel(*channel, JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName()));
+		sendMsg(joiningClient,JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName()));
+		
 		if (channel->getisTopic() == 1)
 		{
 			sendMsg(joiningClient, RPL_TOPIC(username, channelTojoin, channel->getTopic()));
@@ -99,11 +100,11 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		}
 		sendMsg(joiningClient, RPL_NAMREPLY(joiningClient->getNickName(), channelTojoin, *channel));
 		sendMsg(joiningClient, RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin));
-		channel->printAllMembers();
+		//channel->printAllMembers();
 	}
 	else
 	{
-		channel->printAllMembers();
+		//channel->printAllMembers();
 		if (channel->flagCheck('i') == 0)
 		{
 			sendMsg(joiningClient,ERR_INVITEONLYCHAN(server->getName(), username, channel->getName()));
@@ -114,19 +115,15 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 			if (caseK(server, joiningClient, channel) == -1)
 				return ;
 		}
-		if (channel->isUserInChannel(joiningClient->getNickName()))
+		if (channel->isUserInChannel(joiningClient->getNickName()) || channel->joinClient(joiningClient) == -1)
 		{
-			sendMsg(joiningClient,ERR_USERONCHANNEL(server->getName(), joiningClient->getNickName(), channel->getName()));
+			sendMsg(joiningClient,ERR_USERONCHANNEL2(joiningClient->getNickName(), joiningClient->getNickName(), channel->getName()));
 			return ;
 		}
-		if (channel->joinClient(joiningClient) == -1)
-		{
-			sendMsg(joiningClient,ERR_USERONCHANNEL(server->getName(), joiningClient->getNickName(), channel->getName()));
-			return ;
-		}
-		std::string welcomemsg_str = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
-		const char *welcomemsg = welcomemsg_str.c_str();
-		sendToChannel(*channel, welcomemsg);
+		// std::string welcomemsg_str = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
+		// const char *welcomemsg = welcomemsg_str.c_str();
+		sendMsg(joiningClient,JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName()));
+		sendToChannel(*channel, JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName()));
 		if (channel->getisTopic() == 1)
 		{
 
