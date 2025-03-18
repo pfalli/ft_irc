@@ -6,7 +6,7 @@
 # define ERR_NEEDMOREPARAMS(username) ":serverhost 461 " + username + " :Not enough parameters\r\n"
 # define ERR_TOOMANYPARAMS(username) ":serverhost 461 " + username + " :Too many parameters\r\n"
 # define ERR_USERNOTINCHANNEL(client, nick, channel) ":" + client + " " + nick + " " + channel + ":Error (441): They aren't on that channel\r\n"
-# define ERR_NOTONCHANNEL(client, channel) ":" + client + " " + channel + " Error(442):You're not on that channel\r\n"
+# define ERR_NOTONCHANNEL(client, channel) "serverhost 442:" + client + " " + channel + " :You're not on that channel\r\n"
 # define ERR_USERONCHANNEL(client, nick, channel) ":serverhost 443 " + client + " " + channel + " " + nick + ":is already on channel\r\n"
 # define ERR_NOTEXIST(target) ":serverhost 461 " + target + " doesn't exist\r\n"
 # define ERR_INVERTPARAM(command, target) ":serverhost 461 '" + target + "' is not a channel. "+command+" <client> <channel> \r\n"

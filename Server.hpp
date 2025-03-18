@@ -145,6 +145,7 @@ class Server
 	void deleteClientInsideChannels(const Client &client);
 	void handleNotice(Client *handleClient, const Command &cmd);
 	void giveHelp(const Client &client);
+	void numClients(Client &requestingClient);
 
 
 

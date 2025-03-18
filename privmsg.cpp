@@ -42,7 +42,7 @@ void	messageToTargets(Client *sender, Server *server, std::vector<std::string> &
 		{
 			std::string success_message = SUCCESS_PRIVMSG(sender->getNickName(), *recipient, msg);
 			send(fd, success_message.c_str(), success_message.length(), 0);
-			send(sender->getSocket(), success_message.c_str(), success_message.length(), 0);
+			// send(sender->getSocket(), success_message.c_str(), success_message.length(), 0); // ***HEXCHAT ERROR: because it was sending the message to the sender***
 		}
 		else
 			send(sender->getSocket(), ERR_NOSUCHNICK(sender->getNickName(), *recipient).c_str(), ERR_NOSUCHNICK(sender->getNickName(), *recipient).length(), 0);
@@ -70,13 +70,13 @@ void	splitTargetUsers(std::string tmpTarget, std::vector<std::string> &targets)
 // 	std::cout << "targetChannel :" << targetChannel << std::endl;
 // }
 
-void	sendToChannel(Channel &channel, const std::string &message)
-{
+void sendToChannel(Channel &channel, const std::string &message, int senderSocket) {
 	const char *msg = message.c_str();
 	std::vector<Client *> clients = channel.getJoinedClients();
-	for (std::vector<Client *>::iterator it = clients.begin(); it != clients.end() ;it++)
-	{
-		send((*it)->getSocket(), msg, strlen(msg), 0);
+	for (std::vector<Client *>::iterator it = clients.begin(); it != clients.end(); it++) {
+		if ((*it)->getSocket() != senderSocket) { // ***CHANGED: because it was sending the message to the sender***
+			send((*it)->getSocket(), msg, strlen(msg), 0);
+		}
 	}
 }
 
@@ -128,16 +128,16 @@ void	privmsg(Server *server, Client *sender, const Command &cmd)
 			send(sender->getSocket(), errmsg.c_str(), errmsg.length(), 0);
 			return ;
 		}
-		else
-		{
-			if (channel->isUserInChannel(sender->getNickName()) == NULL)
-			{
+		else {
+			if (channel->isUserInChannel(sender->getNickName()) == NULL) { // ***CHANGED: i have to pass the sender Socket to avoid sending the message to the sender***
 				std::string notOnChannel = ERR_NOTONCHANNEL(server->getName(), channel->getName());
 				send(sender->getSocket(), notOnChannel.c_str(), notOnChannel.length(), 0);
-				return ;
+				return;
 			}
 		}
-		messageToAllChannel(server, sender, cmd);
+		// messageToAllChannel(server, sender, cmd); // *** it wasn't working on hexchat because it repets the message to sender***
+		std::string msgToChannel = TO_ALL_CHANNEL(sender->getNickName(), cmd.parameter, cmd.message);
+		sendToChannel(*channel, msgToChannel);
 		return ;
 	}
 	messageToTargets(sender, server, targets, cmd.message);
