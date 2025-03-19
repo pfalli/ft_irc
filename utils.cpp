@@ -24,17 +24,29 @@ class PortFormatException : public std::exception
 };
 
 
-bool		userNameTaken(std::vector<Client> clients, std::string username)
-{
-	std::vector<Client>::iterator it = clients.begin();
-	while (it != clients.end())
-	{
-		if ((*it).getUserName() == username)
-			return true;
-		it++;
-	}
-	return false;
-}
+// bool		userNameTaken(std::vector<Client> clients, std::string username)
+// {
+// 	std::vector<Client>::iterator it = clients.begin();
+// 	while (it != clients.end())
+// 	{
+// 		if ((*it).getUserName() == username)
+// 			return true;
+// 		it++;
+// 	}
+// 	return false;
+// }
+
+// bool		nickNameTaken(std::vector<Client> clients, std::string nickname)
+// {
+// 	std::vector<Client>::iterator it = clients.begin();
+// 	while (it != clients.end())
+// 	{
+// 		if ((*it).getNickName() == nickname)
+// 			return true;
+// 		it++;
+// 	}
+// 	return false;
+// }
 
 static bool validUsername(std::string str)
 {
@@ -160,38 +172,38 @@ bool	verfifyPassword(std::string password, int clientSocket)
 	return true;
 }
 
-std::string					requestName(int format, int clientSocket, std::vector<Client> &clients)
-{
-	char buff[1024] = {0};
-	std::string _name;
-	const char *to_client;
-	while (true)
-	{
-		if (format == USERNAME)
-			to_client = "Please enter your user name (user name != nickname):\n";
-		else if (format == NICKNAME)
-			to_client = "Please enter your nick name (user name != nickname):\n";
-		send(clientSocket, to_client, strlen(to_client), 0);
-		recv(clientSocket, buff, sizeof(buff), 0);
-		_name = removeNewline(buff);
-		if (validFormat(format, _name))
-		{
-			if (!userNameTaken(clients, _name))
-				break;
-			else
-			{
-				to_client = "Username already taken.\n";
-				send(clientSocket, to_client, strlen(to_client), 0);
-			}
-		}
-		else
-		{
-			to_client = "Wrong Format.\n";
-			send(clientSocket, to_client, strlen(to_client), 0);
-		}
-	}
-	return (_name);
-}
+// std::string					requestName(int format, int clientSocket, std::vector<Client> &clients)
+// {
+// 	char buff[1024] = {0};
+// 	std::string _name;
+// 	const char *to_client;
+// 	while (true)
+// 	{
+// 		if (format == USERNAME)
+// 			to_client = "Please enter your user name (user name != nickname):\n";
+// 		else if (format == NICKNAME)
+// 			to_client = "Please enter your nick name (user name != nickname):\n";
+// 		send(clientSocket, to_client, strlen(to_client), 0);
+// 		recv(clientSocket, buff, sizeof(buff), 0);
+// 		_name = removeNewline(buff);
+// 		if (validFormat(format, _name))
+// 		{
+// 			if ((clients, _name))
+// 				break;
+// 			else
+// 			{
+// 				to_client = "Username already taken.\n";
+// 				send(clientSocket, to_client, strlen(to_client), 0);
+// 			}
+// 		}
+// 		else
+// 		{
+// 			to_client = "Wrong Format.\n";
+// 			send(clientSocket, to_client, strlen(to_client), 0);
+// 		}
+// 	}
+// 	return (_name);
+// }
 
 
 void	signal_handler(int signal)
@@ -299,14 +311,90 @@ std::string removeSpace(std::string input)
 	return str;
 }
 
-bool	checkCaseHex(const Command &cmd, Client & client)
+bool	Server::checkCaseHex(const Command &cmd, Client & client)
 {
+	if (cmd.command == "PASS" && !cmd.message.empty())
+	{
+		std::string param = cmd.parameter;
+		const char *nick_ptr = strstr(param.c_str(), "NICK");
+		if (!nick_ptr)
+			return false;
+		const char *user_ptr = strstr(param.c_str(), "USER");
+		if (!user_ptr)
+			return false;
+		size_t i;
+		std::string pass = "";
+		for (i = 0; i < param.length(); i++)
+		{
+			if (isspace(param[i]))
+			{
+				i++;
+				if (&param[i] == nick_ptr)
+					break ;
+			}
+			pass += param[i];
+		}
+		if (pass != this->password)
+			return false;
+		client.setPW();
+		std::string nickname = "";
+		i += 5;
+		for (; i < param.length(); i++)
+		{
+			if (isspace(param[i]))
+			{
+				i++;
+				if (user_ptr == &param[i])
+					break ;
+			}
+			nickname += param[i];
+		}
+		if (&param[i] == user_ptr)
+		{
+			i += 5;	//skip whitespace after USER
+			std::string username = "";
+			while (i < param.length())
+			{
+				if (isspace(param[i]))
+					break;
+				username += param[i];
+				i++;
+			}
+			if (existingName(username, USERNAME))
+			{
+				std::string str = ERR_ALREADYREGISTERED(username)
+				send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
+				return true ;
+			}
+			else
+			{
+				client.setUserName(username);
+				client.setUser();
+			}
+			if (existingName(nickname, NICKNAME))
+			{
+				std::string str = ERR_NICKNAMEINUSE(nickname);
+				send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
+				return true ;
+			}
+			else
+			{
+				client.setNickName(nickname);
+				client.setNick();
+			}
+			client.setRealName(cmd.message);
+			client.setRegistered();
+			const char *msg = "Registration complete. You can now continue.\r\n";
+			send(client.getSocket(), msg, strlen(msg), 0);
+			return true;
+		}
+	}
 	if (cmd.command == "NICK" && !cmd.message.empty())
 	{
 		std::string param = cmd.parameter;
 		const char *ptr = strstr(param.c_str(), "USER");
 		if (!ptr)
-			return false;
+			return true ;
 		std::string nickname = "";
 		size_t i;
 		for (i = 0; i < param.length(); i++)
@@ -319,7 +407,6 @@ bool	checkCaseHex(const Command &cmd, Client & client)
 			}
 			nickname += param[i];
 		}
-		client.setNickName(nickname);
 		if (&param[i] == ptr)
 		{
 			i += 5;	//skip whitespace after USER
@@ -331,11 +418,42 @@ bool	checkCaseHex(const Command &cmd, Client & client)
 				username += param[i];
 				i++;
 			}
-			client.setUserName(username);
+			if (existingName(username, USERNAME))
+			{
+				std::string str = ERR_ALREADYREGISTERED(username)
+				send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
+				return true ;
+			}
+			else
+			{
+				client.setUserName(username);
+				client.setUser();
+			}
+			if (existingName(nickname, NICKNAME))
+			{
+				std::string str = ERR_NICKNAMEINUSE(nickname);
+				send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
+				return true ;
+			}
+			else
+			{
+				client.setNickName(nickname);
+				client.setNick();
+			}
+			if (!validFormat(NICKNAME, cmd.parameter))
+			{
+				std::string msg = ERR_ERRONEUSNICKNAME(client.getUserName(), cmd.parameter);
+				send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
+				return true ;
+			}
 			client.setRealName(cmd.message);
 			client.setRegistered();
-			const char *msg = "Registration complete. Now you just need the password.\r\n";
-			send(client.getSocket(), msg, strlen(msg), 0);
+			std::string msg;
+			if (!client.getPW())
+				msg = "Registration complete. Now you just need the password.\r\n";
+			else
+				msg = "Registration complete. You can now continue.\r\n";
+			send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
 			return true;
 		}
 	}
@@ -343,49 +461,105 @@ bool	checkCaseHex(const Command &cmd, Client & client)
 	{
 		std::string param = cmd.parameter;
 		const char *nick_ptr = strstr(param.c_str(), "NICK");
-		if (!nick_ptr)
-			return false;
 		const char *user_ptr = strstr(param.c_str(), "USER");
-		if (!user_ptr)
-			return false;
+		const char *pass_ptr = strstr(param.c_str(), "PASS");
 		size_t i;
 		for (i = 0; i < param.length(); i++)
 		{
-			if (&param[i] == nick_ptr)
+			if (&param[i] == pass_ptr || &param[i] == nick_ptr)
 			{
 				i += 5;	//5 to skip whitespace after too
 				break ;
 			}
 		}
-		std::string nickname = "";
-		for (; i < param.length(); i++)
+		if (pass_ptr)
 		{
-			if (isspace(param[i]))
-			{
-				i++;
-				if (user_ptr == &param[i])
-					break ;
-			}
-			nickname += param[i];
-		}
-		client.setNickName(nickname);
-		if (&param[i] == user_ptr)
-		{
-			i += 5;	//skip whitespace after USER
-			std::string username = "";
-			while (i < param.length())
+
+			std::string pass = "";
+			for (; i < param.length(); i++)
 			{
 				if (isspace(param[i]))
-					break;
-				username += param[i];
-				i++;
+				{
+					i++;
+					if (&param[i] == nick_ptr || param[i] == '\r')
+						break ;
+				}
+				pass += param[i];
 			}
-			client.setUserName(username);
-			client.setRealName(cmd.message);
-			client.setRegistered();
-			const char *msg = "Registration complete. Now you just need the password.\r\n";
-			send(client.getSocket(), msg, strlen(msg), 0);
-			return true;
+			if (pass != this->password)
+			{
+				std::string msg = ERR_PASSWORDWRONG(client.getUserName())
+				send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
+				return true; //true so _register() will just return and not continue to save runtime
+			}
+			client.setPW();
+			if (&param[i] == nick_ptr)
+				i += 5;
+		}
+		if (nick_ptr)
+		{
+			if (!user_ptr)
+				return true;
+			std::string nickname = "";
+			for (; i < param.length(); i++)
+			{
+				if (isspace(param[i]))
+				{
+					i++;
+					if (user_ptr == &param[i])
+						break ;
+				}
+				nickname += param[i];
+			}
+			if (&param[i] == user_ptr)
+			{
+				i += 5;	//skip whitespace after USER
+				std::string username = "";
+				while (i < param.length())
+				{
+					if (isspace(param[i]))
+						break;
+					username += param[i];
+					i++;
+				}
+				if (existingName(username, USERNAME))
+				{
+					std::string str = ERR_ALREADYREGISTERED(client.getUserName());
+					send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
+					return true;
+				}
+				else
+				{
+					client.setUserName(username);
+					client.setUser();
+				}
+				if (existingName(nickname, NICKNAME))
+				{
+					std::string str = ERR_NICKNAMEINUSE(client.getNickName());
+					send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
+					return true;
+				}
+				else
+				{
+					client.setNickName(nickname);
+					client.setNick();
+				}
+				if (!validFormat(NICKNAME, cmd.parameter))
+				{
+					std::string msg = ERR_ERRONEUSNICKNAME(client.getUserName(), cmd.parameter);
+					send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
+					return true ;
+				}
+				client.setRealName(cmd.message);
+				client.setRegistered();
+				std::string msg;
+				if (client.getPW())
+					msg = "Registration complete. You can now continue.\r\n";
+				else
+					msg = "Registration complete. Please enter the password manually.";
+				send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
+				return true;
+			}
 		}
 	}
 	return false;

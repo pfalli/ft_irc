@@ -10,11 +10,13 @@
 # define ERR_USERONCHANNEL(client, nick, channel) ":serverhost 443 " + client + " " + channel + " " + nick + ":is already on channel\r\n"
 # define ERR_NOTEXIST(target) ":serverhost 461 " + target + " doesn't exist\r\n"
 # define ERR_INVERTPARAM(command, target) ":serverhost 461 '" + target + "' is not a channel. "+command+" <client> <channel> \r\n"
-# define ERR_UNKNOWNCOMMAND(username, command) ":serverhost 421 " + username + " " + command + " :Unknown command\r\n"
-
+# define ERR_UNKNOWNCOMMAND(username, command) ":serverhost 421 " + username + " " + command + " :Unknown command\r\n";
 # define ERR_USERONCHANNEL2(clientName, target, channelName) ":serverhost 443 " + clientName + " " + target + " " + channelName + " :is already on channel\r\n"
-
-
+# define ERR_PASSWORDWRONG(Username) ":serverhost 462 " + Username + " :Password incorrect\r\n";
+# define ERR_ALREADYREGISTERED(username) ":serverhost 462 " + username + " :You may not reregister\r\n";
+# define ERR_NOTREGISTERED ":serverhost 451 new_client :You have not registered";
+# define ERR_NICKNAMEINUSE(nickname) ":serverhost 433 " + nickname + " :Nickname is already in use\r\n";
+# define ERR_ERRONEUSNICKNAME(username, nickname) ":serverhost 432 " + username + " " + nickname + " :Erroneus nickname";
 // **REPLIES
 # define RPL_QUIT(username, reason) "" + username + " /Quit reason: " + reason + "\r\n"
 #define RPL_KICK(kickernick, kickeruser, channelname, username, reason) ":" + kickernick + "!" + kickeruser + "@localhost KICK " + channelname + " " + username + ", reason: " + reason + "\r\n"
