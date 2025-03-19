@@ -277,6 +277,19 @@ Client*	Channel::hasOper(Client *client)
 	return (NULL);
 }
 
+void Channel::giveOper(std::string nickName)
+{
+	std::vector<Client *>::iterator it = this->_joinedClients.begin();
+	for (; it != this->_joinedClients.end(); it++)
+	{
+		if((*it)->getNickName() == nickName)
+		{
+			this->_operators.push_back(*it);
+			return ;
+		}
+	}
+}
+
 // int	Channel::signMinus(Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch)
 // {
 	

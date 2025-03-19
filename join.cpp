@@ -93,7 +93,7 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		send(joiningClient->getSocket(), str.c_str(), strlen(str.c_str()), 0);
 		sendToChannel(*channel, str.c_str(), joiningClient->getSocket());
 		sendMsg(joiningClient,JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName()));
-		
+		channel->giveOper(joiningClient->getNickName());
 		if (channel->getisTopic() == 1)
 		{
 			sendMsg(joiningClient, RPL_TOPIC(username, channelTojoin, channel->getTopic()));

@@ -72,6 +72,7 @@ class Channel {
 	std::string								getKey()const{return (this->_key);}
 	int										flagCheck(char flag);
 	void									takeOper(std::string nickName);
+	void									giveOper(std::string nickName);
 
 	//void									modeT();
 	//void									modeI();
