@@ -6,7 +6,7 @@
 # define ERR_NEEDMOREPARAMS(username) ":serverhost 461 " + username + " :Not enough parameters\r\n"
 # define ERR_TOOMANYPARAMS(username) ":serverhost 461 " + username + " :Too many parameters\r\n"
 # define ERR_USERNOTINCHANNEL(client, nick, channel) ":" + client + " " + nick + " " + channel + ":Error (441): They aren't on that channel\r\n"
-# define ERR_NOTONCHANNEL(client, channel) "serverhost 442:" + client + " " + channel + " :You're not on that channel\r\n"
+# define ERR_NOTONCHANNEL(client, channel) ":serverhost 442 " + client + " " + channel + " :You're not on that channel\r\n"
 # define ERR_USERONCHANNEL(client, nick, channel) ":serverhost 443 " + client + " " + channel + " " + nick + ":is already on channel\r\n"
 # define ERR_NOTEXIST(target) ":serverhost 461 " + target + " doesn't exist\r\n"
 # define ERR_INVERTPARAM(command, target) ":serverhost 461 '" + target + "' is not a channel. "+command+" <client> <channel> \r\n"
@@ -52,7 +52,7 @@
 # define RPL_CREATIONTIME(serverName, nickName, channelName, creationTime) (  ":" + serverName + " 329 " + nickName + " " + channelName + " " + timeToString(creationTime) + "\r\n")
 # define ERR_UMODEUNKNOWNFLAG(serverName, nickName) (  ":" + serverName + " Error(501) " + nickName + " :unknown MODE flag" + "\r\n")
 # define ERR_UNKNOWNMODE(serverName, nickName, char) (  ":" + serverName + " Error(472) " + nickName + " " + char + " :is unknown mode char to me" + "\r\n") 
-# define ERR_CHANOPRIVSNEEDED(serverName, nickName, channelName) (  ":" + serverName + " Error(485) " + nickName + " " + channelName + " :You're not channel operator "+ "\r\n")
+# define ERR_CHANOPRIVSNEEDED(serverName, nickName, channelName) (  ":serverhost 485 " + nickName + " " + channelName + " :You're not channel operator "+ "\r\n")
 
 # define WELCOME_MESSAGE "\n\
 	Hello, welcome to our server!\n\

@@ -130,8 +130,7 @@ void	privmsg(Server *server, Client *sender, const Command &cmd)
 		}
 		else {
 			if (channel->isUserInChannel(sender->getNickName()) == NULL) { // ***CHANGED: i have to pass the sender Socket to avoid sending the message to the sender***
-				std::string notOnChannel = ERR_NOTONCHANNEL(server->getName(), channel->getName());
-				send(sender->getSocket(), notOnChannel.c_str(), notOnChannel.length(), 0);
+				sendMsg(sender, ERR_NOTONCHANNEL(sender->getNickName(), channel->getName()));
 				return;
 			}
 		}

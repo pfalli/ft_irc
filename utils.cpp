@@ -334,7 +334,7 @@ bool	checkCaseHex(const Command &cmd, Client & client)
 			client.setUserName(username);
 			client.setRealName(cmd.message);
 			client.setRegistered();
-			const char *msg = "Registration complete. Now you just need the password.\r\n";
+			const char *msg = "Registration complete. Now you just need the password. From us.\r\n";
 			send(client.getSocket(), msg, strlen(msg), 0);
 			return true;
 		}
@@ -383,7 +383,7 @@ bool	checkCaseHex(const Command &cmd, Client & client)
 			client.setUserName(username);
 			client.setRealName(cmd.message);
 			client.setRegistered();
-			const char *msg = "Registration complete. Now you just need the password.\r\n";
+			const char *msg = "Registration complete. Now you just need the password. From us.\r\n";
 			send(client.getSocket(), msg, strlen(msg), 0);
 			return true;
 		}

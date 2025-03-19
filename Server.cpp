@@ -372,8 +372,8 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
 		return ;
 	}
-	// if (checkCaseHex(cmd, client))
-	// 		return ;
+	if (checkCaseHex(cmd, client))
+			return ;
 	if (cmd.parameter.empty())
 	{
 		const std::string str = ERR_NEEDMOREPARAMS(client.getUserName());

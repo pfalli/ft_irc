@@ -36,6 +36,7 @@ void sendTopicMsg(Client *client, Channel *channel, std::string userName)
 
 int	topicProtected(Server *server, Channel *channel, Client *client)
 {
+	(void) server; // fix it later
 	std::string errmsg = ERR_CHANOPRIVSNEEDED(server->getName(), client->getNickName(), channel->getName());
 	if (channel->flagCheck('t') == 0)
 	{
