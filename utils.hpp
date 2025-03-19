@@ -14,7 +14,8 @@ typedef enum	s_format
 }				t_format;
 
 bool			validFormat(int format, std::string str);
-bool			userNameTaken(std::vector<Client> clients, std::string username);
+// bool			userNameTaken(std::vector<Client> clients, std::string username);
+// bool			nickNameTaken(std::vector<Client> clients, std::string nickname);
 std::string		removeNewline(char *buff);
 bool			verfifyPassword(std::string password, int clientSocket);
 std::string		requestName(int format, int clientSocket, std::vector<Client> &clients);
@@ -46,7 +47,6 @@ template <typename T> typename std::vector<T>::iterator		findObject(int toFind, 
 bool isOperator(Channel &channel, Client *client);
 
 std::string userNameCommandFormat(std::string params, int mode);
-bool	checkCaseHex(const Command &cmd, Client & client);
 std::string removeSpace(std::string input);
 
 void sendMsg(Client *client, const std::string &message);

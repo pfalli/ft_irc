@@ -150,6 +150,7 @@ bool							Server::existingName(std::string name, int mode)
 	{
 		while (it != this->clients.end())
 		{
+			
 			if (it->getUserName() == name)
 				return true;
 			it++;
@@ -368,7 +369,7 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 {
 	if (client.getRegistered() && client.getPW() && mode != NICKNAME)
 	{
-		std::string str = client.getUserName() + " :You may not reregister\r\n";
+		std::string str = ERR_ALREADYREGISTERED(client.getUserName());
 		send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
 		return ;
 	}
@@ -390,35 +391,18 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		}
 		else
 		{
-			const char *msg = "Incorrect Password. Please try again.\r\n";
-			send(client.getSocket(), msg, strlen(msg), 0);
+			std::string msg = ERR_PASSWORDWRONG(client.getUserName())
+			send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
 		}
 		return ;
 	}
 	else if (mode == USERNAME)
 	{
-		if (!client.getPW())
-		{
-			const char *msg = "Please enter the password first.\r\n";
-			send(client.getSocket(), msg, strlen(msg), 0);
-			return ;
-		}
 		if (!existingName(cmd.parameter, USERNAME))
 		{
 			std::string uName = userNameCommandFormat(cmd.parameter, USERNAME);
 			std::cout << uName << std::endl;
-			if (uName == "ERROR")
-			{
-				const char *msg = "Wrong Format. please try again.\r\n";
-				send(client.getSocket(), msg, strlen(msg), 0);
-				return ;
-			}
-			if (!validFormat(USERNAME, uName))
-			{
-				const char *msg = "Wrong Format. please try again.\r\n";
-				send(client.getSocket(), msg, strlen(msg), 0);
-				return ;
-			}
+
 			client.setUserName(uName);
 			client.setUser();
 			if (!cmd.message.empty())
@@ -429,31 +413,19 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		}
 		else
 		{
-			const char *msg = "Username already taken. Please try again with a different user name.\r\n";
-			send(client.getSocket(), msg, strlen(msg), 0);
+			std::string msg = ERR_ALREADYREGISTERED(client.getUserName());
+			send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
 			return ;
 		}
 	}
 	else if (mode == NICKNAME)
 	{
-		if (!client.getPW())
-		{
-			const char *msg = "Please enter the password and username first.\r\n";
-			send(client.getSocket(), msg, strlen(msg), 0);
-			return ;
-		}
-		else if (client.getUserName() == "default")
-		{
-			const char *msg = "Please set your username first.\r\n";
-			send(client.getSocket(), msg, strlen(msg), 0);
-			return ;
-		}
 		if (!existingName(cmd.parameter, NICKNAME))
 		{
 			if (!validFormat(NICKNAME, cmd.parameter))
 			{
-				const char *msg = "Wrong Format. please try again.\r\n";
-				send(client.getSocket(), msg, strlen(msg), 0);
+				std::string msg = ERR_ERRONEUSNICKNAME(client.getUserName(), cmd.parameter);
+				send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
 				return ;
 			}
 			client.setNickName(cmd.parameter);
@@ -461,8 +433,8 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		}
 		else
 		{
-			const char *msg = "Nickname already taken. Please try again with a different nick name.\r\n";
-			send(client.getSocket(), msg, strlen(msg), 0);
+			std::string msg = ERR_NICKNAMEINUSE(cmd.parameter);
+			send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
 			return ;
 		}
 	}

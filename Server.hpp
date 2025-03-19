@@ -128,6 +128,7 @@ class Server
 	void									newConnection();
 	void									clean();
 	bool									existingName(std::string name, int mode);
+	bool									checkCaseHex(const Command &cmd, Client & client);
 
 	void									debugging_whoinserver();
 
