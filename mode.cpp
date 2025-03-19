@@ -146,7 +146,7 @@ void	mode(Server *server, const Command &cmd, Client *client)
 	channel = server->isChannelExist2(parsedModeCommand.channelName);
 	if (channel == 0) // if channel does not exist
 	{
-		std::string noSuchChannel = ERR_NOSUCHCHANNEL(server->getName(), client->getUserName(), channelName);
+		std::string noSuchChannel = ERR_NOSUCHCHANNEL(client->getUserName(), channelName);
 		send (client->getSocket(), noSuchChannel.c_str(), noSuchChannel.length(), 0);
 		return ;
 	}

@@ -94,7 +94,7 @@ void Server::handleNotice(Client *handleClient, const Command &cmd) {
 		// Target is a channel
 		Channel *channel = isChannelExist2(target);
 		if (channel == NULL) {
-			std::string str = ERR_NOSUCHCHANNEL(this->name, handleClient->getUserName(), target);
+			std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), target);
 			send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 			return;
 		}
@@ -135,7 +135,7 @@ void Server::printInfo(Client* handleClient, const Command &cmd) {
 		channelIt++;
 	}
 	if (channelIt == channels.end()) {
-		std::string msg = ERR_NOSUCHCHANNEL(this->getName(), handleClient->getNickName(), channelIt->getName());
+		std::string msg = ERR_NOSUCHCHANNEL(handleClient->getNickName(), channelIt->getName());
 		send(handleClient->getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
 		return ;
 	}
@@ -169,9 +169,14 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
         send(handleClient->getSocket(), str.c_str(), str.length(), 0);
         return;
     }
+	if (targetNick.find(" ") != std::string::npos) {
+        std::string str = ERR_TOOMANYPARAMS(handleClient->getUserName());
+        send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+        return;
+    }
 
     if (channelName[0] != '#') {
-        const std::string str = ERR_INVERTPARAM(cmd.command, channelName);
+        std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelName);
         send(handleClient->getSocket(), str.c_str(), str.length(), 0);
         return;
     }
@@ -185,16 +190,18 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
     }
 
     if (channelIt == channels.end()) {
-        std::string str = ERR_NOSUCHCHANNEL(this->name, handleClient->getUserName(), channelName);
+        std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelName);
         send(handleClient->getSocket(), str.c_str(), str.length(), 0);
         return;
     }
 
-    if (!isOperator(*channelIt, handleClient)) {
-        std::string error = "Error: you need to be operator to do this.\n";
-        send(handleClient->getSocket(), error.c_str(), error.length(), 0);
-        return;
-    }
+	if (!isOperator(*channelIt, handleClient))
+	{
+		// std::string error = "Error: you need to be operator to do this.\n";
+		// send(handleClient->getSocket(), error.c_str(), error.length(), 0);
+		sendMsg(handleClient, ERR_CHANOPRIVSNEEDED("",handleClient->getNickName(), channelIt->getName())); // FIX it later
+		return ;
+	}
 
     std::vector<Client *>::iterator inviterIt = channelIt->getJoinedClients().begin();
     while (inviterIt != channelIt->getJoinedClients().end()) {
@@ -268,14 +275,15 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 		channelIt++;
 	}
 	if (channelIt == channels.end()) {
-		std::string str = ERR_NOSUCHCHANNEL(this->name, handleClient->getUserName(), channelIt->getName());
+		std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelIt->getName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
 	if (!isOperator(*channelIt, handleClient))
 	{
-		std::string error = "Error: you need to be operator to do this.\n";
-		send(handleClient->getSocket(), error.c_str(), error.length(), 0);
+		// std::string error = "Error: you need to be operator to do this.\n";
+		// send(handleClient->getSocket(), error.c_str(), error.length(), 0);
+		sendMsg(handleClient, ERR_CHANOPRIVSNEEDED("",handleClient->getNickName(), channelIt->getName())); // FIX it later
 		return ;
 	}
 	//--------------------------------------------------------------------
@@ -303,8 +311,10 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 			++operatorIt;
 		}
 	}
-	const std::string str = RPL_KICK(handleClient->getNickName(),  handleClient->getUserName(), channelIt->getName(), (*targetIt)->getUserName(), cmd.message);
+	const std::string str = RPL_KICK(handleClient->getNickName(),  handleClient->getUserName(), channelIt->getName(), (*targetIt)->getNickName(), cmd.message);
+	const std::string msg = RPL_KICK((*targetIt)->getNickName(),  (*targetIt)->getUserName(), channelIt->getName(), (*targetIt)->getNickName(), cmd.message);
 	send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+	send((*targetIt)->getSocket(), msg.c_str(), msg.length(), 0);
 }
 
 bool Server::findChannelByName(const std::string& str) {

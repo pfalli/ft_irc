@@ -108,7 +108,7 @@ void	messageToAllChannel(Server *server, Client *sender, const Command &cmd)
 			return ;
 		}
 	}
-	std::string errmsg = ERR_NOSUCHCHANNEL(server->getName(), sender->getUserName(), targetChannel);
+	std::string errmsg = ERR_NOSUCHCHANNEL(sender->getUserName(), targetChannel);
 	send(sender->getSocket(), errmsg.c_str(), errmsg.length(), 0);
 }
 
@@ -124,7 +124,7 @@ void	privmsg(Server *server, Client *sender, const Command &cmd)
 		channel = server->isChannelExist2(cmd.parameter);
 		if (channel == NULL)
 		{
-			std::string errmsg = ERR_NOSUCHCHANNEL(server->getName(), sender->getUserName(), cmd.parameter);
+			std::string errmsg = ERR_NOSUCHCHANNEL(sender->getUserName(), cmd.parameter);
 			send(sender->getSocket(), errmsg.c_str(), errmsg.length(), 0);
 			return ;
 		}

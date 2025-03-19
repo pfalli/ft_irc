@@ -17,7 +17,7 @@
 
 // **REPLIES
 # define RPL_QUIT(username, reason) "" + username + " /Quit reason: " + reason + "\r\n"
-#define RPL_KICK(kickernick, kickeruser, channelname, username, reason) ":" + kickernick + "!" + kickeruser + "@localhost KICK " + channelname + " " + username + ", reason: " + reason + "\r\n"
+#define RPL_KICK(kickernick, kickeruser, channelname, username, reason) ":" + kickernick + "!" + kickeruser + "@serverhost KICK " + channelname + " " + username + " :" + reason + "\r\n"
 # define RPL_INVITING(client, targetnick, channel) ":serverhost 341 " + client + targetnick + channel + "\r\n"
 # define RPL_NOTICE(client, username, targetnick, message) ":" + client + "!" + username + "@localhost NOTICE " + targetnick + " :" + message + "\r\n"
 
@@ -25,7 +25,7 @@
 # define ERR_NOSUCHNICK(client, nickname) ( ":serverhost 401" + client + " " + nickname + ":" + " : No such nick/channel"  + "\r\n" )
 # define SUCCESS_PRIVMSG(sender, recipient, msg)  ":" + sender + " PRIVMSG " + recipient + " :" + msg  + "\r\n"
 # define TO_ALL_CHANNEL(senderNickname, channelName, msg) (":" + senderNickname + " PRIVMSG " + channelName + " :" + msg + "\r\n")
-# define ERR_NOSUCHCHANNEL(serverName, nickName, channelName) ( ":" + serverName + " 403 " + nickName + " " + channelName + " :No such channel" + "\r\n")
+# define ERR_NOSUCHCHANNEL(nickName, channelName) ( ":serverhost 403 " + nickName + " " + channelName + " :No such channel" + "\r\n") // ok
 # define TO_ALL_CHANNEL_TEST(senderNick, recipient, msg, senderUser, serverName)  (senderNick + "!" + senderUser + "@" + serverName + " PRIVMSG " + recipient + " :" + msg  + "\r\n")
 
 /* join */
@@ -52,7 +52,7 @@
 # define RPL_CREATIONTIME(serverName, nickName, channelName, creationTime) (  ":" + serverName + " 329 " + nickName + " " + channelName + " " + timeToString(creationTime) + "\r\n")
 # define ERR_UMODEUNKNOWNFLAG(serverName, nickName) (  ":" + serverName + " Error(501) " + nickName + " :unknown MODE flag" + "\r\n")
 # define ERR_UNKNOWNMODE(serverName, nickName, char) (  ":" + serverName + " Error(472) " + nickName + " " + char + " :is unknown mode char to me" + "\r\n") 
-# define ERR_CHANOPRIVSNEEDED(serverName, nickName, channelName) (  ":serverhost 485 " + nickName + " " + channelName + " :You're not channel operator "+ "\r\n")
+# define ERR_CHANOPRIVSNEEDED(serverName, nickName, channelName) (  ":serverhost 482 " + nickName + " " + channelName + " :You're not channel operator "+ "\r\n")
 
 # define WELCOME_MESSAGE "\n\
 	Hello, welcome to our server!\n\

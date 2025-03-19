@@ -76,7 +76,7 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 	}
 	if (channelTojoin[0] != '#')
 	{
-		sendMsg(joiningClient, ERR_NOSUCHCHANNEL(server->getName(), joiningClient->getNickName(), channelTojoin));
+		sendMsg(joiningClient, ERR_NOSUCHCHANNEL(joiningClient->getNickName(), channelTojoin));
 		return ;
 	}
 	channel = server->isChannelExist2(channelTojoin);

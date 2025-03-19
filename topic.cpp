@@ -56,7 +56,7 @@ void topic(Server *server, const Command &cmd, Client *client)
 	channel = server->isChannelExist2(channelName);
 	if (channel == 0) // if channel does not exist
 	{
-		std::string noSuchChannel = ERR_NOSUCHCHANNEL(server->getName(), nickName, channelName);
+		std::string noSuchChannel = ERR_NOSUCHCHANNEL(nickName, channelName);
 		send (client->getSocket(), noSuchChannel.c_str(), noSuchChannel.length(), 0);
 		return ;
 	}
