@@ -34,18 +34,6 @@ void sendTopicMsg(Client *client, Channel *channel, std::string userName)
 	}
 }
 
-int	topicProtected(Server *server, Channel *channel, Client *client)
-{
-	(void) server; // fix it later
-	std::string errmsg = ERR_CHANOPRIVSNEEDED(server->getName(), client->getNickName(), channel->getName());
-	if (channel->flagCheck('t') == 0)
-	{
-		if (channel->hasOper(client) != NULL)
-			return (1);
-	}
-	send(client->getSocket(), errmsg.c_str(), errmsg.length(), 0);
-	return (-1);
-} 
 
 void topic(Server *server, const Command &cmd, Client *client)
 {
@@ -73,8 +61,11 @@ void topic(Server *server, const Command &cmd, Client *client)
 	}
 	else
 	{
-		if (topicProtected(server, channel, client) == -1)
+		if (channel->flagCheck('t') == -1 && isOperator(*channel, client) == false)
+		{
+			sendMsg(client, ERR_CHANOPRIVSNEEDED(client->getNickName(), channel->getName()));
 			return ;
+		}
 		if (cmd.message.empty())
 			channel->clearTopic(nickName);
 		else

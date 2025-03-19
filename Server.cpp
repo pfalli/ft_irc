@@ -483,6 +483,11 @@ void Server::parseCommand(const std::string &str, Command &cmd) {
 			cmd.parameter += word;
 		}
 	}
+
+	if (!cmd.message.empty() && cmd.message[cmd.message.size() - 1] == '\r') {
+		cmd.message.erase(cmd.message.size() - 1);
+	}
+
 	std::cout << "\n-------------------\nParsed command:|" << cmd.command << "|" << std::endl;
 	std::cout << "Parameter:|" << cmd.parameter << "|" << std::endl;
 	std::cout << "Message:|" << cmd.message << "|" << "\n-------------------\n" << std::endl;

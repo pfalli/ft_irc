@@ -115,7 +115,7 @@ void	applyModeToChannel(Server *server, Client *client, modeCommand &modeCommand
 		{
 			if (is_itkol(ch) == -1)
 			{
-				std::string msg = ERR_UNKNOWNMODE(serverName, client->getNickName(), ch);
+				std::string msg = ERR_UNKNOWNMODE(client->getNickName(), ch);
 				send(client->getSocket(), msg.c_str(), msg.length(), 0);
 				channel.setmodes(prvModes);
 				return ;
@@ -159,7 +159,7 @@ void	mode(Server *server, const Command &cmd, Client *client)
 	{
 		if (channel->hasOper(client) == NULL)
 		{
-			std::string noPrivs = ERR_CHANOPRIVSNEEDED(server-> getName(), client->getNickName(), channel->getName());
+			std::string noPrivs = ERR_CHANOPRIVSNEEDED(client->getNickName(), channel->getName());
 			send (client->getSocket(), noPrivs.c_str(), noPrivs.length(), 0);
 			return ;
 		}

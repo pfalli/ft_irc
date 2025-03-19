@@ -33,17 +33,11 @@
 /* join */
 // # define ERR_NEEDMOREPARAMS2(serverName, userName, command) (":" + serverName + " 461 " + userName + " " + command + " :Not enough parameters" + "\r\n")
 # define JOIN_SUCCESS(nickName, channelName, serverName, userName) ( ":" + nickName + "!" + userName + "@" + serverName + " JOIN " + channelName + "\r\n")
-# define RPL_TOPIC(userName, channelName, topic) (  channelName + " :" + topic + "\r\n") 
-# define RPL_TOPICWHOTIME(userName, channelName, nickName, time) (  userName + " " + channelName + " " + nickName + " " + timeToString(time) + "\r\n")
+# define RPL_TOPIC(nickName, channelName, topic) (":serverhost 332 " +nickName + " " + channelName + " :" + topic + "\r\n") 
 # define RPL_NAMREPLY(nickName, channelName, channel) (nickName + "=" + channelName + " :" + ((channel).makeMemberList()) + "\r\n")
 # define RPL_ENDOFNAMES(nickName, channelName) (nickName + " " + channelName + " :End of /NAMES list \r\n")
 
-
-
-
-# define RPL_TOPIC(userName, channelName, topic) (  channelName + " :" + topic + "\r\n") 
-# define RPL_TOPICWHOTIME(userName, channelName, nickName, time) (  userName + " " + channelName + " " + nickName + " " + timeToString(time) + "\r\n")
-
+# define RPL_TOPICWHOTIME(channelName, nickName, setterNickname, time) (":serverhost 333 " +  nickName + " " + channelName + " " + setterNickname + " " + timeToString(time) + "\r\n")
 # define ERR_INVITEONLYCHAN(serverName, nickName, channelName)(  serverName + ": Error(473) " + nickName + " " + channelName + " :Cannot join channel (+i)" + "\r\n")
 # define ERR_BADCHANNELKEY(serverName, nickName, channelName)(  serverName + ": Error(475) " + nickName + " " + channelName + " :Cannot join channel (+k)" + "\r\n")
 /* TOPIC */
@@ -53,8 +47,8 @@
 # define RPL_CHANNELMODEIS(serverName, nickName, channelName, modeString) (  ":" + serverName + " 324 " + nickName + " " + channelName + " " + modeString + "\r\n")
 # define RPL_CREATIONTIME(serverName, nickName, channelName, creationTime) (  ":" + serverName + " 329 " + nickName + " " + channelName + " " + timeToString(creationTime) + "\r\n")
 # define ERR_UMODEUNKNOWNFLAG(serverName, nickName) (  ":" + serverName + " Error(501) " + nickName + " :unknown MODE flag" + "\r\n")
-# define ERR_UNKNOWNMODE(serverName, nickName, char) (  ":" + serverName + " Error(472) " + nickName + " " + char + " :is unknown mode char to me" + "\r\n") 
-# define ERR_CHANOPRIVSNEEDED(serverName, nickName, channelName) (  ":serverhost 482 " + nickName + " " + channelName + " :You're not channel operator "+ "\r\n")
+# define ERR_UNKNOWNMODE(nickName, char) (  ":serverhost 472 " + nickName + " " + char + " :is unknown mode char to me" + "\r\n") 
+# define ERR_CHANOPRIVSNEEDED(nickName, channelName) (  ":serverhost 482 " + nickName + " " + channelName + " :You're not channel operator "+ "\r\n")
 
 # define WELCOME_MESSAGE "\n\
 	Hello, welcome to our server!\n\

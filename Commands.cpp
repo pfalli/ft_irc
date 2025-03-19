@@ -199,7 +199,7 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 	{
 		// std::string error = "Error: you need to be operator to do this.\n";
 		// send(handleClient->getSocket(), error.c_str(), error.length(), 0);
-		sendMsg(handleClient, ERR_CHANOPRIVSNEEDED("",handleClient->getNickName(), channelIt->getName())); // FIX it later
+		sendMsg(handleClient, ERR_CHANOPRIVSNEEDED(handleClient->getNickName(), channelIt->getName())); // FIX it later
 		return ;
 	}
 
@@ -283,7 +283,7 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 	{
 		// std::string error = "Error: you need to be operator to do this.\n";
 		// send(handleClient->getSocket(), error.c_str(), error.length(), 0);
-		sendMsg(handleClient, ERR_CHANOPRIVSNEEDED("",handleClient->getNickName(), channelIt->getName())); // FIX it later
+		sendMsg(handleClient, ERR_CHANOPRIVSNEEDED(handleClient->getNickName(), channelIt->getName())); // FIX it later
 		return ;
 	}
 	//--------------------------------------------------------------------

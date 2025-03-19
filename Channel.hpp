@@ -78,7 +78,7 @@ class Channel {
 	//void									modeI();
 	int										modeK(std::vector<std::string> &argumentSet);
 	int										modeO(std::string serverName, Client *client, std::vector<std::string> &argumentSet);
-	int										modeL(std::string serverName, Client *client, std::vector<std::string> &argumentSet);
+	int										modeL(Client *client, std::vector<std::string> &argumentSet);
 	Client*									hasOper(Client *client);
 	
 	// piero added

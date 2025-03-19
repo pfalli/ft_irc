@@ -196,7 +196,7 @@ int	Channel::modeO(std::string serverName, Client *client, std::vector<std::stri
 	return (0);
 }
 
-int	Channel::modeL(std::string serverName, Client *client, std::vector<std::string> &argumentSet)
+int	Channel::modeL(Client *client, std::vector<std::string> &argumentSet)
 {
 	size_t		result;
 	std::string	argument;
@@ -207,7 +207,7 @@ int	Channel::modeL(std::string serverName, Client *client, std::vector<std::stri
 	result = stringToSizeT(argument);
 	if (result == 0)
 	{
-		std::string errMsg = ERR_UNKNOWNMODE(serverName, client->getNickName(), "l");
+		std::string errMsg = ERR_UNKNOWNMODE(client->getNickName(), "l");
 		send(client->getSocket(), errMsg.c_str(), errMsg.size(), 0);
 		return (2);
 	}
@@ -241,7 +241,7 @@ int Channel::signPlus(std::string serverName, Channel &channel, Client *client, 
 	}
 	if (ch == 'l')
 	{
-		if (modeL(serverName, client, argumentSet) == -1)
+		if (modeL(client, argumentSet) == -1)
 			return (3);
 	}
 	// if (ch == 'i')
