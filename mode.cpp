@@ -61,8 +61,8 @@ void	printModes(std::string serverName, Client *client, Channel &channel, int to
 	{
 		const char *msg1 = channelModeIs.c_str();
 		const char *msg2 = creationTime.c_str();
-		sendToChannel(channel, msg1);
-		sendToChannel(channel, msg2);
+		sendToChannel(channel, msg1, client->getSocket());
+		sendToChannel(channel, msg2,client->getSocket());
 		return ;
 	}
 }

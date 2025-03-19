@@ -104,7 +104,7 @@ void	messageToAllChannel(Server *server, Client *sender, const Command &cmd)
 	{
 		if (it->getName() == targetChannel)
 		{
-			sendToChannel(*it, message);
+			sendToChannel(*it, message, sender->getSocket());
 			return ;
 		}
 	}
@@ -137,7 +137,7 @@ void	privmsg(Server *server, Client *sender, const Command &cmd)
 		}
 		// messageToAllChannel(server, sender, cmd); // *** it wasn't working on hexchat because it repets the message to sender***
 		std::string msgToChannel = TO_ALL_CHANNEL(sender->getNickName(), cmd.parameter, cmd.message);
-		sendToChannel(*channel, msgToChannel);
+		sendToChannel(*channel, msgToChannel, sender->getSocket());
 		return ;
 	}
 	messageToTargets(sender, server, targets, cmd.message);

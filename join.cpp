@@ -89,8 +89,9 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		channel->joinClient(joiningClient);
 		// *** print message in case JOIN_FAILURE, because client already exist in channel ***
 		// *** try JOIN !!!channel *** it has to create only channels with '#'
-
-		sendToChannel(*channel, JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName()));
+		std::string str = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
+		send(joiningClient->getSocket(), str.c_str(), strlen(str.c_str()), 0);
+		sendToChannel(*channel, str.c_str(), joiningClient->getSocket());
 		sendMsg(joiningClient,JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName()));
 		
 		if (channel->getisTopic() == 1)
@@ -122,8 +123,9 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		}
 		// std::string welcomemsg_str = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
 		// const char *welcomemsg = welcomemsg_str.c_str();
-		sendMsg(joiningClient,JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName()));
-		sendToChannel(*channel, JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName()));
+		std::string str = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
+		sendMsg(joiningClient, str.c_str());
+		sendToChannel(*channel, str.c_str(), joiningClient->getSocket());
 		if (channel->getisTopic() == 1)
 		{
 

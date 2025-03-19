@@ -105,7 +105,7 @@ void Server::handleNotice(Client *handleClient, const Command &cmd) {
 		}
 		std::string str = RPL_NOTICE(handleClient->getNickName(), handleClient->getUserName(), target, cmd.message);
 		const char *msg = str.c_str();
-		sendToChannel(*channel, msg);
+		sendToChannel(*channel, msg, handleClient->getSocket()); //might need to send notice to handleClient as well
 	} else {
 		// Target exist?
 		std::vector<Client>::iterator targetIt = clients.begin();
@@ -335,7 +335,7 @@ void Server::handleQuit(Client *handleClient, const Command &cmd) {
 	const char *msg = str.c_str();
 	std::vector<Channel>::iterator channelIt = channels.begin();
 	for (size_t i = 0; i < channels.size(); i++) {
-		sendToChannel(*channelIt, msg);
+		sendToChannel(*channelIt, msg, handleClient->getSocket());
 	}
 	deleteClient(clientIt, pollIt);
 }

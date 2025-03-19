@@ -372,8 +372,8 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
 		return ;
 	}
-	if (checkCaseHex(cmd, client))
-			return ;
+	// if (checkCaseHex(cmd, client))
+	// 		return ;
 	if (cmd.parameter.empty())
 	{
 		const std::string str = ERR_NEEDMOREPARAMS(client.getUserName());
@@ -475,49 +475,47 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 }
 
 void Server::parseCommand(const std::string &str, Command &cmd) {
-    std::istringstream iss(str);
-    std::string line;
-    while (std::getline(iss, line)) {
-        if (line.empty() || line == "\n") continue;
-        if (line[line.size() - 1] == '\r') {
-            line.erase(line.size() - 1);
-        }
-        
-        // Reset cmd object for each new command
-        cmd.command.clear();
-        cmd.parameter.clear();
-        cmd.message.clear();
-        cmd.hasMessage = 0;
+	std::istringstream iss(str);
+	iss >> cmd.command;	
+	std::string word;
+	cmd.hasMessage = 0;
+	bool messageStarted = false;
+	// if (cmd.command == "USER") {
+	// 	std::getline(iss, cmd.parameter);
+	// 	std::size_t pos = cmd.parameter.find(':');
+	// 	if (pos != std::string::npos) {
+	// 		cmd.message = cmd.parameter.substr(pos + 1);
+	// 		cmd.parameter = cmd.parameter.substr(0, pos);
+	// 		cmd.hasMessage = 1;
+	// 	}
+	// 	cmd.parameter = cmd.parameter.substr(1); // Remove leading space
+	// 	std::cout << "\n-------------TEST USER command for HEXCHAT---------------\nParsed command: " << cmd.command << std::endl;
+	// 	std::cout << "Parameter: " << cmd.parameter << std::endl;
+	// 	std::cout << "Message: " << cmd.message << "\n-------------------\n" << std::endl;
 
-        std::istringstream lineStream(line);
-        lineStream >> cmd.command;
-        std::string word;
-        bool messageStarted = false;
-        while (lineStream >> word) {
-            if (word[0] == ':') {
-                messageStarted = true;
-                cmd.hasMessage = 1;
-                cmd.message = word.substr(1);
-                word.clear(); // Clear the word to avoid adding it to the parameter
-                std::getline(lineStream, word);
-                cmd.message += word;
-                break;
-            } else if (!messageStarted) {
-                if (cmd.command.empty()) {
-                    cmd.command = word;
-                } else {
-                    if (!cmd.parameter.empty()) {
-                        cmd.parameter += " ";
-                    }
-                    cmd.parameter += word;
-                }
-            }
-        }
-        std::cout << "\n-------------------\nParsed command:|" << cmd.command << "|" << std::endl;
-        std::cout << "Parameter:|" << cmd.parameter << "|" << std::endl;
-        std::cout << "Message:|" << cmd.message << "|" << "\n-------------------\n" << std::endl;
-    }
+	// 	std::cout << "|" << cmd.message << "|" << std::endl;
+	// 	return;
+	// }
+	while (iss >> word) {
+		if (word[0] == ':') {
+			messageStarted = true;
+			cmd.hasMessage = 1;
+			cmd.message = word.substr(1);
+			std::getline(iss, word);
+			cmd.message += word;
+			break;
+		} else if (!messageStarted) {
+			if (!cmd.parameter.empty()) {
+				cmd.parameter += " ";
+			}
+			cmd.parameter += word;
+		}
+	}
+	std::cout << "\n-------------------\nParsed command:|" << cmd.command << "|" << std::endl;
+	std::cout << "Parameter:|" << cmd.parameter << "|" << std::endl;
+	std::cout << "Message:|" << cmd.message << "|" << "\n-------------------\n" << std::endl;
 }
+
 
 
 void	Server::createChannel(Client &client, std::string name, int creatorFd)
