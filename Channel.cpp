@@ -246,10 +246,6 @@ int Channel::signPlus(std::string serverName, Channel &channel, Client *client, 
 		if (modeL(client, argumentSet) == -1)
 			return (3);
 	}
-	// if (ch == 'i')
-	// 	modeI();
-	// if (ch == 't')
-	// 	modeT();
 	if (ch != 'o')
 		channel.addFlag(ch);
 	return (0);

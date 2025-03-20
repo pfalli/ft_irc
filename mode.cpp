@@ -40,7 +40,7 @@ int		modeParse(const Command &cmd, modeCommand& parsedModeCommand)
 	return (0);
 }
 
-void	printModes(std::string serverName, Client *client, Channel &channel, int to_all)
+void	printModes(Client *client, Channel &channel, int to_all)
 {
 	std::string channelModeIs;
 	if (channel.getModes().find('l') != std::string::npos)
@@ -62,7 +62,9 @@ void	printModes(std::string serverName, Client *client, Channel &channel, int to
 		const char *msg1 = channelModeIs.c_str();
 		const char *msg2 = creationTime.c_str();
 		sendToChannel(channel, msg1, client->getSocket());
+		sendMsg(client, channelModeIs);
 		sendToChannel(channel, msg2,client->getSocket());
+		sendMsg(client, creationTime);
 		return ;
 	}
 }
@@ -92,7 +94,7 @@ void	applyModeToChannel(Server *server, Client *client, modeCommand &modeCommand
 	std::string modeArgument = modeCommand.modeArgument;
 	std::string prvModes = channel.getModes();
 	std::string	serverName = server->getName();
-	std::string unknownError = ERR_UMODEUNKNOWNFLAG(serverName, client->getNickName());
+	std::string unknownError = ERR_UMODEUNKNOWNFLAG(client->getNickName());
 	std::vector <std::string> argumentSet;
 
 	if (mode[0] != '+' && mode[0] != '-')
@@ -133,7 +135,7 @@ void	applyModeToChannel(Server *server, Client *client, modeCommand &modeCommand
 			}
 		}
 	}
-	printModes(serverName, client, channel, 1);
+	printModes(client, channel, 1);
 }
 
 void	mode(Server *server, const Command &cmd, Client *client)
@@ -152,7 +154,7 @@ void	mode(Server *server, const Command &cmd, Client *client)
 	}
 	if (parsedModeCommand.mode.empty())
 	{
-		printModes(server->getName(), client, *channel, 0);
+		printModes(client, *channel, 0);
 		return ;
 	}
 	else

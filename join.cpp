@@ -41,7 +41,7 @@ void	removeNewline(std::string &str)
 		str.erase(pos, 1);
 }
 
-int		caseK(Server *server, Client *joiningClient, Channel *channel)
+int		caseK(Client *joiningClient, Channel *channel)
 {
 	char buffer[BUFFER_SIZE];
 	std::string key = "Enter key for this channel\r\n";
@@ -55,7 +55,7 @@ int		caseK(Server *server, Client *joiningClient, Channel *channel)
 	removeNewline(input);
 	if (input != channel->getKey())
 	{
-		std::string badKey = ERR_BADCHANNELKEY(server->getName(), joiningClient->getNickName(), channel->getName());
+		std::string badKey = ERR_BADCHANNELKEY(joiningClient->getNickName(), channel->getName());
 		send(joiningClient->getSocket(), badKey.c_str(), badKey.length(), 0);
 		return (-1);
 	}
@@ -108,12 +108,12 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		//channel->printAllMembers();
 		if (channel->flagCheck('i') == 0)
 		{
-			sendMsg(joiningClient,ERR_INVITEONLYCHAN(server->getName(), username, channel->getName()));
+			sendMsg(joiningClient,ERR_INVITEONLYCHAN(username, channel->getName()));
 			return ;
 		}
 		if (channel->flagCheck('k') == 0)
 		{
-			if (caseK(server, joiningClient, channel) == -1)
+			if (caseK(joiningClient, channel) == -1)
 				return ;
 		}
 		if (channel->isUserInChannel(joiningClient->getNickName()) || channel->joinClient(joiningClient) == -1)
@@ -121,14 +121,11 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 			sendMsg(joiningClient,ERR_USERONCHANNEL2(joiningClient->getNickName(), joiningClient->getNickName(), channel->getName()));
 			return ;
 		}
-		// std::string welcomemsg_str = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
-		// const char *welcomemsg = welcomemsg_str.c_str();
 		std::string str = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
 		sendMsg(joiningClient, str.c_str());
 		sendToChannel(*channel, str.c_str(), joiningClient->getSocket());
 		if (channel->getisTopic() == 1)
 		{
-
 			sendMsg(joiningClient,RPL_TOPIC(username, channelTojoin, channel->getTopic()));
 			sendMsg(joiningClient,RPL_TOPICWHOTIME(username, channelTojoin, channel->getwhoTopicSet(), channel->getwhenTopicSet()));
 		}
