@@ -36,11 +36,11 @@
 # define RPL_NAMREPLY(nickName, channelName, channel) nickName + "=" + channelName + " :" + ((channel).makeMemberList()) + "\r\n"
 # define RPL_ENDOFNAMES(nickName, channelName) nickName + " " + channelName + " :End of /NAMES list\r\n"
 
-# define RPL_TOPICWHOTIME(channelName, nickName, setterNickname, time) ":serverhost 333 " + nickName + " " + channelName + " " + timeToString(time) + " " + setterNickname + "\r\n"
+# define RPL_TOPICWHOTIME(channelName, nickName, setterNickname, time) ":serverhost 333 " + nickName + " " + channelName + " "  + setterNickname + " " + timeToString(time) +"\r\n"
 # define ERR_INVITEONLYCHAN(serverName, nickName, channelName) serverName + ": Error(473) " + nickName + " " + channelName + " :Cannot join channel (+i)\r\n"
 # define ERR_BADCHANNELKEY(serverName, nickName, channelName) serverName + ": Error(475) " + nickName + " " + channelName + " :Cannot join channel (+k)\r\n"
 /* TOPIC */
-# define RPL_NOTOPIC(nickName, channelName) ("serverhost 331 " + nickName + " " + channelName + " :No Topic is set" + "\r\n")
+# define RPL_NOTOPIC(nickName, channelName) (":serverhost 331 " + nickName + " " + channelName + " :No Topic is set" + "\r\n")
 # define TOPIC_SET(nickName, userName, channelName, topic) (":" + nickName + "!" + userName + "@" + "serverhost" + " TOPIC " + channelName + " :" + topic + "\r\n")
 
 /* MODE */
