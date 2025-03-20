@@ -382,6 +382,12 @@ bool	Server::checkCaseHex(const Command &cmd, Client & client)
 				client.setNickName(nickname);
 				client.setNick();
 			}
+			if (!validFormat(NICKNAME, nickname))
+			{
+				std::string msg = ERR_ERRONEUSNICKNAME(client.getUserName(), nickname);
+				send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
+				return true ;
+			}
 			client.setRealName(cmd.message);
 			client.setRegistered();
 			const char *msg = "Registration complete. You can now continue.\r\n";
@@ -440,9 +446,9 @@ bool	Server::checkCaseHex(const Command &cmd, Client & client)
 				client.setNickName(nickname);
 				client.setNick();
 			}
-			if (!validFormat(NICKNAME, cmd.parameter))
+			if (!validFormat(NICKNAME, nickname))
 			{
-				std::string msg = ERR_ERRONEUSNICKNAME(client.getUserName(), cmd.parameter);
+				std::string msg = ERR_ERRONEUSNICKNAME(client.getUserName(), nickname);
 				send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
 				return true ;
 			}
@@ -524,7 +530,7 @@ bool	Server::checkCaseHex(const Command &cmd, Client & client)
 				}
 				if (existingName(username, USERNAME))
 				{
-					std::string str = ERR_ALREADYREGISTERED(client.getUserName());
+					std::string str = ERR_ALREADYREGISTERED(username));
 					send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
 					return true;
 				}
@@ -535,7 +541,7 @@ bool	Server::checkCaseHex(const Command &cmd, Client & client)
 				}
 				if (existingName(nickname, NICKNAME))
 				{
-					std::string str = ERR_NICKNAMEINUSE(client.getNickName());
+					std::string str = ERR_NICKNAMEINUSE(nickname);
 					send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
 					return true;
 				}
@@ -544,9 +550,9 @@ bool	Server::checkCaseHex(const Command &cmd, Client & client)
 					client.setNickName(nickname);
 					client.setNick();
 				}
-				if (!validFormat(NICKNAME, cmd.parameter))
+				if (!validFormat(NICKNAME, nickname)
 				{
-					std::string msg = ERR_ERRONEUSNICKNAME(client.getUserName(), cmd.parameter);
+					std::string msg = ERR_ERRONEUSNICKNAME(client.getUserName(), nickname);
 					send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
 					return true ;
 				}
