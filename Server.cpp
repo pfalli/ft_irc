@@ -391,7 +391,7 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		}
 		else
 		{
-			std::string msg = ERR_PASSWORDWRONG(client.getUserName())
+			std::string msg = ERR_PASSWORDWRONG(client.getUserName());
 			send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
 		}
 		return ;

@@ -362,7 +362,7 @@ bool	Server::checkCaseHex(const Command &cmd, Client & client)
 			}
 			if (existingName(username, USERNAME))
 			{
-				std::string str = ERR_ALREADYREGISTERED(username)
+				std::string str = ERR_ALREADYREGISTERED(username);
 				send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
 				return true ;
 			}
@@ -420,7 +420,7 @@ bool	Server::checkCaseHex(const Command &cmd, Client & client)
 			}
 			if (existingName(username, USERNAME))
 			{
-				std::string str = ERR_ALREADYREGISTERED(username)
+				std::string str = ERR_ALREADYREGISTERED(username);
 				send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
 				return true ;
 			}
@@ -488,7 +488,7 @@ bool	Server::checkCaseHex(const Command &cmd, Client & client)
 			}
 			if (pass != this->password)
 			{
-				std::string msg = ERR_PASSWORDWRONG(client.getUserName())
+				std::string msg = ERR_PASSWORDWRONG(client.getUserName());
 				send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
 				return true; //true so _register() will just return and not continue to save runtime
 			}

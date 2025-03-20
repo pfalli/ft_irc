@@ -45,7 +45,10 @@ void	messageToTargets(Client *sender, Server *server, std::vector<std::string> &
 			// send(sender->getSocket(), success_message.c_str(), success_message.length(), 0); // ***HEXCHAT ERROR: because it was sending the message to the sender***
 		}
 		else
-			send(sender->getSocket(), ERR_NOSUCHNICK(sender->getNickName(), *recipient).c_str(), ERR_NOSUCHNICK(sender->getNickName(), *recipient).length(), 0);
+		{
+			std::string error_message = ERR_NOSUCHNICK(sender->getNickName(), *recipient);
+			send(sender->getSocket(), error_message.c_str(), error_message.length(), 0);
+		}
 	}
 }
 
