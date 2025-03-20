@@ -41,7 +41,8 @@
 # define ERR_INVITEONLYCHAN(serverName, nickName, channelName)(  serverName + ": Error(473) " + nickName + " " + channelName + " :Cannot join channel (+i)" + "\r\n")
 # define ERR_BADCHANNELKEY(serverName, nickName, channelName)(  serverName + ": Error(475) " + nickName + " " + channelName + " :Cannot join channel (+k)" + "\r\n")
 /* TOPIC */
-# define RPL_NOTOPIC(userName, channelName) (  userName + " " + channelName + " :No Topic is set" + "\r\n")
+# define RPL_NOTOPIC(nickName, channelName) ("serverhost 331 " + nickName + " " + channelName + " :No Topic is set" + "\r\n")
+# define TOPIC_SET(nickName, userName, channelName, topic) (":" + nickName + "!" + userName + "@" + "serverhost" + " TOPIC " + channelName + " :" + topic + "\r\n")
 
 /* MODE */
 # define RPL_CHANNELMODEIS(serverName, nickName, channelName, modeString) (  ":" + serverName + " 324 " + nickName + " " + channelName + " " + modeString + "\r\n")

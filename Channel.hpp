@@ -58,7 +58,7 @@ class Channel {
 	void									printAllMembers();
 	std::string 							makeMemberList();
 	void									setTopic(std::string topic, std::string whoSet);
-	void									clearTopic(std::string whoClear);
+	void									clearTopic(Channel *channel, Client *client);
 	void									removeFlag(char flag);
 	void									addFlag(char flag);
 	void									setmodes(std::string modes);

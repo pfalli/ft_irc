@@ -15,20 +15,20 @@
 #include "Server.hpp"
 #include "utils.hpp"
 
-void sendTopicMsg(Client *client, Channel *channel, std::string userName)
+void sendTopicMsg(Client *client, Channel *channel)
 {
 	int	fd = client->getSocket();
 	if (channel->getisTopic() == 1)
 	{
-		std::string rtlTopic = RPL_TOPIC(userName, channel->getName(), channel->getTopic());
+		std::string rtlTopic = RPL_TOPIC(client->getNickName(), channel->getName(), channel->getTopic());
 		send(fd, rtlTopic.c_str(), rtlTopic.length(), 0);
-		std::string whoTime = RPL_TOPICWHOTIME(userName, channel->getName(), channel->getwhoTopicSet(), channel->getwhenTopicSet());
+		std::string whoTime = RPL_TOPICWHOTIME(channel->getName(), client->getNickName(), channel->getwhoTopicSet(), channel->getwhenTopicSet());
 		send(fd, whoTime.c_str(), whoTime.length(), 0);
 		return ;
 	}
 	else
 	{
-		std::string rplNotopic = RPL_NOTOPIC(userName, channel->getName());
+		std::string rplNotopic = RPL_NOTOPIC(client->getNickName(), channel->getName());
 		send(fd, rplNotopic.c_str(), rplNotopic.length(), 0);
 		return ;
 	}
@@ -56,26 +56,25 @@ void topic(Server *server, const Command &cmd, Client *client)
 	}
 	if (cmd.hasMessage == 0)
 	{
-		sendTopicMsg(client, channel, nickName);
+		sendTopicMsg(client, channel);
 		return ;
 	}
 	else
 	{
-		if (channel->flagCheck('t') == -1 && isOperator(*channel, client) == false)
+		if (channel->flagCheck('t') == 0 && isOperator(*channel, client) == false)
 		{
 			sendMsg(client, ERR_CHANOPRIVSNEEDED(client->getNickName(), channel->getName()));
 			return ;
 		}
-		if (cmd.message.empty())
-			channel->clearTopic(nickName);
+		if (cmd.message.size() == 1 && cmd.message[0] == ':')
+		{
+			channel->clearTopic(channel, client);
+			return ;
+		}
 		else
 			channel->setTopic(cmd.message, nickName);
-		std::string str = RPL_TOPIC(nickName, channelName, channel->getTopic());
-		const char *msg1 = str.c_str();
-		sendToChannel(*channel, msg1, client->getSocket());
-		str = RPL_TOPICWHOTIME(nickName, channelName, channel->getwhoTopicSet(), channel->getwhenTopicSet());
-		const char *msg2 = str.c_str();
-		sendToChannel(*channel, msg2, client->getSocket());
+		sendToChannel(*channel, TOPIC_SET(client->getNickName(), client->getUserName(),  channelName, channel->getTopic()), client->getSocket());
+		sendMsg(client, TOPIC_SET(client->getNickName(), client->getUserName(),  channelName, channel->getTopic()));
 		return ;
 	}
 }

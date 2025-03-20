@@ -113,12 +113,14 @@ Client *Channel::isUserInChannel(std::string nickName)
     return NULL;
 }
 
-void Channel::clearTopic(std::string whoClear)
+void Channel::clearTopic(Channel *channel, Client *client)
 {
 	this->_topic = "";
 	this->_isTopic = 0;
-	this->_whoTopicSet = whoClear;
+	this->_whoTopicSet = "";
 	this->_whenTopicSet = time(NULL);
+	sendToChannel(*channel, TOPIC_SET(client->getNickName(), client->getUserName(), channel->getName(), channel->getTopic()), client->getSocket());
+	sendMsg(client, TOPIC_SET(client->getNickName(), client->getUserName(), channel->getName(), channel->getTopic()));
 }
 
 void Channel::removeFlag(char flag)
