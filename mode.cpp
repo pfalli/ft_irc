@@ -40,16 +40,33 @@ int		modeParse(const Command &cmd, modeCommand& parsedModeCommand)
 	return (0);
 }
 
+std::string modeCommandMaker(Channel &channel)
+{
+	std::string modeString = channel.getModes();
+	for(size_t i = 0; i < channel.getModes().length(); i++)
+	{
+		if (modeString[i] == 'l')
+			modeString += " " + convertSizeTtoString(channel.getLimit());
+		if (modeString[i] == 'k')
+			modeString += " " + channel.getKey();
+		if (modeString[i] == 'o')
+		{
+			std::vector<Client *> operators = channel.getOperators();
+			for (size_t i = 0; i < operators.size(); i++)
+			{
+				modeString += " " + operators[i]->getNickName();
+			}
+		}
+	}
+	return (modeString);
+}
+
 void	printModes(Client *client, Channel &channel, int to_all)
 {
 	std::string channelModeIs;
-	if (channel.getModes().find('l') != std::string::npos)
-	{
-		std::string modeString = channel.getModes() + " " + convertSizeTtoString(channel.getLimit());
-		channelModeIs = RPL_CHANNELMODEIS(serverName, client->getNickName(), channel.getName(), modeString);
-	}
-	else
-		channelModeIs = RPL_CHANNELMODEIS(serverName, client->getNickName(), channel.getName(), channel.getModes());
+	std::string	modeString;
+	modeString = modeCommandMaker(channel);
+	channelModeIs = RPL_CHANNELMODEIS(serverName, client->getNickName(), channel.getName(), modeString);
 	std::string creationTime = RPL_CREATIONTIME(serverName, client->getNickName(), channel.getName(), channel.getserverCreationTime());
 	if (to_all == 0)
 	{	

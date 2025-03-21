@@ -188,6 +188,7 @@ void	Channel::takeOper(std::string nickName, Client *client)
 int	Channel::modeO(std::string serverName, Client *client, std::vector<std::string> &argumentSet)
 {
 	std::string nickName;
+	size_t		pos;
 	if (argumentSet.empty() || argumentSet[0].empty()) 
 		return (-1);
 	nickName = argumentSet[0];
@@ -199,6 +200,13 @@ int	Channel::modeO(std::string serverName, Client *client, std::vector<std::stri
 		return (-1);
 	}
 	this->_operators.push_back(toBeOperator);
+	pos = _modes.find('o');
+	if (pos == std::string::npos)
+		_modes.push_back('o');
+	else
+	{
+		_modes.insert(pos + 1, 1, 'o');
+	}
 	argumentSet.erase(argumentSet.begin());
 	return (0);
 }
