@@ -42,6 +42,8 @@
 /* TOPIC */
 # define RPL_NOTOPIC(nickName, channelName) (":serverhost 331 " + nickName + " " + channelName + " :No Topic is set" + "\r\n")
 # define TOPIC_SET(nickName, userName, channelName, topic) (":" + nickName + "!" + userName + "@" + "serverhost" + " TOPIC " + channelName + " :" + topic + "\r\n")
+#define ERR_USERNOTINCHANNEL2(client, nick, channel) (std::string(":serverhost 441 ") + client + " " + nick + " " + channel + " :They aren't on that channel\r\n")
+
 
 /* MODE */
 

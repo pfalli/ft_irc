@@ -126,7 +126,7 @@ void	applyModeToChannel(Server *server, Client *client, modeCommand &modeCommand
 			{
 				channel.removeFlag(ch);
 				if (ch == 'o')
-					channel.takeOper(client->getNickName());
+					channel.takeOper(modeArgument, client);
 			}
 			if (sign == 1)
 			{

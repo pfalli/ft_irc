@@ -17,7 +17,7 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 	if (!client.getRegistered() || !client.getPW())
 		return ;
 	if (cmd.command == "JOIN") {
-		join(this, &client, cmd.parameter);
+		join(this, &client, cmd);
 	}
 	else if (cmd.command == "CLIENTS") {
 		numClients(client);

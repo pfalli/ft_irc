@@ -27,7 +27,7 @@ std::string		convertSizeTtoString(size_t number);
 void	mode(Server *server, const Command &cmd, Client *client);
 
 /* join */
-void	join(Server *server, Client *joiningClient, std::string channelTojoin);
+void	join(Server *server, Client *joiningClient, const Command &cmd);
 //Channel*		isChannelExist(std::vector<Channel>&	channels, std::string channelTojoin);
 
 

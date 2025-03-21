@@ -167,7 +167,7 @@ int	Channel::modeK(std::vector<std::string> &argumentSet)
 	return (0);
 }
 
-void	Channel::takeOper(std::string nickName)
+void	Channel::takeOper(std::string nickName, Client *client)
 {
 	std::vector<Client *>::iterator it = this->_operators.begin();
 	for (; it != this->_operators.end(); it++)
@@ -177,6 +177,11 @@ void	Channel::takeOper(std::string nickName)
 			this->_operators.erase(it);
 			return ;
 		}
+	}
+	if (isUserInChannel(nickName) != NULL)
+	{
+		sendMsg(client, ERR_USERNOTINCHANNEL2(client->getNickName(), _name, nickName));
+		return ;
 	}
 }
 

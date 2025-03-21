@@ -39,21 +39,33 @@ void	removeNewline(std::string &str)
 	pos = str.find('\n');
 	if (pos != std::string::npos)
 		str.erase(pos, 1);
+	pos = str.find('\r');
+	if (pos != std::string::npos)
+		str.erase(pos, 1);
 }
 
-int		caseK(Client *joiningClient, Channel *channel)
+std::string getPassword(std::string parameter)
 {
-	char buffer[BUFFER_SIZE];
-	std::string key = "Enter key for this channel\r\n";
-	send(joiningClient->getSocket(), key.c_str(), key.length(), 0);
-	int	bytesReceived = recv(joiningClient->getSocket(), buffer, BUFFER_SIZE, 0);
-	if (bytesReceived < 0)
+	size_t index;
+
+	index = parameter.find(" ");
+	if (index == std::string::npos)
+		return ("");
+	std::string password = parameter.substr(index + 1);
+	return (password);
+}
+
+int		caseK(Client *joiningClient, Channel *channel, const Command &cmd)
+{
+	std::string password;
+	password = getPassword(cmd.parameter);
+	if (password.empty())
 	{
+		sendMsg(joiningClient, ERR_BADCHANNELKEY(joiningClient->getNickName(), channel->getName()));
 		return (-1);
 	}
-	std::string input(buffer, bytesReceived);
-	removeNewline(input);
-	if (input != channel->getKey())
+	removeNewline(password);
+	if (password != channel->getKey())
 	{
 		std::string badKey = ERR_BADCHANNELKEY(joiningClient->getNickName(), channel->getName());
 		send(joiningClient->getSocket(), badKey.c_str(), badKey.length(), 0);
@@ -62,11 +74,24 @@ int		caseK(Client *joiningClient, Channel *channel)
 	return (0);
 }
 
-void	join(Server *server, Client *joiningClient, std::string channelTojoin)
+std::string getChannelName(std::string parameter)
+{
+	size_t	index;
+
+	index = parameter.find(" ");
+	if (index == std::string::npos)
+		return (parameter);
+	std::string channelName = parameter.substr(0, index);
+	return (channelName);
+}
+
+void	join(Server *server, Client *joiningClient, const Command &cmd)
 {
 	std::string				username;
 	Channel					*channel;
+	std::string				channelTojoin;
 
+	channelTojoin = getChannelName(cmd.parameter);
 	server->debugging_whoinserver();
 	username = joiningClient->getNickName();
 	if (channelTojoin.empty())
@@ -113,7 +138,7 @@ void	join(Server *server, Client *joiningClient, std::string channelTojoin)
 		}
 		if (channel->flagCheck('k') == 0)
 		{
-			if (caseK(joiningClient, channel) == -1)
+			if (caseK(joiningClient, channel, cmd) == -1)
 				return ;
 		}
 		if (channel->isUserInChannel(joiningClient->getNickName()) || channel->joinClient(joiningClient) == -1)

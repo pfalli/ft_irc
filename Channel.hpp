@@ -71,7 +71,7 @@ class Channel {
 	int										isUserInTheChannel2(std::string userName);
 	std::string								getKey()const{return (this->_key);}
 	int										flagCheck(char flag);
-	void									takeOper(std::string nickName);
+	void									takeOper(std::string nickName, Client *client);
 	void									giveOper(std::string nickName);
 
 	//void									modeT();
