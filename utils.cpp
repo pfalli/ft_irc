@@ -364,6 +364,19 @@ bool	Server::checkCaseHex(const Command &cmd, Client & client)
 			{
 				std::string str = ERR_ALREADYREGISTERED(username);
 				send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
+				std::vector<Client>::iterator clientIt = findObject(client.getSocket(), clients);
+				std::vector<pollfd>::iterator pollIt = poll_fds.begin();
+				while (pollIt != poll_fds.end()) {
+					if (pollIt->fd == client.getSocket()) {
+						break;
+					}
+					pollIt++;
+				}
+				if (pollIt == poll_fds.end()) {
+					std::cerr << "Debug: Poll not found for QUIT command" << std::endl;
+					return true;
+				}
+				deleteClient(clientIt, pollIt);
 				return true ;
 			}
 			else
@@ -428,6 +441,19 @@ bool	Server::checkCaseHex(const Command &cmd, Client & client)
 			{
 				std::string str = ERR_ALREADYREGISTERED(username);
 				send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
+				std::vector<Client>::iterator clientIt = findObject(client.getSocket(), clients);
+				std::vector<pollfd>::iterator pollIt = poll_fds.begin();
+				while (pollIt != poll_fds.end()) {
+					if (pollIt->fd == client.getSocket()) {
+						break;
+					}
+					pollIt++;
+				}
+				if (pollIt == poll_fds.end()) {
+					std::cerr << "Debug: Poll not found for QUIT command" << std::endl;
+					return true;
+				}
+				deleteClient(clientIt, pollIt);
 				return true ;
 			}
 			else
@@ -532,7 +558,20 @@ bool	Server::checkCaseHex(const Command &cmd, Client & client)
 				{
 					std::string str = ERR_ALREADYREGISTERED(username);
 					send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
-					return true;
+					std::vector<Client>::iterator clientIt = findObject(client.getSocket(), clients);
+					std::vector<pollfd>::iterator pollIt = poll_fds.begin();
+					while (pollIt != poll_fds.end()) {
+						if (pollIt->fd == client.getSocket()) {
+							break;
+						}
+						pollIt++;
+					}
+					if (pollIt == poll_fds.end()) {
+						std::cerr << "Debug: Poll not found for QUIT command" << std::endl;
+						return true;
+					}
+					deleteClient(clientIt, pollIt);
+					return true ;
 				}
 				else
 				{

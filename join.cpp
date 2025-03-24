@@ -115,7 +115,7 @@ void	join(Server *server, Client *joiningClient, const Command &cmd)
 		// *** print message in case JOIN_FAILURE, because client already exist in channel ***
 		// *** try JOIN !!!channel *** it has to create only channels with '#'
 		std::string str = JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName());
-		send(joiningClient->getSocket(), str.c_str(), strlen(str.c_str()), 0);
+		//send(joiningClient->getSocket(), str.c_str(), strlen(str.c_str()), 0);
 		sendToChannel(*channel, str.c_str(), joiningClient->getSocket());
 		sendMsg(joiningClient,JOIN_SUCCESS(joiningClient->getNickName(), channelTojoin, server->getName(), joiningClient->getUserName()));
 		if (channel->getisTopic() == 1)

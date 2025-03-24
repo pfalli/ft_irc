@@ -43,7 +43,7 @@ void Server::handleCommand(const Command &cmd, Client &client) {
 	if (cmd.command == "TOPIC") {
 		topic(this, cmd, &client);
 	}
-    else if (cmd.command == "INVITE") {
+	else if (cmd.command == "INVITE") {
 		handleInvite(&client, cmd);
 	}
 	else if (cmd.command == "INFO") {
@@ -160,40 +160,40 @@ void Server::printInfo(Client* handleClient, const Command &cmd) {
 
 // INVITE <nickname> <channel>
 void Server::handleInvite(Client* handleClient, const Command &cmd) {
-    std::istringstream iss(cmd.parameter);
-    std::string targetNick, channelName;
-    iss >> targetNick >> channelName;
+	std::istringstream iss(cmd.parameter);
+	std::string targetNick, channelName;
+	iss >> targetNick >> channelName;
 
-    if (channelName.empty() || targetNick.empty()) {
-        std::string str = ERR_NEEDMOREPARAMS(handleClient->getUserName());
-        send(handleClient->getSocket(), str.c_str(), str.length(), 0);
-        return;
-    }
+	if (channelName.empty() || targetNick.empty()) {
+		std::string str = ERR_NEEDMOREPARAMS(handleClient->getUserName());
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+		return;
+	}
 	if (targetNick.find(" ") != std::string::npos) {
-        std::string str = ERR_TOOMANYPARAMS(handleClient->getUserName());
-        send(handleClient->getSocket(), str.c_str(), str.length(), 0);
-        return;
-    }
+		std::string str = ERR_TOOMANYPARAMS(handleClient->getUserName());
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+		return;
+	}
 
-    if (channelName[0] != '#') {
-        std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelName);
-        send(handleClient->getSocket(), str.c_str(), str.length(), 0);
-        return;
-    }
+	if (channelName[0] != '#') {
+		std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelName);
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+		return;
+	}
 
-    std::vector<Channel>::iterator channelIt = channels.begin();
-    while (channelIt != channels.end()) {
-        if (channelIt->getName() == channelName) {
-            break;
-        }
-        channelIt++;
-    }
+	std::vector<Channel>::iterator channelIt = channels.begin();
+	while (channelIt != channels.end()) {
+		if (channelIt->getName() == channelName) {
+			break;
+		}
+		channelIt++;
+	}
 
-    if (channelIt == channels.end()) {
-        std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelName);
-        send(handleClient->getSocket(), str.c_str(), str.length(), 0);
-        return;
-    }
+	if (channelIt == channels.end()) {
+		std::string str = ERR_NOSUCHCHANNEL(handleClient->getUserName(), channelName);
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+		return;
+	}
 
 	if (!isOperator(*channelIt, handleClient))
 	{
@@ -203,49 +203,57 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 		return ;
 	}
 
-    std::vector<Client *>::iterator inviterIt = channelIt->getJoinedClients().begin();
-    while (inviterIt != channelIt->getJoinedClients().end()) {
-        if ((*inviterIt)->getNickName() == handleClient->getNickName()) {
-            break;
-        }
-        inviterIt++;
-    }
+	std::vector<Client *>::iterator inviterIt = channelIt->getJoinedClients().begin();
+	while (inviterIt != channelIt->getJoinedClients().end()) {
+		if ((*inviterIt)->getNickName() == handleClient->getNickName()) {
+			break;
+		}
+		inviterIt++;
+	}
 
-    if (inviterIt == channelIt->getJoinedClients().end()) {
-        std::string str = ERR_NOTONCHANNEL(handleClient->getNickName(), channelName);
-        send(handleClient->getSocket(), str.c_str(), str.length(), 0);
-        return;
-    }
+	if (inviterIt == channelIt->getJoinedClients().end()) {
+		std::string str = ERR_NOTONCHANNEL(handleClient->getNickName(), channelName);
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+		return;
+	}
 
-    std::vector<Client *>::iterator targetIt = channelIt->getJoinedClients().begin();
-    while (targetIt != channelIt->getJoinedClients().end()) {
-        if ((*targetIt)->getNickName() == targetNick) {
-            std::string str = ERR_USERONCHANNEL(handleClient->getUserName(), targetNick, channelName);
-            send(handleClient->getSocket(), str.c_str(), str.length(), 0);
-            return;
-        }
-        targetIt++;
-    }
+	std::vector<Client *>::iterator targetIt = channelIt->getJoinedClients().begin();
+	while (targetIt != channelIt->getJoinedClients().end()) {
+		if ((*targetIt)->getNickName() == targetNick) {
+			std::string str = ERR_USERONCHANNEL(handleClient->getUserName(), targetNick, channelName);
+			send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+			return;
+		}
+		targetIt++;
+	}
 
-    std::vector<Client>::iterator targetExistIt = this->getClients().begin();
-    while (targetExistIt != this->getClients().end()) {
-        if (targetExistIt->getNickName() == targetNick) {
-            break;
-        }
-        targetExistIt++;
-    }
+	std::vector<Client>::iterator targetExistIt = this->getClients().begin();
+	for (size_t i = 0; i < this->getClients().size() && targetExistIt != this->getClients().end(); i++)
+	{
+		if (targetExistIt->getNickName() == targetNick) {
+			break;
+		}
+		targetExistIt++;
+	}
+	
+	// while (targetExistIt != this->getClients().end()) {
+	// 	if (targetExistIt->getNickName() == targetNick) {
+	// 		break;
+	// 	}
+	// 	targetExistIt++;
+	// }
 
-    if (targetExistIt == this->getClients().end()) {
-        std::string str = ERR_NOSUCHNICK(handleClient->getNickName(), targetNick);
-        send(handleClient->getSocket(), str.c_str(), str.length(), 0);
-        return;
-    }
+	if (targetExistIt == this->getClients().end()) {
+		std::string str = ERR_NOSUCHNICK(handleClient->getNickName(), targetNick);
+		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
+		return;
+	}
 
-    std::string confirmMsg = ":" + this->name + " 341 " + handleClient->getNickName() + " " + targetNick + " " + channelName + "\r\n";
-    send(handleClient->getSocket(), confirmMsg.c_str(), confirmMsg.length(), 0);
+	std::string confirmMsg = ":" + this->name + " 341 " + handleClient->getNickName() + " " + targetNick + " " + channelName + "\r\n";
+	send(handleClient->getSocket(), confirmMsg.c_str(), confirmMsg.length(), 0);
 
-    std::string inviteMsg = ":" + handleClient->getNickName() + "!" + handleClient->getUserName() + "@" + this->name + " INVITE " + targetNick + " :" + channelName + "\r\n";
-    send(targetExistIt->getSocket(), inviteMsg.c_str(), inviteMsg.length(), 0);
+	std::string inviteMsg = ":" + handleClient->getNickName() + "!" + handleClient->getUserName() + "@" + this->name + " INVITE " + targetNick + " :" + channelName + "\r\n";
+	send(targetExistIt->getSocket(), inviteMsg.c_str(), inviteMsg.length(), 0);
 }
 
 void Server::handleKick(Client* handleClient, const Command &cmd) {

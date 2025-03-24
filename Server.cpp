@@ -192,12 +192,11 @@ void		Server::deleteClient(std::vector<Client>::iterator client, std::vector<pol
 {
 	std::cout	<< "Client disconnected: "	<< (*client).getUserName() + "," <<
 		" Socket: "	<< client->getSocket()				<< std::endl;
-	close(client->getSocket());
-	this->clients.erase(client);
-	this->poll_fds.erase(poll);
 	// if client inside one or multiple channels => delete
 	deleteClientInsideChannels(*client);
-
+	this->clients.erase(client);
+	this->poll_fds.erase(poll);
+	close(client->getSocket());
 }
 
 void	Server::deleteClientInsideChannels(const Client &client) {
@@ -376,6 +375,19 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 	{
 		std::string str = ERR_ALREADYREGISTERED(client.getUserName());
 		send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
+		std::vector<Client>::iterator clientIt = findObject(client.getSocket(), clients);
+		std::vector<pollfd>::iterator pollIt = poll_fds.begin();
+		while (pollIt != poll_fds.end()) {
+			if (pollIt->fd == client.getSocket()) {
+				break;
+			}
+			pollIt++;
+		}
+		if (pollIt == poll_fds.end()) {
+			std::cerr << "Debug: Poll not found for QUIT command" << std::endl;
+			return;
+		}
+		deleteClient(clientIt, pollIt);
 		return ;
 	}
 	if (checkCaseHex(cmd, client))
