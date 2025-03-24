@@ -31,12 +31,12 @@ int		modeParse(const Command &cmd, modeCommand& parsedModeCommand)
 	else if (parsedModeCommand.mode[0] == '-')
 		parsedModeCommand.setRemove = -1;
 	
-	std::cout << "!------------------------------------------------------------!" << std::endl;
-	std::cout << "channelName :" << parsedModeCommand.channelName << std::endl;
-	std::cout << "mode :" << parsedModeCommand.mode << std::endl;
-	std::cout << "modeArgument :" << parsedModeCommand.modeArgument << std::endl;
-	std::cout << "setRemove :" << parsedModeCommand.setRemove << std::endl;
-	std::cout << "!------------------------------------------------------------!" << std::endl;
+	// std::cout << "!------------------------------------------------------------!" << std::endl;
+	// std::cout << "channelName :" << parsedModeCommand.channelName << std::endl;
+	// std::cout << "mode :" << parsedModeCommand.mode << std::endl;
+	// std::cout << "modeArgument :" << parsedModeCommand.modeArgument << std::endl;
+	// std::cout << "setRemove :" << parsedModeCommand.setRemove << std::endl;
+	// std::cout << "!------------------------------------------------------------!" << std::endl;
 	return (0);
 }
 

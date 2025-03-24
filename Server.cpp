@@ -179,7 +179,10 @@ int	Server::NewClient(int new_socket)
 	pollfd client_fd;
 	client_fd.fd = new_socket;
 	client_fd.events = POLLIN;  // Monitor for incoming data
-	poll_fds.push_back(client_fd);
+	client_fd.revents = 0;
+
+	this->poll_fds.push_back(client_fd);
+
 	std::string str = WELCOME_MESSAGE;
 	send(new_socket, str.c_str(), strlen(str.c_str()), 0);
 	return (SUCCESS);
@@ -253,6 +256,7 @@ void	Server::launch()
 	pollfd server_poll_fd;
 	server_poll_fd.fd = serverSocket;
 	server_poll_fd.events = POLLIN;  // constant check for incoming connections
+	server_poll_fd.revents = 0;
 	this->poll_fds.push_back(server_poll_fd);
 
 	while (!server_shutdown)
@@ -266,13 +270,14 @@ void	Server::launch()
 			throw FailedPollException();
 		}
 		std::vector<pollfd>::iterator it = poll_fds.begin();
-		for (size_t i = 0; i < poll_fds.size(); i++)
+		for (size_t i = 0; i < poll_fds.size() && it != poll_fds.end(); i++)
 		{
 			if (it->revents & POLLIN)
 			{
 				if (it->fd == serverSocket)
 				{
 					newConnection();
+					it = poll_fds.begin();
 				}
 				else
 				{
