@@ -52,6 +52,7 @@
 # define ERR_UMODEUNKNOWNFLAG(nickName) ":serverhost 501 " + nickName + " :unknown MODE flag\r\n"
 # define ERR_UNKNOWNMODE(nickName, char) ":serverhost 472 " + nickName + " " + char + " :is unknown mode char to me\r\n"
 # define ERR_CHANOPRIVSNEEDED(nickName, channelName) ":serverhost 482 " + nickName + " " + channelName + " :You're not channel operator\r\n"
+# define ERR_CHANNELISFULL(nickName, channelName) ":serverhost 471 " + nickName + " " + channelName + " :Cannot join channel (+i)\r\n"
 
 # define WELCOME_MESSAGE "\n\
     Hello, welcome to our server!\n\

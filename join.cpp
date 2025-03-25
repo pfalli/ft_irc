@@ -131,9 +131,16 @@ void	join(Server *server, Client *joiningClient, const Command &cmd)
 	{
 		//channel->printAllMembers();
 		if (channel->flagCheck('i') == 0)
-		{
 			sendMsg(joiningClient,ERR_INVITEONLYCHAN(username, channel->getName()));
 			return ;
+		}
+		if (channel->flagCheck('l') == 0)
+		{
+			if (channel->getLimit() <= channel->getJoinedClients().size())
+			{
+				sendMsg(joiningClient,ERR_CHANNELISFULL(username, channel->getName()));
+				return ;
+			}
 		}
 		if (channel->flagCheck('k') == 0)
 		{
