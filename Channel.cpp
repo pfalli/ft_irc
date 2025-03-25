@@ -167,7 +167,7 @@ int	Channel::modeK(std::vector<std::string> &argumentSet)
 	return (0);
 }
 
-void	Channel::takeOper(std::string nickName, Client *client)
+int	Channel::takeOper(std::string nickName, Client *client)
 {
 	std::vector<Client *>::iterator it = this->_operators.begin();
 	for (; it != this->_operators.end(); it++)
@@ -175,20 +175,22 @@ void	Channel::takeOper(std::string nickName, Client *client)
 		if ((*it)->getNickName() == nickName)
 		{
 			this->_operators.erase(it);
-			return ;
+			return 0;
 		}
 	}
-	if (isUserInChannel(nickName) != NULL)
+	if (isUserInChannel(nickName) == NULL)
 	{
 		sendMsg(client, ERR_USERNOTINCHANNEL2(client->getNickName(), _name, nickName));
-		return ;
+		return -1;
 	}
+	return -1;
 }
 
 int	Channel::modeO(std::string serverName, Client *client, std::vector<std::string> &argumentSet)
 {
 	std::string nickName;
 	size_t		pos;
+
 	if (argumentSet.empty() || argumentSet[0].empty()) 
 		return (-1);
 	nickName = argumentSet[0];
@@ -199,6 +201,8 @@ int	Channel::modeO(std::string serverName, Client *client, std::vector<std::stri
 		send(client->getSocket(), notInChannel.c_str(), notInChannel.size(), 0);
 		return (-1);
 	}
+	if (hasOper(toBeOperator) != NULL)
+		return (-1);
 	this->_operators.push_back(toBeOperator);
 	pos = _modes.find('o');
 	if (pos == std::string::npos)
@@ -300,6 +304,17 @@ void Channel::giveOper(std::string nickName)
 		}
 	}
 }
+
+// Client *Channel::nickToClient(std::string nickName)
+// {
+// 	std::vector<Client *>::iterator it = this->_joinedClients.begin();
+// 	for (; it != this->_joinedClients.end(); it++)
+// 	{
+// 		if ((*it)->getNickName() == nickName)
+// 			return (*it);
+// 	}
+// 	return (NULL);
+// }
 
 // int	Channel::signMinus(Channel &channel, Client &client, std::vector<std::string> &argumentSet, char ch)
 // {

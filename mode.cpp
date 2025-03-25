@@ -43,19 +43,18 @@ int		modeParse(const Command &cmd, modeCommand& parsedModeCommand)
 std::string modeCommandMaker(Channel &channel)
 {
 	std::string modeString = channel.getModes();
-	for(size_t i = 0; i < channel.getModes().length(); i++)
+	std::vector<Client *> operators = channel.getOperators();
+	size_t	i = 0;
+	for(; i < channel.getModes().length(); i++)
 	{
 		if (modeString[i] == 'l')
 			modeString += " " + convertSizeTtoString(channel.getLimit());
 		if (modeString[i] == 'k')
 			modeString += " " + channel.getKey();
-		if (modeString[i] == 'o')
+		while (modeString[i] == 'o' && i < channel.getModes().length())
 		{
-			std::vector<Client *> operators = channel.getOperators();
-			for (size_t i = 0; i < operators.size(); i++)
-			{
-				modeString += " " + operators[i]->getNickName();
-			}
+			modeString += " " + operators[i]->getNickName();
+			i ++;
 		}
 	}
 	return (modeString);
@@ -141,9 +140,12 @@ void	applyModeToChannel(Server *server, Client *client, modeCommand &modeCommand
 			}
 			if (sign == -1)
 			{
-				channel.removeFlag(ch);
 				if (ch == 'o')
-					channel.takeOper(modeArgument, client);
+				{
+					if (channel.takeOper(modeArgument, client) == -1)
+						return ;
+				}
+				channel.removeFlag(ch);
 			}
 			if (sign == 1)
 			{

@@ -71,7 +71,7 @@ class Channel {
 	int										isUserInTheChannel2(std::string userName);
 	std::string								getKey()const{return (this->_key);}
 	int										flagCheck(char flag);
-	void									takeOper(std::string nickName, Client *client);
+	int										takeOper(std::string nickName, Client *client);
 	void									giveOper(std::string nickName);
 
 	//void									modeT();
@@ -80,6 +80,7 @@ class Channel {
 	int										modeO(std::string serverName, Client *client, std::vector<std::string> &argumentSet);
 	int										modeL(Client *client, std::vector<std::string> &argumentSet);
 	Client*									hasOper(Client *client);
+	Client*									nickToClient(std::string nickName);
 	
 	// piero added
 	void									removeClientFromList(std::vector<Client *>::iterator person);
