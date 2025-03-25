@@ -376,7 +376,7 @@ void Server::handleQuit(Client *handleClient, const Command &cmd) {
 }
 
 
-void Server::handlePing(Client *handleClient, const Command &cmd) {
+void Server::handlePing(Client *handleClient, const Command &cmd) { // in nc PING needs parameter, in Hexchat only PING because hexchat will pass already a parameter
 	if (cmd.parameter.empty()) {
 		std::string str = ERR_NEEDMOREPARAMS(handleClient->getUserName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
