@@ -33,7 +33,7 @@
 /* join */
 # define JOIN_SUCCESS(nickName, channelName, serverName, userName) ":" + nickName + "!" + userName + "@" + serverName + " JOIN " + channelName + "\r\n"
 # define RPL_TOPIC(nickName, channelName, topic) ":serverhost 332 " + nickName + " " + channelName + " :" + topic + "\r\n"
-# define RPL_NAMREPLY(userName, symbol, channelName, channel) ":serverhost 353 " + userName + " " + symbol + " #" + channelName + " :" +((channel).makeMemberList()) + "\r\n"
+# define RPL_NAMREPLY(userName, symbol, channelName, channel) ":serverhost 353 " + userName + " " + symbol + " " + channelName + " :" +((channel).makeMemberList()) + "\r\n"
 # define RPL_ENDOFNAMES(nickName, channelName) ":serverhost 366 " + nickName + " " + channelName + " :End of /NAMES list\r\n"
 
 # define RPL_TOPICWHOTIME(channelName, nickName, setterNickname, time) ":serverhost 333 " + nickName + " " + channelName + " "  + setterNickname + " " + timeToString(time) +"\r\n"

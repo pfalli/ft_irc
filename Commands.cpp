@@ -270,7 +270,7 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 	std::string inviteMsg = ":" + handleClient->getNickName() + "!" + handleClient->getUserName() + "@" + this->name + " INVITE " + targetNick + " :" + channelName + "\r\n";
 	send(this->getClients()[i].getSocket(), inviteMsg.c_str(), inviteMsg.length(), 0);
 
-	channelIt->getJoinedClients().push_back(&this->getClients()[i]); // *** adding Client invited ***
+	join(this, &this->getClients()[i], cmd);
 }
 
 void Server::handleKick(Client* handleClient, const Command &cmd) {
