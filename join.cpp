@@ -123,8 +123,9 @@ void	join(Server *server, Client *joiningClient, const Command &cmd)
 			sendMsg(joiningClient, RPL_TOPIC(username, channelTojoin, channel->getTopic()));
 			sendMsg(joiningClient, RPL_TOPICWHOTIME(username, channelTojoin, channel->getwhoTopicSet(), channel->getwhenTopicSet()));
 		}
-		sendMsg(joiningClient, RPL_NAMREPLY(joiningClient->getNickName(), channelTojoin, *channel));
-		sendMsg(joiningClient, RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin));
+		const char symbol = 0x3D;
+		sendMsg(joiningClient,RPL_NAMREPLY(joiningClient->getUserName(), symbol, channelTojoin, *channel));
+		sendMsg(joiningClient, RPL_ENDOFNAMES(joiningClient->getUserName(), channelTojoin));
 		//channel->printAllMembers();
 	}
 	else
@@ -153,7 +154,8 @@ void	join(Server *server, Client *joiningClient, const Command &cmd)
 			sendMsg(joiningClient,RPL_TOPIC(username, channelTojoin, channel->getTopic()));
 			sendMsg(joiningClient,RPL_TOPICWHOTIME(username, channelTojoin, channel->getwhoTopicSet(), channel->getwhenTopicSet()));
 		}
-		sendMsg(joiningClient,RPL_NAMREPLY(joiningClient->getNickName(), channelTojoin, *channel));
-		sendMsg(joiningClient,RPL_ENDOFNAMES(joiningClient->getNickName(), channelTojoin));
+		const char symbol = 0x3D;
+		sendMsg(joiningClient,RPL_NAMREPLY(joiningClient->getUserName(), symbol, channelTojoin, *channel));
+		sendMsg(joiningClient,RPL_ENDOFNAMES(joiningClient->getUserName(), channelTojoin));
 	}
 }

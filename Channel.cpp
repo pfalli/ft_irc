@@ -84,14 +84,24 @@ void Channel:: printAllMembers()
 std::string Channel::makeMemberList()
 {
 	std::vector<Client *> memberList = this->getJoinedClients();
-	std::string	result;
-	
-	std::vector<Client *>::iterator it = memberList.begin();
-	for (; it != memberList.end(); it++)
+	std::string	list;
+	std::string final_list;
+	std::vector<Client *>::iterator it;
+
+	final_list = "";
+	for (it = memberList.begin(); it != memberList.end(); it++)
 	{
-		result = result + " " + (* it)->getNickName();
+		list.clear();
+		list = (*it)->getNickName();
+		if (isOperator(*this, *it))
+			final_list += "@";
+		final_list += list;
+		final_list += " ";
 	}
-	return (result);
+	if (final_list.size() >= 1 && final_list[final_list.size() - 1] == ' ')
+		final_list.erase(final_list.end() - 1);
+	std::cout << std::endl << "list: " + final_list << std::endl;
+	return (final_list);
 }
 
 void Channel::setTopic(std::string topic, std::string whoSet)
@@ -213,20 +223,20 @@ int	Channel::modeO(std::string serverName, Client *client, std::vector<std::stri
 
 int	Channel::modeL(Client *client, std::vector<std::string> &argumentSet)
 {
-	size_t		result;
+	size_t		list;
 	std::string	argument;
 
 	if (argumentSet.empty() || argumentSet[0].empty())
 		return (-1);
 	argument = argumentSet[0];
-	result = stringToSizeT(argument);
-	if (result == 0)
+	list = stringToSizeT(argument);
+	if (list == 0)
 	{
 		std::string errMsg = ERR_UNKNOWNMODE(client->getNickName(), "l");
 		send(client->getSocket(), errMsg.c_str(), errMsg.size(), 0);
 		return (2);
 	}
-	_limit = result;
+	_limit = list;
 	argumentSet.erase(argumentSet.begin());
 	return (0);
 }
