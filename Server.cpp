@@ -194,9 +194,10 @@ void		Server::deleteClient(std::vector<Client>::iterator client, std::vector<pol
 		" Socket: "	<< client->getSocket()				<< std::endl;
 	// if client inside one or multiple channels => delete
 	deleteClientInsideChannels(*client);
-	this->clients.erase(client);
-	this->poll_fds.erase(poll);
+	
 	close(client->getSocket());
+	this->poll_fds.erase(poll);
+	this->clients.erase(client);
 }
 
 void	Server::deleteClientInsideChannels(const Client &client) {
@@ -318,7 +319,11 @@ void	Server::existingConnection(std::vector<pollfd>::iterator it)
 	bytes_read = recv(client->getSocket(), buffer, BUFFER_SIZE, 0); // ***receiving message
 	if (bytes_read <= FAILURE || bytes_read == 0)
 	{
-		deleteClient(findObject(it->fd, this->clients), it);
+		std::vector<Client>::iterator client_it = findObject(it->fd, this->clients);
+		if (client_it != this->clients.end())
+			deleteClient(findObject(it->fd, this->clients), it);
+		else
+			std::cout << "Error: failed to delete client." << std::endl;
 		return ;
 	}
 	else if (bytes_read > 0)
@@ -327,19 +332,11 @@ void	Server::existingConnection(std::vector<pollfd>::iterator it)
 		std::cout << buffer << std::endl;
 		std::string str = buffer;
 		memset(buffer, 0, BUFFER_SIZE);
-		if (str == "end")
-		{
-			deleteClient(findObject(it->fd, this->clients), it);
-			return ;
-		}
-		else
-		{
-			std::cout << "Received(existingConnection):|" << str << "|" << std::endl;
-			Command cmd;
-			parseCommand(str, cmd);
-			handleCommand(cmd, *client);
-			std::cout << "-----------------------------------------------------" << std::endl;
-		}
+		std::cout << "Received(existingConnection):|" << str << "|" << std::endl;
+		Command cmd;
+		parseCommand(str, cmd);
+		handleCommand(cmd, *client);
+		std::cout << "-----------------------------------------------------" << std::endl;
 	}
 }
 
@@ -392,13 +389,13 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 	}
 	if (checkCaseHex(cmd, client))
 			return ;
-	if (cmd.parameter.empty())
+	if (cmd.parameter.empty() && mode != NICKNAME)
 	{
 		const std::string str = ERR_NEEDMOREPARAMS(client.getUserName());
 		send(client.getSocket(), str.c_str(), str.length(), 0);
 		return ;
 	}
-	if (mode == PASSWORD)
+	if (mode == PASSWORD && client.getPW() == false)
 	{
 		if (this->password == cmd.parameter)
 		{
@@ -413,7 +410,7 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 		}
 		return ;
 	}
-	else if (mode == USERNAME)
+	else if (mode == USERNAME && client.getUser() == false)
 	{
 		if (!existingName(cmd.parameter, USERNAME))
 		{
@@ -437,6 +434,12 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 	}
 	else if (mode == NICKNAME)
 	{
+		if (cmd.parameter.empty())
+		{
+			std::string msg = ERR_NONICKNAMEGIVEN(client.getUserName());
+			send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
+			return ;
+		}
 		if (!existingName(cmd.parameter, NICKNAME))
 		{
 			if (!validFormat(NICKNAME, cmd.parameter))
@@ -447,6 +450,8 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 			}
 			client.setNickName(cmd.parameter);
 			client.setNick();
+			std::string msg = RPL_NICK(client.getNickName(), client.getUserName(), cmd.parameter);
+			send(client.getSocket(), msg.c_str(), strlen(msg.c_str()), 0);
 		}
 		else
 		{
@@ -455,11 +460,12 @@ void					Server::_register(Client &client, const Command &cmd, int mode)
 			return ;
 		}
 	}
-	if (client.getNick() == true && client.getPW() == true && client.getUser() == true)
+	if (client.getRGSTR_MSG() == false && client.getNick() == true && client.getPW() == true && client.getUser() == true)
 	{
 		client.setRegistered();
 		const char *msg = "Registration complete!\r\n";
 		send(client.getSocket(), msg, strlen(msg), 0);
+		client.setRGSTR_MSG();
 	}
 }
 

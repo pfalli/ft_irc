@@ -127,6 +127,8 @@ void Server::handleNotice(Client *handleClient, const Command &cmd) {
 
 // **DEBUGGER PRINT CHANNEL INFO BY NAME***
 void Server::printInfo(Client* handleClient, const Command &cmd) {
+	if (cmd.parameter.empty())
+		return ;
 	std::vector<Channel>::iterator channelIt = channels.begin();
 	while (channelIt != channels.end()) {
 		if (channelIt->getName() == cmd.parameter) {
@@ -232,7 +234,6 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 	size_t i;
 	for (i = 0; i < this->getClients().size(); i++)
 	{
-		std::cout << std::endl << "test print " << i << std::endl;
 		if (this->getClients()[i].getNickName() == targetNick) {
 			break;
 		}

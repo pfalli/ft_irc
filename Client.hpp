@@ -25,21 +25,35 @@ class Client
 	bool									user;
 	bool									nick;
 	bool									registered;
+	bool									regstr_msg_sent;
 
 	std::string								buffer_in;
 	std::string								buffer_out;
 
 	public:
+											Client()
+											{
+												user_name = "no_user_set";
+												nick_name = "no_nick_set";
+												real_name = "no_real_set";
+												password = false;
+												user = false;
+												nick = false;
+												registered =false;
+												clientSocket = 4;
+												regstr_msg_sent = false;
+											};
 											Client(int socket)
 											{
-												user_name = "default";
-												nick_name = "default_nick";
-												real_name = "default_real";
+												user_name = "no_user_set";
+												nick_name = "no_nick_set";
+												real_name = "no_real_set";
 												password = false;
 												user = false;
 												nick = false;
 												registered =false;
 												clientSocket = socket;
+												regstr_msg_sent = false;
 											};
 											~Client(){};
 	void									setUserName(std::string _name){this->user_name = _name;}
@@ -50,11 +64,13 @@ class Client
 	void									setPW(){this->password = true;}
 	void									setUser(){this->user = true;}
 	void									setNick(){this->nick = true;}
+	void									setRGSTR_MSG(){this->regstr_msg_sent = true;}
 
 	std::string								getUserName() const{return (this->user_name);}
 	std::string								getNickName() const{return (this->nick_name);}
 	std::string								getRealName() const{return (this->real_name);}
 	int										getSocket()const{return (this->clientSocket);}
+	bool									getRGSTR_MSG()const{return(this->regstr_msg_sent);}
 	bool									getRegistered()const{return (this->registered);}
 	bool									getPW()const{return (this->password);}
 	bool									getUser()const{return (this->user);}

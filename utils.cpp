@@ -66,7 +66,7 @@ static bool validNickname(std::string str)
 		return (false);
 	for (size_t i = 0; i < strlen(str.c_str()); i++)
 	{
-		if (!isalnum(str[i])  && !(str[i] <= 40 && str[i] >= 21))
+		if (!(str[i] >= 97 && str[i] <= 122) && !(str[i] >= 48 && str[i] <= 57))
 			return (false);
 	}
 	return (true);
@@ -386,6 +386,7 @@ bool	Server::checkCaseHex(const Command &cmd, Client & client)
 			}
 			if (existingName(nickname, NICKNAME))
 			{
+				client.setNickName(username); //debug, might remove later
 				std::string str = ERR_NICKNAMEINUSE(nickname);
 				send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
 				return true ;
@@ -463,6 +464,7 @@ bool	Server::checkCaseHex(const Command &cmd, Client & client)
 			}
 			if (existingName(nickname, NICKNAME))
 			{
+				client.setNickName(username); //debug, might remove later
 				std::string str = ERR_NICKNAMEINUSE(nickname);
 				send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
 				return true ;
@@ -580,6 +582,7 @@ bool	Server::checkCaseHex(const Command &cmd, Client & client)
 				}
 				if (existingName(nickname, NICKNAME))
 				{
+					client.setNickName(username); //debug, might remove later
 					std::string str = ERR_NICKNAMEINUSE(nickname);
 					send(client.getSocket(), str.c_str(), strlen(str.c_str()), 0);
 					return true;
