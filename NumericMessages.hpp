@@ -16,13 +16,13 @@
 # define ERR_NOTREGISTERED ":serverhost 451 new_client :You have not registered\r\n"
 # define ERR_NICKNAMEINUSE(nickname) ":serverhost 433 " + nickname + " :Nickname is already in use\r\n"
 # define ERR_ERRONEUSNICKNAME(username, nickname) ":serverhost 432 " + username + " " + nickname + " :Erroneous nickname\r\n"
-
+# define ERR_NONICKNAMEGIVEN(username) ":serverhost 431 :" + username + " :No nickname given\r\n"
 // **REPLIES
 # define RPL_QUIT(username, reason) ":" + username + " /Quit : " + reason + "\r\n"
 # define RPL_KICK(kickernick, kickeruser, channelname, username, reason) ":" + kickernick + "!" + kickeruser + "@serverhost KICK " + channelname + " " + username + " :" + reason + "\r\n"
 # define RPL_INVITING(client, targetnick, channel) ":serverhost 341 " + client + " " + targetnick + " " + channel + "\r\n"
 # define RPL_NOTICE(client, username, targetnick, message) ":" + client + "!" + username + "@localhost NOTICE " + targetnick + " :" + message + "\r\n"
-
+# define RPL_NICK(old_nickname, username, new_nickname) ":" + old_nickname + "!" + username + "@localhost NICK " + new_nickname + "\r\n"
 /* PRIVMSG */
 # define ERR_NOSUCHNICK(client, nickname) ":serverhost 401 " + client + " " + nickname + " :No such nick/channel\r\n"
 # define SUCCESS_PRIVMSG(sender, recipient, msg) ":" + sender + " PRIVMSG " + recipient + " :" + msg + "\r\n"
