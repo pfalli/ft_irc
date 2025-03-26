@@ -194,8 +194,7 @@ void		Server::deleteClient(std::vector<Client>::iterator client, std::vector<pol
 		" Socket: "	<< client->getSocket()				<< std::endl;
 	// if client inside one or multiple channels => delete
 	deleteClientInsideChannels(*client);
-
-	client->setValid(false); // Set valid to false
+	
 	close(client->getSocket());
 	this->poll_fds.erase(poll);
 	this->clients.erase(client);
