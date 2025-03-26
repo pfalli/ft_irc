@@ -229,8 +229,6 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 		}
 		targetIt++;
 	}
-
-	// std::vector<Client>::iterator targetExistIt = this->getClients().begin();
 	
 	size_t i;
 	for (i = 0; i < this->getClients().size(); i++)
@@ -239,28 +237,7 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 			break;
 		}
 	}
-	
-	// for (size_t i = 0; i < this->getClients().size(); i++)
-	// {
-	// 	if (targetExistIt == this->getClients().end())
-	// 		break ;
-	// 	std::cout << std::endl << "test print " << i << std::endl;
-	// 	if (targetExistIt->getNickName() == targetNick) {
-	// 	   break;
-	//    }
-	//    targetExistIt++;
-	// }
-	
-	// while (targetExistIt != this->getClients().end()) {
-	// 	std::cout << std::endl << "test print " << targetExistIt->getSocket() << std::endl;
- 	// 	if (targetExistIt->getNickName() == targetNick) {
-	// 		break;
-	// 	}
-	// 	targetExistIt++;
-	// }
-
 	if (i == this->getClients().size()){
-	//if (targetExistIt == this->getClients().end()) {
 		std::string str = ERR_NOSUCHNICK(handleClient->getNickName(), targetNick);
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
@@ -271,9 +248,6 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 	std::string inviteMsg = ":" + handleClient->getNickName() + "!" + handleClient->getUserName() + "@" + this->name + " INVITE " + targetNick + " :" + channelName + "\r\n";
 	send(this->getClients()[i].getSocket(), inviteMsg.c_str(), inviteMsg.length(), 0);
 
-	// join(this, &this->getClients()[i], cmd);
-	// std::string str = JOIN_SUCCESS(targetNick, channelName, this->getName(), handleClient->getUserName());
-	// send(this->getClients()[i].getSocket(), inviteMsg.c_str(), inviteMsg.length(), 0);
 	
 	std::vector<Client *>::iterator inv = channelIt->getInvitedClients().begin();
     for (; inv != channelIt->getInvitedClients().end(); inv++)
@@ -281,9 +255,10 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
         if ((*inv)->getNickName() == targetNick)
             break ;
     }
-    if (inv == channelIt->getInvitedClients().end())
-	{
-		channelIt->getInvitedClients().push_back(&(this->getClients()[i]));
+
+    if (inv == channelIt->getInvitedClients().end()) {
+		Client *ClientToInvite = &this->getClients()[i];
+		channelIt->getInvitedClients().push_back(ClientToInvite);
 	}
 }
 

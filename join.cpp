@@ -137,7 +137,8 @@ void	join(Server *server, Client *joiningClient, const Command &cmd)
 		std::vector<Client *>::iterator inv = channel->getInvitedClients().begin();
 		for (; inv != channel->getInvitedClients().end(); inv++)
 		{
-			if ((*inv)->getNickName() == joiningClient->getNickName())
+			std::cout << "Address of inv: " << &(*inv) << std::endl;
+			if ((*inv) == joiningClient)
 			{
 				is_invited = 1;
 				channel->getInvitedClients().erase(inv);
