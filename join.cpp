@@ -134,17 +134,33 @@ void	join(Server *server, Client *joiningClient, const Command &cmd)
 	}
 	else
 	{
-		std::vector<Client *>::iterator inv = channel->getInvitedClients().begin();
-		for (; inv != channel->getInvitedClients().end(); inv++)
+		std::vector<Client *> &InviteClients = channel->getInvitedClients();
+		std::vector<Client> clients = server->getClients();
+		std::vector<Client *>::iterator inv = InviteClients.begin();
+		size_t i;
+		for ( i = 0; i < InviteClients.size(); i++)
 		{
-			std::cout << "Address of inv: " << &(*inv) << std::endl;
-			if ((*inv) == joiningClient)
+			if (InviteClients[i]->getNickName() == joiningClient->getNickName())
 			{
+				std::cout << "TEST" << std::endl;
 				is_invited = 1;
-				channel->getInvitedClients().erase(inv);
+				InviteClients.erase(inv);
 				break;
 			}
 		}
+		
+		// for (; inv != channel->getInvitedClients().end(); inv++)
+		// {
+		// 	std::cout << "Address of inv: " << &(*inv) << std::endl;
+		// 	// if ((*inv)->getNickName() == joiningClient->getNickName())
+		// 	if ((*inv) == joiningClient)
+		// 	{
+		// 		std::cout << "TEST" << std::endl;
+		// 		is_invited = 1;
+		// 		channel->getInvitedClients().erase(inv);
+		// 		break;
+		// 	}
+		// }
 		if (channel->flagCheck('i') == 0 && is_invited == 0)
 		{
 			sendMsg(joiningClient,ERR_INVITEONLYCHAN(username, channel->getName()));

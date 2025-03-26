@@ -242,24 +242,24 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
 		return;
 	}
-
-	std::string confirmMsg = ":" + this->name + " 341 " + handleClient->getNickName() + " " + targetNick + " " + channelName + "\r\n";
-	send(handleClient->getSocket(), confirmMsg.c_str(), confirmMsg.length(), 0);
-	std::string inviteMsg = ":" + handleClient->getNickName() + "!" + handleClient->getUserName() + "@" + this->name + " INVITE " + targetNick + " :" + channelName + "\r\n";
-	send(this->getClients()[i].getSocket(), inviteMsg.c_str(), inviteMsg.length(), 0);
-
-	
 	std::vector<Client *>::iterator inv = channelIt->getInvitedClients().begin();
     for (; inv != channelIt->getInvitedClients().end(); inv++)
     {
         if ((*inv)->getNickName() == targetNick)
             break ;
     }
-
-    if (inv == channelIt->getInvitedClients().end()) {
-		Client *ClientToInvite = &this->getClients()[i];
+	inv = channelIt->getInvitedClients().begin();
+	inv += i;
+    if (inv == channelIt->getInvitedClients().end())
+	{
+		Client *ClientToInvite = *inv;
+		std::cout << ClientToInvite->getNickName() << std::endl;
 		channelIt->getInvitedClients().push_back(ClientToInvite);
 	}
+	std::string confirmMsg = ":" + this->name + " 341 " + handleClient->getNickName() + " " + targetNick + " " + channelName + "\r\n";
+	send(handleClient->getSocket(), confirmMsg.c_str(), confirmMsg.length(), 0);
+	std::string inviteMsg = ":" + handleClient->getNickName() + "!" + handleClient->getUserName() + "@" + this->name + " INVITE " + targetNick + " :" + channelName + "\r\n";
+	send(this->getClients()[i].getSocket(), inviteMsg.c_str(), inviteMsg.length(), 0);
 }
 
 void Server::handleKick(Client* handleClient, const Command &cmd) {
