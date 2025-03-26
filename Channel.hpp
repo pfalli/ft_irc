@@ -85,6 +85,7 @@ class Channel {
 	int										modeL(Client *client, std::vector<std::string> &argumentSet);
 	Client*									hasOper(Client *client);
 	Client*									nickToClient(std::string nickName);
+	void									removeClient(std::vector<Client *> &clientList, Client *client);
 	
 	// piero added
 	void									removeClientFromList(std::vector<Client *>::iterator person);

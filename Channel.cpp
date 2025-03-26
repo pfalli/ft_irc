@@ -123,6 +123,21 @@ Client *Channel::isUserInChannel(std::string nickName)
     return NULL;
 }
 
+void Channel::removeClient(std::vector<Client *> &clientList, Client *client)
+{
+	std::vector<Client *>::iterator it = clientList.begin();
+	std::string clientNickname = client->getNickName();
+	for (; it != clientList.end(); it++)
+	{
+		if ((*it)->getNickName() == clientNickname)
+		{
+			clientList.erase(it);
+			std::cout << clientNickname << ": Client removed from the list." << std::endl;
+			return ;
+		}
+	}
+}
+
 void Channel::clearTopic(Channel *channel, Client *client)
 {
 	this->_topic = "";
