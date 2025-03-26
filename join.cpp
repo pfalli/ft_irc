@@ -90,6 +90,10 @@ void	join(Server *server, Client *joiningClient, const Command &cmd)
 	std::string				username;
 	Channel					*channel;
 	std::string				channelTojoin;
+	int is_invited = 0;
+
+	
+
 
 	channelTojoin = getChannelName(cmd.parameter);
 	server->debugging_whoinserver();
@@ -130,13 +134,22 @@ void	join(Server *server, Client *joiningClient, const Command &cmd)
 	}
 	else
 	{
-		//channel->printAllMembers();
-		if (channel->flagCheck('i') == 0)
+		std::vector<Client *>::iterator inv = channel->getInvitedClients().begin();
+		for (; inv != channel->getInvitedClients().end(); inv++)
+		{
+			if ((*inv)->getNickName() == joiningClient->getNickName())
+			{
+				is_invited = 1;
+				channel->getInvitedClients().erase(inv);
+				break;
+			}
+		}
+		if (channel->flagCheck('i') == 0 && is_invited == 0)
 		{
 			sendMsg(joiningClient,ERR_INVITEONLYCHAN(username, channel->getName()));
 			return ;
 		}
-		if (channel->flagCheck('l') == 0)
+		if (channel->flagCheck('l') == 0 && is_invited == 0)
 		{
 			if (channel->getLimit() <= channel->getJoinedClients().size())
 			{
@@ -144,7 +157,7 @@ void	join(Server *server, Client *joiningClient, const Command &cmd)
 				return ;
 			}
 		}
-		if (channel->flagCheck('k') == 0)
+		if (channel->flagCheck('k') == 0 && is_invited == 0)
 		{
 			if (caseK(joiningClient, channel, cmd) == -1)
 				return ;

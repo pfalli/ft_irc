@@ -269,10 +269,22 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 	std::string confirmMsg = ":" + this->name + " 341 " + handleClient->getNickName() + " " + targetNick + " " + channelName + "\r\n";
 	send(handleClient->getSocket(), confirmMsg.c_str(), confirmMsg.length(), 0);
 	std::string inviteMsg = ":" + handleClient->getNickName() + "!" + handleClient->getUserName() + "@" + this->name + " INVITE " + targetNick + " :" + channelName + "\r\n";
-
-
 	send(this->getClients()[i].getSocket(), inviteMsg.c_str(), inviteMsg.length(), 0);
-	join(this, handleClient, cmd);
+
+	// join(this, &this->getClients()[i], cmd);
+	// std::string str = JOIN_SUCCESS(targetNick, channelName, this->getName(), handleClient->getUserName());
+	// send(this->getClients()[i].getSocket(), inviteMsg.c_str(), inviteMsg.length(), 0);
+	
+	std::vector<Client *>::iterator inv = channelIt->getInvitedClients().begin();
+    for (; inv != channelIt->getInvitedClients().end(); inv++)
+    {
+        if ((*inv)->getNickName() == targetNick)
+            break ;
+    }
+    if (inv == channelIt->getInvitedClients().end())
+	{
+		channelIt->getInvitedClients().push_back(&(this->getClients()[i]));
+	}
 }
 
 void Server::handleKick(Client* handleClient, const Command &cmd) {
@@ -378,7 +390,7 @@ void Server::handleQuit(Client *handleClient, const Command &cmd) {
 }
 
 
-void Server::handlePing(Client *handleClient, const Command &cmd) {
+void Server::handlePing(Client *handleClient, const Command &cmd) { // in nc PING needs parameter, in Hexchat only PING because hexchat will pass already a parameter
 	if (cmd.parameter.empty()) {
 		std::string str = ERR_NEEDMOREPARAMS(handleClient->getUserName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);

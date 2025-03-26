@@ -33,6 +33,9 @@ class Channel {
 	std::string								_key;
 	std::vector<Client *>					_joinedClients;
 	std::vector<Client *>					_operators;
+
+	std::vector<Client *>					_invitedClients;
+
 	size_t									_limit;
 	int										_channelCreator;
 	bool									_isTopic;
@@ -55,6 +58,7 @@ class Channel {
 	std::string								getmodeArguments()const{return (this->_modeArguments);}
 	std::string								getModes()const{return (this->_modes);}
 	std::vector<Client *>					&getJoinedClients(){return (this-> _joinedClients);}
+	std::vector<Client *>					&getInvitedClients(){return (this-> _invitedClients);}
 	void									printAllMembers();
 	std::string 							makeMemberList();
 	void									setTopic(std::string topic, std::string whoSet);
