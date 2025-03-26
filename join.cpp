@@ -132,6 +132,7 @@ void	join(Server *server, Client *joiningClient, const Command &cmd)
 	{
 		//channel->printAllMembers();
 		if (channel->flagCheck('i') == 0)
+		{
 			sendMsg(joiningClient,ERR_INVITEONLYCHAN(username, channel->getName()));
 			return ;
 		}

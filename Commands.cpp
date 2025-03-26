@@ -166,6 +166,7 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 	std::string targetNick, channelName;
 	iss >> targetNick >> channelName;
 
+	
 	if (channelName.empty() || targetNick.empty()) {
 		std::string str = ERR_NEEDMOREPARAMS(handleClient->getUserName());
 		send(handleClient->getSocket(), str.c_str(), str.length(), 0);
@@ -268,9 +269,10 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
 	std::string confirmMsg = ":" + this->name + " 341 " + handleClient->getNickName() + " " + targetNick + " " + channelName + "\r\n";
 	send(handleClient->getSocket(), confirmMsg.c_str(), confirmMsg.length(), 0);
 	std::string inviteMsg = ":" + handleClient->getNickName() + "!" + handleClient->getUserName() + "@" + this->name + " INVITE " + targetNick + " :" + channelName + "\r\n";
-	send(this->getClients()[i].getSocket(), inviteMsg.c_str(), inviteMsg.length(), 0);
 
-	channelIt->getJoinedClients().push_back(&this->getClients()[i]); // *** adding Client invited ***
+
+	send(this->getClients()[i].getSocket(), inviteMsg.c_str(), inviteMsg.length(), 0);
+	join(this, handleClient, cmd);
 }
 
 void Server::handleKick(Client* handleClient, const Command &cmd) {
