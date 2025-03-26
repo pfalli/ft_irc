@@ -248,11 +248,12 @@ void Server::handleInvite(Client* handleClient, const Command &cmd) {
         if ((*inv)->getNickName() == targetNick)
             break ;
     }
-	inv = channelIt->getInvitedClients().begin();
-	inv += i;
     if (inv == channelIt->getInvitedClients().end())
 	{
-		Client *ClientToInvite = *inv;
+		std::vector<Client>::iterator clientToInvite = this->clients.begin();
+		clientToInvite += i;
+
+		Client *ClientToInvite = static_cast<Client *>(&(*clientToInvite));
 		std::cout << ClientToInvite->getNickName() << std::endl;
 		channelIt->getInvitedClients().push_back(ClientToInvite);
 	}
