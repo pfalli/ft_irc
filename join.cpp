@@ -92,9 +92,6 @@ void	join(Server *server, Client *joiningClient, const Command &cmd)
 	std::string				channelTojoin;
 	int is_invited = 0;
 
-	
-
-
 	channelTojoin = getChannelName(cmd.parameter);
 	server->debugging_whoinserver();
 	username = joiningClient->getNickName();

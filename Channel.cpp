@@ -158,6 +158,12 @@ void Channel::removeFlag(char flag)
 	else
 	{
 		_modes.erase(pos, 1);
+		if (flag == 'l')
+			_limit = 99999;
+		if (flag == 'k')
+			_key = "";
+		if (flag == 't')
+			_topic = "";
 		return ;
 	}
 }
@@ -248,12 +254,18 @@ int	Channel::modeL(Client *client, std::vector<std::string> &argumentSet)
 	if (argumentSet.empty() || argumentSet[0].empty())
 		return (-1);
 	argument = argumentSet[0];
+	if (argument [0] == '-')
+	{
+		sendMsg(client, ERR_UNKNOWNMODE(client->getNickName(), "l"));
+		argumentSet.erase(argumentSet.begin());
+		return (-1);
+	}
 	list = stringToSizeT(argument);
 	if (list == 0)
 	{
 		std::string errMsg = ERR_UNKNOWNMODE(client->getNickName(), "l");
 		send(client->getSocket(), errMsg.c_str(), errMsg.size(), 0);
-		return (2);
+		return (-1);
 	}
 	_limit = list;
 	argumentSet.erase(argumentSet.begin());

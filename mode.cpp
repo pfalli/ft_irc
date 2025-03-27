@@ -44,18 +44,23 @@ std::string modeCommandMaker(Channel &channel)
 {
 	std::string modeString = channel.getModes();
 	std::vector<Client *> operators = channel.getOperators();
+	size_t	len = modeString.length();
 	size_t	i = 0;
-	for(; i < channel.getModes().length(); i++)
+	size_t	k = 0;
+	for(; i < len; i++)
 	{
 		if (modeString[i] == 'l')
 			modeString += " " + convertSizeTtoString(channel.getLimit());
 		if (modeString[i] == 'k')
 			modeString += " " + channel.getKey();
-		while (modeString[i] == 'o' && i < channel.getModes().length())
+		while (i < len && modeString[i] == 'o')
 		{
-			modeString += " " + operators[i]->getNickName();
+			if (i == 0 || operators.size() < i - k + 1)
+				return (modeString);
+			modeString += " " + operators[i - k + 1]->getNickName();
 			i ++;
 		}
+		k ++;
 	}
 	return (modeString);
 }
