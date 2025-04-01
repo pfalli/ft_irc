@@ -497,8 +497,10 @@ void Server::parseCommand(const std::string &str, Command &cmd) {
 			messageStarted = true;
 			cmd.hasMessage = 1;
 			cmd.message = word.substr(1);
-			std::getline(iss, word);
-			cmd.message += word;
+			if (iss.peek() != EOF) {
+				std::getline(iss, word);
+				cmd.message += word; // here
+			}
 			break;
 		} else if (!messageStarted) {
 			if (!cmd.parameter.empty()) {

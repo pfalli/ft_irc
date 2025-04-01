@@ -316,6 +316,7 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 		return;
 	}
 	// Remove the client from the channel
+	Client *targetClient = *targetIt;
 	channelIt->removeClientFromList(targetIt);
 	// Remove Client from operator list
 	std::vector<Client *>::iterator operatorIt = channelIt->getOperators().begin();
@@ -326,10 +327,10 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 			++operatorIt;
 		}
 	}
-	const std::string str = RPL_KICK(handleClient->getNickName(),  handleClient->getUserName(), channelIt->getName(), (*targetIt)->getNickName(), cmd.message);
-	const std::string msg = RPL_KICK((*targetIt)->getNickName(),  (*targetIt)->getUserName(), channelIt->getName(), (*targetIt)->getNickName(), cmd.message);
+	const std::string str = RPL_KICK(handleClient->getNickName(),  handleClient->getUserName(), channelIt->getName(), targetClient->getNickName(), cmd.message);
+	const std::string msg = RPL_KICK(targetClient->getNickName(),  targetClient->getUserName(), channelIt->getName(), targetClient->getNickName(), cmd.message);
 	send(handleClient->getSocket(), str.c_str(), str.length(), 0);
-	send((*targetIt)->getSocket(), msg.c_str(), msg.length(), 0);
+	send(targetClient->getSocket(), msg.c_str(), msg.length(), 0);
 }
 
 bool Server::findChannelByName(const std::string& str) {

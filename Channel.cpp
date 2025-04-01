@@ -239,9 +239,7 @@ int	Channel::modeO(std::string serverName, Client *client, std::vector<std::stri
 	if (pos == std::string::npos)
 		_modes.push_back('o');
 	else
-	{
 		_modes.insert(pos + 1, 1, 'o');
-	}
 	argumentSet.erase(argumentSet.begin());
 	return (0);
 }
