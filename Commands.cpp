@@ -317,13 +317,20 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 	}
 	// Remove the client from the channel
 	Client *targetClient = *targetIt;
+	Channel *channel = &(*channelIt);
 	channelIt->removeClientFromList(targetIt);
 	// Remove Client from operator list
-	std::vector<Client *>::iterator operatorIt = channelIt->getOperators().begin();
-	while (operatorIt != channelIt->getOperators().end()) {
-		if ((*operatorIt)->getNickName() == targetNick) {
-			operatorIt = channelIt->getOperators().erase(operatorIt);
-		} else {
+	std::vector<Client *>::iterator operatorIt = channel->getOperators().begin();
+	std::vector<Client *> &operatorList = channel->getOperators();
+	while (operatorIt != operatorList.end())
+	{
+		if ((*operatorIt)->getNickName() == targetNick)
+		{
+			channel->takeOper(targetNick, handleClient);
+			channel->removeFlag('o');
+		}
+		else
+		{
 			++operatorIt;
 		}
 	}
