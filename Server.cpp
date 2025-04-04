@@ -217,10 +217,6 @@ void	Server::deleteClientInsideChannels(const Client &client) {
 					{
 						channel->takeOper(client.getNickName(), *clientIt);
 						channel->removeFlag('o');
-			
-						std::vector<Client *>::iterator operatorIt_save = operatorIt - 1;
-						//channelIt->getOperators().erase(operatorIt);
-						operatorIt = operatorIt_save +1;
 					} else
 					{
 						++operatorIt;
