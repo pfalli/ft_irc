@@ -321,7 +321,7 @@ void Server::handleKick(Client* handleClient, const Command &cmd) {
 	channelIt->removeClientFromList(targetIt);
 	// Remove Client from operator list
 	std::vector<Client *>::iterator operatorIt = channel->getOperators().begin();
-	std::vector<Client *> &operatorList = channel->getOperators();
+	std::vector<Client *> &operatorList = channel->getOperators(); //1
 	while (operatorIt != operatorList.end())
 	{
 		if ((*operatorIt)->getNickName() == targetNick)
@@ -363,7 +363,7 @@ void Server::handleQuit(Client *handleClient, const Command &cmd) {
 		std::cerr << "Debug: Poll not found for QUIT command" << std::endl;
 		return;
 	}
-	// send to all people inside all channels
+	// send to all people inside all channels 
 	std::string str = RPL_QUIT(clientIt->getNickName(), cmd.message);
 	const char *msg = str.c_str();
 	std::vector<Channel>::iterator channelIt = channels.begin();

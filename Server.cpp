@@ -205,15 +205,24 @@ void	Server::deleteClientInsideChannels(const Client &client) {
 
 	for (; channelIt != channels.end(); ++channelIt) { // found channel
 		std::vector<Client *> &joinedClients = channelIt->getJoinedClients(); // take reference to joinedClients
+		Channel *channel = &(*channelIt);
 		for (std::vector<Client *>::iterator clientIt = joinedClients.begin(); clientIt != joinedClients.end(); ++clientIt) { // found client inside the channel
 			if ((*clientIt)->getSocket() == client.getSocket()) {
 				joinedClients.erase(clientIt);
 				// if client is OPERATOR, delete from operators container
 				std::vector<Client *>::iterator operatorIt = channelIt->getOperators().begin();
-				while (operatorIt != channelIt->getOperators().end()) {
-					if ((*operatorIt)->getSocket() == client.getSocket()) {
-						channelIt->getOperators().erase(operatorIt);
-					} else {
+				while (operatorIt != channelIt->getOperators().end())
+				{
+					if ((*operatorIt)->getSocket() == client.getSocket())
+					{
+						channel->takeOper(client.getNickName(), *clientIt);
+						channel->removeFlag('o');
+			
+						std::vector<Client *>::iterator operatorIt_save = operatorIt - 1;
+						//channelIt->getOperators().erase(operatorIt);
+						operatorIt = operatorIt_save +1;
+					} else
+					{
 						++operatorIt;
 					}
 				}
